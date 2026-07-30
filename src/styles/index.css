@@ -1,0 +1,14 @@
+/* Fontes self-hosted via @fontsource (ARQUITETURA-INTERFACE.md §4.2) */
+@import '@fontsource/sora/400.css';
+@import '@fontsource/sora/500.css';
+@import '@fontsource/sora/600.css';
+@import '@fontsource/sora/700.css';
+@import '@fontsource/sora/800.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './screens.css';
+@import './states.css';

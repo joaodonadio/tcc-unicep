@@ -1,0 +1,835 @@
+{
+  "gerado_em": "2026-07-14T09:42:00-03:00",
+  "sentimento_geral": "otimista_moderado",
+  "estado_mercado": "estavel",
+  "usuario": {
+    "nome": "João",
+    "perfil": "moderado"
+  },
+  "resumo_simples": "Bom dia! O mercado está tranquilo hoje. O sistema analisou 8 ativos e encontrou 4 boas oportunidades. A principal é a Petrobras, com 91 por cento de confiança: mais gente comprando, preço subindo aos poucos e notícias boas. Há 2 pontos de atenção: Magazine Luiza e Hapvida — melhor esperar. Nenhuma ação é obrigatória: explore as recomendações com calma.",
+  "estatisticas": {
+    "oportunidades": 4,
+    "riscos": 2,
+    "ativos_analisados": 8
+  },
+  "ativos": [
+    {
+      "ticker": "PETR4",
+      "nome": "Petrobras",
+      "tipo": "oportunidade"
+    },
+    {
+      "ticker": "VALE3",
+      "nome": "Vale",
+      "tipo": "oportunidade"
+    },
+    {
+      "ticker": "WEGE3",
+      "nome": "WEG",
+      "tipo": "oportunidade"
+    },
+    {
+      "ticker": "ITUB4",
+      "nome": "Itaú Unibanco",
+      "tipo": "oportunidade"
+    },
+    {
+      "ticker": "MGLU3",
+      "nome": "Magazine Luiza",
+      "tipo": "risco"
+    },
+    {
+      "ticker": "HAPV3",
+      "nome": "Hapvida",
+      "tipo": "risco"
+    },
+    {
+      "ticker": "BBAS3",
+      "nome": "Banco do Brasil",
+      "tipo": "neutro"
+    },
+    {
+      "ticker": "ELET3",
+      "nome": "Eletrobras",
+      "tipo": "neutro"
+    }
+  ],
+  "recomendacoes": [
+    {
+      "id": "petr4",
+      "ticker": "PETR4",
+      "nome": "Petrobras",
+      "setor": "ENERGIA · PETRÓLEO",
+      "tipo": "oportunidade",
+      "confianca": 91,
+      "risco": "Moderado",
+      "titulo": "apresenta cenário favorável",
+      "variacao_30d": "+6,2",
+      "resumo": "Volume, tendência e noticiário convergem em um cenário positivo de curto prazo para o ativo.",
+      "evidencias": [
+        {
+          "direcao": "up",
+          "texto": "Volume negociado 38% acima da média dos últimos 30 dias"
+        },
+        {
+          "direcao": "up",
+          "texto": "Tendência de alta consistente: +6,2% no mês"
+        },
+        {
+          "direcao": "up",
+          "texto": "24 notícias analisadas — 78% com tom positivo"
+        },
+        {
+          "direcao": "up",
+          "texto": "Indicadores técnicos (RSI, médias móveis) em zona favorável"
+        }
+      ],
+      "porque": "Quando volume crescente acompanha uma tendência de alta, o movimento tende a ser sustentado por interesse real do mercado — e não por oscilação passageira. O noticiário positivo reforça esse quadro.",
+      "explicacao_simples": "Em palavras simples: mais gente está comprando esta ação, o preço vem subindo aos poucos e as notícias sobre a empresa são boas. Por isso o sistema vê um bom momento — mas, como todo investimento, sem garantia.",
+      "leitura_tecnica": [
+        {
+          "indicador": "RSI (14)",
+          "valor": "58 — zona neutra-positiva, sem sobrecompra"
+        },
+        {
+          "indicador": "MACD",
+          "valor": "cruzamento de alta confirmado há 4 pregões"
+        },
+        {
+          "indicador": "MM50 × MM200",
+          "valor": "preço 4,2% acima da MM50; golden cross ativo"
+        },
+        {
+          "indicador": "Beta",
+          "valor": "1,12 — oscila 12% mais que o Ibovespa"
+        },
+        {
+          "indicador": "Volume médio 30d",
+          "valor": "R$ 1,8 bi/dia (+38% vs. média)"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Volume negociado",
+          "definicao": "quantidade de ações compradas e vendidas no período. Volume alto indica maior interesse do mercado."
+        },
+        {
+          "termo": "RSI",
+          "definicao": "índice que mede se um ativo subiu ou caiu rápido demais, ajudando a identificar exageros de preço."
+        }
+      ],
+      "adequacao_perfil": 74,
+      "consenso": {
+        "casas": 12,
+        "compra": 8,
+        "neutro": 3,
+        "venda": 1,
+        "preco_alvo": 44.1,
+        "preco_atual": 39.84,
+        "potencial": "+10,7",
+        "concordancia": "concordam"
+      },
+      "preco_atual": 39.84,
+      "serie_30d": [
+        37.51,
+        37.59,
+        37.66,
+        37.72,
+        37.69,
+        37.65,
+        37.65,
+        37.79,
+        37.94,
+        38.03,
+        38,
+        37.96,
+        38.01,
+        38.19,
+        38.37,
+        38.52,
+        38.63,
+        38.74,
+        38.76,
+        38.72,
+        38.69,
+        38.83,
+        39.05,
+        39.27,
+        39.37,
+        39.44,
+        39.52,
+        39.62,
+        39.73,
+        39.84
+      ]
+    },
+    {
+      "id": "wege3",
+      "ticker": "WEGE3",
+      "nome": "WEG",
+      "setor": "BENS INDUSTRIAIS",
+      "tipo": "oportunidade",
+      "confianca": 88,
+      "risco": "Baixo",
+      "titulo": "mantém tendência consistente",
+      "variacao_30d": "+4,8",
+      "resumo": "Crescimento gradual com baixa oscilação — perfil adequado para quem busca estabilidade.",
+      "evidencias": [
+        {
+          "direcao": "up",
+          "texto": "Alta de 4,8% no mês com volatilidade abaixo da média do setor"
+        },
+        {
+          "direcao": "up",
+          "texto": "Resultados trimestrais acima do esperado pelo mercado"
+        },
+        {
+          "direcao": "flat",
+          "texto": "Noticiário estável, sem eventos de risco relevantes"
+        }
+      ],
+      "porque": "Ativos que sobem de forma gradual e com pouca oscilação tendem a exigir menos acompanhamento diário — o que reduz o risco de decisões precipitadas.",
+      "explicacao_simples": "Em palavras simples: esta ação sobe devagar e quase não \"balança\". É o tipo de investimento que dá menos sustos no dia a dia.",
+      "leitura_tecnica": [
+        {
+          "indicador": "RSI (14)",
+          "valor": "54 — tendência saudável"
+        },
+        {
+          "indicador": "Volatilidade 30d",
+          "valor": "14,2% a.a. — abaixo da média do setor (19%)"
+        },
+        {
+          "indicador": "MM50 × MM200",
+          "valor": "ambas ascendentes, preço acima das duas"
+        },
+        {
+          "indicador": "Beta",
+          "valor": "0,78 — defensivo vs. Ibovespa"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Volatilidade",
+          "definicao": "o quanto o preço de um ativo oscila. Baixa volatilidade significa variações mais suaves e previsíveis."
+        }
+      ],
+      "adequacao_perfil": 92,
+      "consenso": null,
+      "preco_atual": 52.3,
+      "serie_30d": [
+        49.9,
+        49.96,
+        50.01,
+        50.07,
+        50.12,
+        50.18,
+        50.23,
+        50.29,
+        50.35,
+        50.42,
+        50.53,
+        50.64,
+        50.73,
+        50.78,
+        50.84,
+        50.92,
+        51.03,
+        51.14,
+        51.22,
+        51.27,
+        51.33,
+        51.42,
+        51.53,
+        51.64,
+        51.75,
+        51.86,
+        51.97,
+        52.08,
+        52.19,
+        52.3
+      ]
+    },
+    {
+      "id": "vale3",
+      "ticker": "VALE3",
+      "nome": "Vale",
+      "setor": "MINERAÇÃO",
+      "tipo": "oportunidade",
+      "confianca": 84,
+      "risco": "Moderado",
+      "titulo": "sinaliza ponto de entrada",
+      "variacao_30d": "+2,1",
+      "resumo": "Preço próximo de um patamar historicamente defendido pelo mercado, com demanda externa em recuperação.",
+      "evidencias": [
+        {
+          "direcao": "up",
+          "texto": "Preço testou e respeitou o suporte dos últimos 6 meses"
+        },
+        {
+          "direcao": "up",
+          "texto": "Preço do minério de ferro em recuperação há 3 semanas"
+        },
+        {
+          "direcao": "down",
+          "texto": "Volume ainda 12% abaixo da média — sinal a monitorar"
+        }
+      ],
+      "porque": "Comprar perto de um suporte histórico tende a limitar a perda potencial: se o padrão se mantiver, o preço tem mais espaço para subir do que para cair. O volume baixo pede confirmação.",
+      "explicacao_simples": "Em palavras simples: o preço está perto de um valor em que, historicamente, ele para de cair e volta a subir. Pode ser uma boa porta de entrada — mas o sistema sugere esperar confirmação.",
+      "leitura_tecnica": [
+        {
+          "indicador": "RSI (14)",
+          "valor": "44 — próximo de zona de sobrevenda"
+        },
+        {
+          "indicador": "Suporte",
+          "valor": "R$ 58,90 testado 3× em 6 meses"
+        },
+        {
+          "indicador": "Minério 62% Fe",
+          "valor": "US$ 108/t — recuperação de 3 semanas"
+        },
+        {
+          "indicador": "Volume 30d",
+          "valor": "-12% vs. média — aguardando confirmação"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Suporte",
+          "definicao": "nível de preço em que historicamente aparecem mais compradores, \"segurando\" novas quedas."
+        }
+      ],
+      "adequacao_perfil": 74,
+      "consenso": {
+        "casas": 10,
+        "compra": 6,
+        "neutro": 3,
+        "venda": 1,
+        "preco_alvo": 68.5,
+        "preco_atual": 61.2,
+        "potencial": "+11,9",
+        "concordancia": "concordam"
+      },
+      "preco_atual": 61.2,
+      "serie_30d": [
+        59.94,
+        59.83,
+        59.71,
+        59.6,
+        59.53,
+        59.45,
+        59.38,
+        59.3,
+        59.23,
+        59.21,
+        59.33,
+        59.46,
+        59.5,
+        59.42,
+        59.35,
+        59.37,
+        59.5,
+        59.62,
+        59.76,
+        59.93,
+        60.09,
+        60.19,
+        60.28,
+        60.36,
+        60.51,
+        60.67,
+        60.83,
+        60.96,
+        61.08,
+        61.2
+      ]
+    },
+    {
+      "id": "itub4",
+      "ticker": "ITUB4",
+      "nome": "Itaú Unibanco",
+      "setor": "FINANCEIRO",
+      "tipo": "oportunidade",
+      "confianca": 79,
+      "risco": "Baixo",
+      "titulo": "combina dividendos e estabilidade",
+      "variacao_30d": "+1,9",
+      "resumo": "Pagamento de dividendos acima da média do setor com histórico de baixa oscilação.",
+      "evidencias": [
+        {
+          "direcao": "up",
+          "texto": "Dividend yield de 6,1% ao ano — acima da média dos bancos"
+        },
+        {
+          "direcao": "flat",
+          "texto": "Preço estável nos últimos 30 dias (±2%)"
+        },
+        {
+          "direcao": "up",
+          "texto": "Lucro trimestral dentro do esperado, sem surpresas negativas"
+        }
+      ],
+      "porque": "Para perfis mais conservadores, receber dividendos regulares reduz a dependência de acertar o momento exato de compra e venda.",
+      "explicacao_simples": "Em palavras simples: este banco paga uma \"mesada\" (dividendos) acima da média e o preço varia pouco. Bom para quem quer renda sem acompanhar o mercado todo dia.",
+      "leitura_tecnica": [
+        {
+          "indicador": "Dividend yield",
+          "valor": "6,1% a.a. — payout médio de 65%"
+        },
+        {
+          "indicador": "P/L",
+          "valor": "8,4× — abaixo da média histórica (9,8×)"
+        },
+        {
+          "indicador": "Volatilidade 30d",
+          "valor": "±2% — regime de baixa oscilação"
+        },
+        {
+          "indicador": "ROE",
+          "valor": "21,3% no último trimestre"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Dividend yield",
+          "definicao": "percentual do preço da ação que retorna ao investidor por ano na forma de dividendos (parcela do lucro distribuída)."
+        }
+      ],
+      "adequacao_perfil": 92,
+      "consenso": null,
+      "preco_atual": 35.6,
+      "serie_30d": [
+        34.94,
+        34.98,
+        35.01,
+        35.05,
+        35,
+        34.96,
+        34.94,
+        35.02,
+        35.1,
+        35.15,
+        35.1,
+        35.06,
+        35.07,
+        35.15,
+        35.23,
+        35.25,
+        35.2,
+        35.16,
+        35.19,
+        35.27,
+        35.35,
+        35.35,
+        35.3,
+        35.26,
+        35.32,
+        35.4,
+        35.48,
+        35.52,
+        35.56,
+        35.6
+      ]
+    },
+    {
+      "id": "mglu3",
+      "ticker": "MGLU3",
+      "nome": "Magazine Luiza",
+      "setor": "VAREJO",
+      "tipo": "risco",
+      "confianca": 87,
+      "risco": "Alto",
+      "titulo": "exige atenção: volatilidade elevada",
+      "variacao_30d": "-9,4",
+      "resumo": "Oscilações bruscas de preço e noticiário negativo aumentam a chance de perdas no curto prazo.",
+      "evidencias": [
+        {
+          "direcao": "down",
+          "texto": "Queda de 9,4% no mês, com oscilações diárias acima de 4%"
+        },
+        {
+          "direcao": "down",
+          "texto": "18 notícias analisadas — 61% com tom negativo"
+        },
+        {
+          "direcao": "down",
+          "texto": "Volume de venda superando o de compra há 9 pregões"
+        }
+      ],
+      "porque": "Volatilidade alta significa que o preço pode variar muito em poucos dias. Se você já possui o ativo, o sistema sugere revisar o tamanho da posição; se não possui, aguardar estabilização.",
+      "explicacao_simples": "Em palavras simples: esta ação está caindo forte e balançando muito. Comprar agora seria como tentar pegar uma faca caindo — melhor esperar.",
+      "leitura_tecnica": [
+        {
+          "indicador": "RSI (14)",
+          "valor": "31 — em queda, sem divergência de alta"
+        },
+        {
+          "indicador": "Volatilidade 30d",
+          "valor": "48% a.a. — 3× a média do Ibovespa"
+        },
+        {
+          "indicador": "Fluxo",
+          "valor": "pressão vendedora há 9 pregões seguidos"
+        },
+        {
+          "indicador": "Short interest",
+          "valor": "8,4% do free float"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Pregão",
+          "definicao": "cada dia de negociação na bolsa de valores."
+        }
+      ],
+      "adequacao_perfil": 30,
+      "consenso": {
+        "casas": 9,
+        "compra": 2,
+        "neutro": 4,
+        "venda": 3,
+        "preco_alvo": 9.8,
+        "preco_atual": 10.45,
+        "potencial": "-6,2",
+        "concordancia": "divididos"
+      },
+      "preco_atual": 10.45,
+      "serie_30d": [
+        11.53,
+        11.48,
+        11.43,
+        11.39,
+        11.42,
+        11.46,
+        11.46,
+        11.36,
+        11.26,
+        11.2,
+        11.23,
+        11.27,
+        11.24,
+        11.12,
+        11,
+        10.96,
+        10.99,
+        11.03,
+        10.98,
+        10.88,
+        10.78,
+        10.77,
+        10.8,
+        10.84,
+        10.76,
+        10.66,
+        10.56,
+        10.52,
+        10.48,
+        10.45
+      ]
+    },
+    {
+      "id": "hapv3",
+      "ticker": "HAPV3",
+      "nome": "Hapvida",
+      "setor": "SAÚDE",
+      "tipo": "risco",
+      "confianca": 82,
+      "risco": "Alto",
+      "titulo": "sob pressão do noticiário",
+      "variacao_30d": "-5,7",
+      "resumo": "Notícias sobre custos do setor pressionam o papel; indicadores ainda não mostram reversão.",
+      "evidencias": [
+        {
+          "direcao": "down",
+          "texto": "Queda de 5,7% no mês, abaixo da média do setor de saúde"
+        },
+        {
+          "direcao": "down",
+          "texto": "Sentimento do noticiário negativo há 2 semanas consecutivas"
+        },
+        {
+          "direcao": "flat",
+          "texto": "Sem sinal técnico de reversão até o momento"
+        }
+      ],
+      "porque": "Quando preço e noticiário caem juntos e nenhum indicador aponta reversão, entrar agora significa tentar \"adivinhar o fundo\" — uma das decisões mais arriscadas para investidores iniciantes.",
+      "explicacao_simples": "Em palavras simples: as notícias do setor estão ruins e o preço segue caindo, sem sinal de melhora. O sistema recomenda apenas observar por enquanto.",
+      "leitura_tecnica": [
+        {
+          "indicador": "RSI (14)",
+          "valor": "38 — fraqueza persistente"
+        },
+        {
+          "indicador": "MM50",
+          "valor": "preço 6,1% abaixo; resistência imediata"
+        },
+        {
+          "indicador": "Sinistralidade",
+          "valor": "72,4% — acima do teto histórico"
+        },
+        {
+          "indicador": "Sinal de reversão",
+          "valor": "nenhum padrão de fundo confirmado"
+        }
+      ],
+      "glossario": [
+        {
+          "termo": "Reversão",
+          "definicao": "momento em que uma tendência de queda dá lugar a uma de alta (ou vice-versa)."
+        }
+      ],
+      "adequacao_perfil": 30,
+      "consenso": null,
+      "preco_atual": 3.42,
+      "serie_30d": [
+        3.63,
+        3.62,
+        3.61,
+        3.6,
+        3.61,
+        3.61,
+        3.61,
+        3.59,
+        3.57,
+        3.56,
+        3.55,
+        3.54,
+        3.54,
+        3.54,
+        3.55,
+        3.54,
+        3.52,
+        3.5,
+        3.49,
+        3.48,
+        3.47,
+        3.47,
+        3.48,
+        3.48,
+        3.47,
+        3.45,
+        3.43,
+        3.43,
+        3.42,
+        3.42
+      ]
+    }
+  ],
+  "alertas": [
+    {
+      "severidade": "positivo",
+      "texto": "PETR4 rompeu a resistência de R$ 39,50 com volume acima da média.",
+      "quando": "há 18 min"
+    },
+    {
+      "severidade": "info",
+      "texto": "VALE3 apresentou aumento de 34% no volume negociado na última hora.",
+      "quando": "há 47 min"
+    },
+    {
+      "severidade": "positivo",
+      "texto": "Bitcoin entrou em tendência de alta no gráfico diário.",
+      "quando": "há 1 h"
+    },
+    {
+      "severidade": "atencao",
+      "texto": "IPCA de junho divulgado hoje às 9h: 0,26% (abaixo do esperado).",
+      "quando": "hoje, 09:00"
+    },
+    {
+      "severidade": "atencao",
+      "texto": "Reunião do COPOM amanhã — decisão da Selic às 18h30.",
+      "quando": "amanhã"
+    }
+  ],
+  "agenda": [
+    {
+      "dia": "HOJE",
+      "hora": "09:00",
+      "titulo": "IPCA — Junho",
+      "subtitulo": "IBGE · Inflação oficial",
+      "impacto": "Alto"
+    },
+    {
+      "dia": "AMANHÃ",
+      "hora": "18:30",
+      "titulo": "Decisão do COPOM",
+      "subtitulo": "Banco Central · Taxa Selic",
+      "impacto": "Alto"
+    },
+    {
+      "dia": "SEX",
+      "hora": "09:30",
+      "titulo": "Payroll — EUA",
+      "subtitulo": "Criação de empregos",
+      "impacto": "Alto"
+    },
+    {
+      "dia": "SEG",
+      "hora": "—",
+      "titulo": "Balanço PETR4",
+      "subtitulo": "Resultados do 2T26",
+      "impacto": "Médio"
+    },
+    {
+      "dia": "TER",
+      "hora": "23:00",
+      "titulo": "PIB da China",
+      "subtitulo": "2º trimestre",
+      "impacto": "Médio"
+    }
+  ],
+  "indicadores": [
+    {
+      "label": "SELIC",
+      "valor": "14,75%",
+      "delta": "estável",
+      "sinal": "flat"
+    },
+    {
+      "label": "IPCA 12M",
+      "valor": "4,32%",
+      "delta": "▼ -0,08 p.p.",
+      "sinal": "up"
+    },
+    {
+      "label": "DÓLAR",
+      "valor": "R$ 5,21",
+      "delta": "▼ -0,3%",
+      "sinal": "up"
+    },
+    {
+      "label": "IBOVESPA",
+      "valor": "142.380",
+      "delta": "▲ +0,8%",
+      "sinal": "up"
+    },
+    {
+      "label": "S&P 500",
+      "valor": "6.412",
+      "delta": "▲ +0,4%",
+      "sinal": "up"
+    },
+    {
+      "label": "NASDAQ",
+      "valor": "21.940",
+      "delta": "▲ +0,6%",
+      "sinal": "up"
+    },
+    {
+      "label": "BITCOIN",
+      "valor": "US$ 118,4k",
+      "delta": "▲ +2,1%",
+      "sinal": "up"
+    },
+    {
+      "label": "IFIX",
+      "valor": "3.512",
+      "delta": "▲ +0,2%",
+      "sinal": "up"
+    }
+  ],
+  "setores": [
+    {
+      "setor": "ENERGIA",
+      "variacao": 2.1
+    },
+    {
+      "setor": "MINERAÇÃO",
+      "variacao": 1.2
+    },
+    {
+      "setor": "AGRO",
+      "variacao": 1.4
+    },
+    {
+      "setor": "FINANCEIRO",
+      "variacao": 0.8
+    },
+    {
+      "setor": "TECH",
+      "variacao": 0.9
+    },
+    {
+      "setor": "INDUSTRIAL",
+      "variacao": 0.6
+    },
+    {
+      "setor": "SAÚDE",
+      "variacao": -0.9
+    },
+    {
+      "setor": "VAREJO",
+      "variacao": -1.8
+    }
+  ],
+  "destaque": {
+    "ticker": "PETR4",
+    "nome": "Petrobras PN",
+    "preco": "R$ 39,84",
+    "variacao_dia": "+1,8",
+    "descricao": "ativo em destaque na análise"
+  },
+  "leituras": [
+    {
+      "tag": "ENERGIA",
+      "tom": "positivo",
+      "titulo": "Petróleo sobe 2,1% após corte de oferta da OPEP+",
+      "fonte": "Reuters · há 40 min",
+      "leitura_do_sistema": "Impacto direto positivo para PETR4: exportadoras se beneficiam do barril mais caro. Reforça a recomendação de hoje."
+    },
+    {
+      "tag": "JUROS",
+      "tom": "alerta",
+      "titulo": "Mercado dividido sobre a decisão do COPOM de amanhã",
+      "fonte": "Valor Econômico · há 1 h",
+      "leitura_do_sistema": "Manutenção da Selic favorece bancos como ITUB4; um corte beneficiaria varejo e construção. As recomendações serão recalculadas após a decisão."
+    },
+    {
+      "tag": "VAREJO",
+      "tom": "negativo",
+      "titulo": "Vendas do varejo recuam 1,8% em maio, aponta IBGE",
+      "fonte": "IBGE · hoje, 09:00",
+      "leitura_do_sistema": "Consumo fraco pressiona margens do setor e reforça o ponto de atenção em MGLU3."
+    }
+  ],
+  "mapa_noticias": [
+    {
+      "lat": -15.79,
+      "lon": -47.88,
+      "tom": "alerta",
+      "titulo": "COPOM amanhã",
+      "sub": "Brasília · Selic"
+    },
+    {
+      "lat": -19.92,
+      "lon": -43.94,
+      "tom": "neutro",
+      "titulo": "Minério estável",
+      "sub": "MG · VALE3"
+    },
+    {
+      "lat": -22.9,
+      "lon": -43.2,
+      "tom": "positivo",
+      "titulo": "Petróleo +2,1%",
+      "sub": "PETR4 · litoral RJ"
+    },
+    {
+      "lat": -23.55,
+      "lon": -46.63,
+      "tom": "negativo",
+      "titulo": "Varejo em queda",
+      "sub": "SP · MGLU3"
+    },
+    {
+      "lat": -28.26,
+      "lon": -52.41,
+      "tom": "positivo",
+      "titulo": "Safra recorde",
+      "sub": "Sul · Agro"
+    }
+  ]
+}
