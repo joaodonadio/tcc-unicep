@@ -1,6 +1,6 @@
 /**
- * Estilos das 4 telas — fiéis ao protótipo de alta fidelidade.
- * Hoje (RF-1.x) · Recomendações (RF-2.x) · Mercado (RF-3.x) · Perguntar (RF-4.x)
+ * Estilos das 3 telas — fiéis ao protótipo de alta fidelidade.
+ * Hoje (RF-1.x) · Recomendações (RF-2.x) · Mercado (RF-3.x)
  */
 
 /* =====================================================================
@@ -1555,177 +1555,6 @@
 }
 
 /* =====================================================================
-   TELA PERGUNTAR
-   ===================================================================== */
-
-.chat-title-row {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-.chat-orb {
-  width: 6.875rem;
-  height: 6.875rem;
-  display: block;
-  flex-shrink: 0;
-}
-.chat-panel {
-  margin-top: 1.875rem;
-  border-radius: 1.5rem;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-}
-.chat-list {
-  max-height: 46vh;
-  min-height: 20rem;
-  overflow-y: auto;
-  padding: 1.625rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-}
-.msg-row {
-  display: flex;
-}
-.msg-row.is-mine {
-  justify-content: flex-end;
-}
-.msg-row.is-system {
-  justify-content: flex-start;
-}
-.msg-bubble {
-  max-width: 78%;
-  padding: 0.875rem 1.125rem;
-  font-size: 0.90625rem;
-  line-height: 1.55;
-}
-.msg-row.is-mine .msg-bubble {
-  border-radius: 1rem 1rem 0.25rem 1rem;
-  background: var(--primary-solid);
-  color: #fff;
-}
-.msg-row.is-system .msg-bubble {
-  border-radius: 1rem 1rem 1rem 0.25rem;
-  background: var(--accent-soft);
-  border: 1px solid rgba(125, 239, 255, 0.16);
-  color: #d5e2f4;
-}
-.msg-who {
-  font-family: var(--font-mono);
-  font-size: 0.5625rem;
-  letter-spacing: 0.18em;
-  margin-bottom: 0.375rem;
-}
-.msg-row.is-mine .msg-who {
-  color: rgba(255, 255, 255, 0.55);
-}
-.msg-row.is-system .msg-who {
-  color: #6fc9d8;
-}
-.msg-text {
-  white-space: pre-line;
-}
-.msg-modo {
-  font-family: var(--font-mono);
-  font-size: 0.5625rem;
-  letter-spacing: 0.12em;
-  color: var(--warning);
-  margin-top: 0.5rem;
-}
-
-.typing {
-  padding: 0.875rem 1.125rem;
-  border-radius: 1rem 1rem 1rem 0.25rem;
-  background: rgba(125, 239, 255, 0.07);
-  border: 1px solid rgba(125, 239, 255, 0.16);
-  display: flex;
-  gap: 0.3125rem;
-  align-items: center;
-}
-.typing i {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  background: var(--accent);
-  animation: typingDot 1.1s ease infinite;
-}
-.typing i:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.typing i:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.chat-composer {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(4, 7, 15, 0.4);
-}
-.chat-suggestions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.875rem;
-}
-.chat-suggestion {
-  font-family: var(--font-display);
-  font-size: 0.78125rem;
-  color: var(--text-link);
-  background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 0.5rem 0.875rem;
-  border-radius: 999px;
-  transition: all 0.2s;
-}
-.chat-suggestion:hover:not(:disabled) {
-  border-color: rgba(125, 239, 255, 0.5);
-  color: #fff;
-  background: var(--accent-soft);
-}
-.chat-suggestion:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.chat-form {
-  display: flex;
-  gap: 0.625rem;
-}
-.chat-input {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  color: var(--text);
-  background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  padding: 0.875rem 1.375rem;
-  outline: none;
-  min-width: 0;
-}
-.chat-input:focus {
-  border-color: rgba(125, 239, 255, 0.55);
-}
-.chat-send {
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--primary-solid);
-  border: none;
-  padding: 0.875rem 1.625rem;
-  border-radius: 999px;
-}
-.chat-send:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
-.chat-send:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* =====================================================================
    RESPONSIVO
    ===================================================================== */
 
@@ -1769,9 +1598,6 @@
   }
   .ind-grid {
     grid-template-columns: 1fr;
-  }
-  .chat-orb {
-    display: none;
   }
   .diario-snapshot {
     margin-left: 0;

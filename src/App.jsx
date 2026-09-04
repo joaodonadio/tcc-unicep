@@ -4,7 +4,7 @@ import { AppLayout } from './components/layout/AppLayout.jsx';
 import { CarregandoTela } from './components/ui/Estados.jsx';
 
 /**
- * SPA com 4 rotas (ARQUITETURA-INTERFACE.md §4.1).
+ * SPA com 3 rotas (ARQUITETURA-INTERFACE.md §4.1).
  *
  * Code splitting por rota: a navbar e a camada de experiência montam uma única
  * vez no layout, e a navegação entre telas é instantânea — o contexto
@@ -14,7 +14,6 @@ import { CarregandoTela } from './components/ui/Estados.jsx';
 const Hoje = lazy(() => import('./pages/Hoje.jsx'));
 const Recomendacoes = lazy(() => import('./pages/Recomendacoes.jsx'));
 const Mercado = lazy(() => import('./pages/Mercado.jsx'));
-const Perguntar = lazy(() => import('./pages/Perguntar.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -27,10 +26,6 @@ const router = createBrowserRouter([
         element: <Suspense fallback={<CarregandoTela />}><Recomendacoes /></Suspense>,
       },
       { path: 'mercado', element: <Suspense fallback={<CarregandoTela />}><Mercado /></Suspense> },
-      {
-        path: 'perguntar',
-        element: <Suspense fallback={<CarregandoTela />}><Perguntar /></Suspense>,
-      },
       { path: '*', element: <Suspense fallback={<CarregandoTela />}><Hoje /></Suspense> },
     ],
   },

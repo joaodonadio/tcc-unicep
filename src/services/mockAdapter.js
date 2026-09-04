@@ -11,7 +11,6 @@
 
 import analiseDoDia from '../mocks/analise-do-dia.json';
 import historico from '../mocks/historico.json';
-import { responderPorRegra } from '../mocks/respostasFallback.js';
 
 const num = (v, padrao) => {
   const n = Number(v);
@@ -99,13 +98,5 @@ export const mockAdapter = {
   // POST /api/feedback — RF-2.5
   registrarFeedback(feedback) {
     return servir(() => ({ ...feedback, registrado_em: new Date().toISOString() }));
-  },
-
-  // POST /chat — sem serviço `agente-chat` no ar, respondemos em modo regra
-  // (RA-9). A latência maior imita o "digitando" do protótipo.
-  perguntar({ mensagem }) {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(responderPorRegra(mensagem)), 1100);
-    });
   },
 };

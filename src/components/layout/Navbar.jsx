@@ -13,7 +13,6 @@ const ITENS = [
   { para: '/', rotulo: 'Análise de hoje', fim: true },
   { para: '/recomendacoes', rotulo: 'Recomendações' },
   { para: '/mercado', rotulo: 'Mercado' },
-  { para: '/perguntar', rotulo: 'Perguntar' },
 ];
 
 export function Navbar() {

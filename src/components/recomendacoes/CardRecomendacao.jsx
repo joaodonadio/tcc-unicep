@@ -1,18 +1,16 @@
 import { useId } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AnaliseExpandida } from './AnaliseExpandida.jsx';
 import { useDecisoes } from '../../context/contextos.js';
 import { horaCurta } from '../../lib/formato.js';
 
 /**
- * RF-2.2 · RF-2.3 · RF-2.6 · RF-2.7 · RF-2.8 — o card de recomendação.
+ * RF-2.2 · RF-2.3 · RF-2.6 · RF-2.8 — o card de recomendação.
  *
  * Colapsado mostra apenas o essencial (tipo, título em frase, resumo,
  * confiança e risco); a análise completa vem por progressive disclosure, para
  * não afogar quem só quer a visão geral (M12).
  */
 export function CardRecomendacao({ recomendacao, expandido, aoAlternar, perfil, geradoEm }) {
-  const navigate = useNavigate();
   const { decisoes, decidir, desfazer } = useDecisoes();
   const idPainel = useId();
 
@@ -97,22 +95,6 @@ export function CardRecomendacao({ recomendacao, expandido, aoAlternar, perfil, 
                   </button>
                 </>
               )}
-
-              {/* RF-2.7 — leva ao chat já com a pergunta formada */}
-              <button
-                type="button"
-                className="btn btn-accent btn-sm"
-                onClick={() =>
-                  navigate('/perguntar', {
-                    state: {
-                      perguntaInicial: `Por que o sistema destacou ${r.ticker} hoje?`,
-                      recomendacaoId: r.id,
-                    },
-                  })
-                }
-              >
-                Perguntar sobre {r.ticker}
-              </button>
 
               {/* RF-2.8 — proveniência */}
               <span className="rec-proveniencia">

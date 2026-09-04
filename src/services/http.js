@@ -1,15 +1,14 @@
 /**
  * Instância única de Axios (ARQUITETURA-INTERFACE.md §1).
  *
- * Um cliente para a API de análises do projeto maior e outro para o serviço
- * `agente-chat`. Os interceptors normalizam o erro para uma mensagem em
- * português que os estados de erro dos cards exibem direto ao usuário.
+ * Cliente para a API de análises do projeto maior. Os interceptors normalizam
+ * o erro para uma mensagem em português que os estados de erro dos cards
+ * exibem direto ao usuário.
  */
 
 import axios from 'axios';
 
 const TIMEOUT_PADRAO = 12000;
-const TIMEOUT_CHAT = 30000; // o agente pode levar mais tempo (§6 do doc do agente)
 
 function normalizaErro(erro) {
   if (erro.response) {
@@ -38,14 +37,6 @@ export const http = comInterceptors(
   axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
     timeout: TIMEOUT_PADRAO,
-    headers: { 'Content-Type': 'application/json' },
-  }),
-);
-
-export const httpChat = comInterceptors(
-  axios.create({
-    baseURL: import.meta.env.VITE_CHAT_BASE_URL || 'http://localhost:8100',
-    timeout: TIMEOUT_CHAT,
     headers: { 'Content-Type': 'application/json' },
   }),
 );

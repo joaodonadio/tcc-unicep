@@ -162,9 +162,6 @@ export default function Hoje() {
             >
               Explorar análise de hoje →
             </button>
-            <button type="button" className="btn btn-ghost" onClick={() => navigate('/perguntar')}>
-              Perguntar ao sistema
-            </button>
           </div>
 
           <div className="hoje-meta">

@@ -78,18 +78,4 @@ export function validarHistorico(dados) {
   return dados;
 }
 
-/** Valida a resposta do agente (`POST /chat`, AGENTE-CHAT-IA.md §7). */
-export function validarRespostaChat(dados) {
-  if (!dados || !eString(dados.resposta)) {
-    throw new PayloadInvalidoError('Resposta do agente sem campo `resposta`.');
-  }
-  return {
-    resposta: dados.resposta,
-    tickers_citados: eLista(dados.tickers_citados) ? dados.tickers_citados : [],
-    fontes: eLista(dados.fontes) ? dados.fontes : [],
-    modo: dados.modo === 'fallback' ? 'fallback' : 'llm',
-    uso: dados.uso ?? null,
-  };
-}
-
 export { PayloadInvalidoError };
