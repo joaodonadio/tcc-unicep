@@ -1,0 +1,81 @@
+{
+  "pacote": "execucao",
+  "versao_contrato": "1.0",
+  "chave": [
+    "data_referencia",
+    "rodada"
+  ],
+  "gerado_em": "2026-10-24T23:23:45-03:00",
+  "dados_ate": "2026-10-23T08:00:00-03:00",
+  "registros": [
+    {
+      "versao_contrato": "1.0",
+      "gerado_em": "2026-10-24T23:23:45-03:00",
+      "dados_ate": "2026-10-23T08:00:00-03:00",
+      "data_referencia": "2026-10-23",
+      "rodada": 8,
+      "inicio": "2026-10-24T23:23:45-03:00",
+      "fim": "2026-10-24T23:25:33-03:00",
+      "status": "ok",
+      "coleta_status": {
+        "consultado": false,
+        "nota": "gatilho da coleta não consultado (etapa 8)"
+      },
+      "pacotes_enviados": [
+        {
+          "pacote": "acoes",
+          "arquivo": "acoes.json",
+          "registros": 85,
+          "removidos": 0
+        },
+        {
+          "pacote": "series_diarias",
+          "arquivo": "series_diarias.json",
+          "registros": 177,
+          "removidos": 0
+        },
+        {
+          "pacote": "mercado_dia",
+          "arquivo": "mercado_dia.json",
+          "registros": 1,
+          "removidos": 0
+        },
+        {
+          "pacote": "resumo_acao",
+          "arquivo": "resumo_acao.json",
+          "registros": 85,
+          "removidos": 0
+        },
+        {
+          "pacote": "fundamentos_trimestrais",
+          "arquivo": "fundamentos_trimestrais.json",
+          "registros": 664,
+          "removidos": 0
+        },
+        {
+          "pacote": "proventos",
+          "arquivo": "proventos.json",
+          "registros": 1268,
+          "removidos": 0
+        },
+        {
+          "pacote": "noticias_dia",
+          "arquivo": "noticias_dia.json",
+          "registros": 85,
+          "removidos": 0
+        }
+      ],
+      "avisos": [
+        "Carga completa: pacotes inteiros, sem o envio incremental; o estado do envio e os registros do experimento não foram alterados.",
+        "Composição do Ibovespa cobre 1448 de 1697 pregões (de 2021-01-04 a 2026-10-22); nos outros, universo = composição atual (ações do cadastro).",
+        "Retornos diários suspeitos (abaixo de -75% ou acima de 100%) entre 2025-10-16 e 2026-10-22, fora das séries e das medianas do setor: AZUL3 (2026-02-10, 2026-04-09, 2026-04-20).",
+        "Modelo provisório: treinado de 2024-01-02 a 2026-06-19 (cerca de 2,5 anos), só para testar a rotina.",
+        "Gerado depois das 10h: não entra no histórico do experimento.",
+        "Antes da entrada em produção: este top 5 é um teste de funcionamento e não entra no histórico do experimento.",
+        "Modelo de 2026-06 (o do mês de D ainda não foi treinado).",
+        "Top 5 gerado e registrado só como teste de funcionamento (modelo não oficial): experimento_top e experimento_historico não enviados à interface (saida.publicar_top_provisorio = false)."
+      ]
+    }
+  ],
+  "removidos": []
+}

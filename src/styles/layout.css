@@ -1,474 +1,770 @@
-/**
- * Layout global: fundo ambiente, navbar flutuante (RF-0.1..0.3), rodapé
- * permanente (RF-0.4), controles de experiência (RF-5.1..5.4) e tour (RF-5.5).
- */
-
-/* ---------- fundo ambiente ---------- */
-
-.ambient {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+/* Moldura: cabeçalho de vidro, navegação em pílulas, faixa de explicação, seções e rodapé. */
+.pagina {
+  width: 100%;
+  max-width: var(--largura-max);
+  margin-inline: auto;
+  padding-inline: var(--espaco-5);
 }
 
-.ambient-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(120, 160, 255, 0.08) 1px, transparent 1px);
-  background-size: 26px 26px;
+@media (max-width: 640px) {
+  .pagina {
+    padding-inline: var(--espaco-4);
+  }
 }
 
-.ambient-top {
-  position: absolute;
-  top: -30%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1400px;
-  height: 900px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(47, 107, 255, 0.16) 0%,
-    rgba(47, 107, 255, 0.05) 40%,
-    transparent 70%
-  );
+/* Cabeçalho: barra translúcida fixa, em uma linha só no computador.
+   Esquerda: marca. Centro: as páginas. Direita: Minha lista e Leitura (painel suspenso). */
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-cabecalho);
+  background: var(--cor-placa);
+  border-bottom: 1px solid var(--cor-fio);
+  color: var(--cor-placa-texto);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
 }
 
-.ambient-bottom {
-  position: absolute;
-  bottom: -40%;
-  right: -15%;
-  width: 900px;
-  height: 700px;
-  background: radial-gradient(ellipse at center, rgba(125, 239, 255, 0.07) 0%, transparent 65%);
-}
-
-/* ---------- navbar ---------- */
-
-.nav {
-  position: fixed;
-  top: 1.125rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
+.cabecalho__linha {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.625rem 0.5rem 1.25rem;
-  border-radius: 999px;
-  background: var(--surface-nav);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-nav);
-  max-width: calc(100vw - 2rem);
-  flex-wrap: wrap;
-  justify-content: center;
+  column-gap: var(--espaco-5);
+  min-height: 4rem;
+  padding-block: var(--espaco-3);
 }
 
-.nav-brand {
-  display: flex;
+/* Marca: um ponto âmbar antes do nome */
+.cabecalho__marca::before {
+  content: '';
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--cor-acento);
+}
+
+.cabecalho__marca {
+  display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 0.625rem;
-  margin-right: 0.875rem;
+  gap: var(--espaco-2);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: inherit;
   text-decoration: none;
+}
+
+.cabecalho__marca:hover {
   color: inherit;
 }
 
-.nav-brand-dot {
-  width: 0.5625rem;
-  height: 0.5625rem;
-  border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 12px rgba(125, 239, 255, 0.9);
-  animation: pulseDot 2.4s ease infinite;
-}
-
-.nav-brand-name {
+.cabecalho__acoes {
   display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-.nav-brand-name strong {
-  font-weight: 800;
-  font-size: 0.9375rem;
-  letter-spacing: -0.01em;
-}
-.nav-brand-name span {
-  font-family: var(--font-mono);
-  font-size: 0.53125rem;
-  letter-spacing: 0.22em;
-  color: var(--text-7);
+  flex: none;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-width: 0;
 }
 
-.nav-link {
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #c6d4ea;
-  background: transparent;
-  border: none;
-  padding: 0.625rem 1.125rem;
-  border-radius: 999px;
+/* Aviso de atualização que falhou: pílula de alerta, só quando há algo a avisar */
+.cabecalho__alerta {
+  max-width: 22rem;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+.cabecalho__nav {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cabecalho__nav > ul {
+  display: flex;
+  justify-content: safe center;
+  gap: var(--espaco-1);
+  list-style: none;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cabecalho__nav li {
+  list-style: none;
+}
+
+.cabecalho__ancora {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 2.5rem;
+  padding: 0 var(--espaco-4);
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-placa-suave);
+  white-space: nowrap;
   text-decoration: none;
-  transition: all 0.25s;
-  white-space: nowrap;
-}
-.nav-link:hover {
-  color: #fff;
-}
-.nav-link.is-active {
-  font-weight: 600;
-  color: var(--text-invert);
-  background: #e8f0ff;
+  transition:
+    background-color var(--duracao) var(--curva),
+    color var(--duracao) var(--curva);
 }
 
-.nav-status {
-  margin-left: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 999px;
-  border: 1px solid var(--success-border);
-  background: rgba(63, 217, 154, 0.07);
-}
-.nav-status-dot {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  background: var(--success);
-  animation: pulseDot 1.6s ease infinite;
-}
-.nav-status-text {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  color: #9fe8c8;
-  white-space: nowrap;
-}
-.nav-status.is-volatil {
-  border-color: var(--warning-border);
-  background: rgba(255, 196, 102, 0.07);
-}
-.nav-status.is-volatil .nav-status-dot {
-  background: var(--warning);
-}
-.nav-status.is-volatil .nav-status-text {
-  color: var(--warning);
-}
-.nav-status.is-analisando {
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-}
-.nav-status.is-analisando .nav-status-dot {
-  background: var(--accent);
-}
-.nav-status.is-analisando .nav-status-text {
-  color: var(--accent);
+.cabecalho__ancora:hover {
+  color: var(--cor-placa-texto);
+  background: var(--cor-superficie-2);
+  text-decoration: none;
 }
 
-.nav-calmo {
-  display: flex;
-  align-items: center;
-  gap: 0.4375rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 999px;
-  border: 1px solid rgba(147, 165, 191, 0.3);
-  background: rgba(147, 165, 191, 0.08);
-}
-.nav-calmo span:last-child {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  color: var(--text-3);
-  white-space: nowrap;
+.cabecalho__ancora[aria-current='true'],
+.cabecalho__ancora[aria-current='page'],
+.cabecalho__ancora[aria-current='location'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
 }
 
-/* ---------- rodapé permanente (RF-0.4) ---------- */
+/* Ícones só aparecem na barra inferior do celular. O menu Mais existe só abaixo de 1280px. */
+.cabecalho__icone,
+.cabecalho__mais,
+.cabecalho__mais-li {
+  display: none;
+}
 
-.footer {
+/* Minha lista: ícone em botão redondo, com o número num selinho âmbar */
+.cabecalho__lista {
   position: relative;
-  z-index: 1;
-  max-width: 82.5rem;
-  margin: 0 auto;
-  /* folga inferior para os controles flutuantes não cobrirem o disclaimer */
-  padding: 1.875rem 2.75rem 6rem;
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
   align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-.footer-tag {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  color: var(--text-9);
-}
-.footer-disclaimer {
-  font-size: 0.75rem;
-  color: var(--text-9);
+  justify-content: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  text-decoration: none;
+  transition: background-color var(--duracao) var(--curva);
 }
 
-/* ---------- shells de página ---------- */
-
-.screen {
-  position: relative;
-  z-index: 1;
-  margin: 0 auto;
-  padding: 8.625rem 2.75rem 3.75rem;
-}
-.screen-wide {
-  max-width: 82.5rem;
-}
-.screen-mid {
-  max-width: 67.5rem;
-}
-.screen-narrow {
-  max-width: 53.75rem;
-}
-.screen-hoje {
-  max-width: 82.5rem;
-  padding-top: 8rem;
-  padding-bottom: 2.5rem;
+.cabecalho__lista:hover {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  text-decoration: none;
 }
 
-/* ---------- controles de experiência (RF-5.1..5.3) ---------- */
-
-.xp-dock {
-  position: fixed;
-  bottom: 1.375rem;
-  left: 1.375rem;
-  z-index: 60;
-  display: flex;
-  gap: 0.625rem;
-  flex-wrap: wrap;
-  max-width: calc(100vw - 12rem);
-}
-
-.xp-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.5rem 0.375rem 1rem;
-  border-radius: 999px;
-  background: var(--surface-float);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-float);
-}
-
-.xp-label {
-  font-family: var(--font-mono);
-  font-size: 0.59375rem;
-  letter-spacing: 0.14em;
-  color: var(--text-5);
-}
-
-.xp-opt {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-link);
-  background: transparent;
-  border: none;
-  border-radius: 999px;
-  padding: 0.4375rem 0.8125rem;
-  transition: all 0.2s;
-}
-.xp-opt[aria-checked='true'],
-.xp-opt[aria-pressed='true'] {
-  color: var(--text-invert);
-  background: var(--accent);
-}
-.xp-opt.is-calmo[aria-pressed='true'] {
-  background: var(--success);
-}
-
-.xp-zoom-btn {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--text-link);
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  transition: all 0.2s;
-}
-.xp-zoom-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-}
-.xp-zoom-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-.xp-zoom-val {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  color: var(--text-5);
-  min-width: 2.375rem;
+.cabecalho__selo {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.3rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25rem;
   text-align: center;
 }
 
-/* ---------- botão de ajuda (RF-5.4) ---------- */
+/* Leitura: botão com ícone e texto. O painel abre logo abaixo, alinhado à direita. */
+.leitura {
+  position: relative;
+  flex: none;
+}
 
-.help-btn {
-  position: fixed;
-  bottom: 1.375rem;
-  right: 1.375rem;
-  z-index: 60;
-  display: flex;
+.leitura__gatilho {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5625rem;
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-invert);
-  background: var(--accent);
-  border: none;
-  padding: 0.8125rem 1.375rem;
-  border-radius: 999px;
-  box-shadow: 0 12px 36px rgba(125, 239, 255, 0.3);
-  min-height: 3rem;
-  transition: all 0.25s;
-}
-.help-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
+  gap: var(--espaco-2);
+  min-height: 2.75rem;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duracao) var(--curva),
+    border-color var(--duracao) var(--curva);
 }
 
-/* ---------- tour guiado (RF-5.5) ---------- */
+.leitura__gatilho:hover {
+  background: var(--cor-superficie);
+}
 
-.tour-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(2, 4, 10, 0.72);
-  backdrop-filter: blur(6px);
+.leitura__gatilho[aria-expanded='true'] {
+  border-color: var(--cor-acento);
+  color: var(--cor-acento);
+}
+
+.leitura__gatilho:focus-visible,
+.leitura__ajuda:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.leitura__gatilho svg {
+  flex-shrink: 0;
+}
+
+.leitura__painel {
+  position: absolute;
+  top: calc(100% + var(--espaco-2));
+  right: 0;
+  z-index: var(--z-painel);
+  display: grid;
+  gap: var(--espaco-5);
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
+  box-shadow: var(--sombra-cartao);
+  color: var(--cor-texto);
+}
+
+.leitura__painel[hidden] {
+  display: none;
+}
+
+.leitura__bloco {
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.leitura__frase {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  color: var(--cor-texto);
+}
+
+.leitura__modos {
+  display: grid;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+  color: var(--cor-texto-suave);
+}
+
+.leitura__modos strong {
+  color: var(--cor-texto);
+  font-weight: var(--peso-titulo);
+}
+
+.leitura__tamanho {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.leitura__percentual {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.leitura__ajuda {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: 2.75rem;
+  color: var(--cor-acento);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Seções da página */
+main {
+  display: block;
+  padding-bottom: var(--espaco-6);
+}
+
+/* foco programático ao trocar de tela: não precisa de contorno visível */
+main:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Faixa "Para quem é e como usar", logo abaixo do cabeçalho */
+.como-usar {
+  margin-top: var(--espaco-5);
+  padding: var(--espaco-5) var(--espaco-6);
+  background: var(--cor-faixa);
+  border-radius: var(--raio-cartao);
+  border: 1px solid var(--cor-borda);
+}
+
+.como-usar__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--espaco-4) var(--espaco-5);
+}
+
+.como-usar__resumo {
+  flex: 0 1 15rem;
+  min-width: 0;
+}
+
+.como-usar__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-titulo);
+  line-height: 1.2;
+  margin-bottom: var(--espaco-1);
+}
+
+.como-usar__publico {
+  font-size: var(--texto-sm);
+}
+
+.como-usar__passos {
+  display: flex;
+  flex: 1 1 24rem;
+  min-width: 0;
+  gap: var(--espaco-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: passo;
+}
+
+.como-usar__passos li {
+  counter-increment: passo;
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  min-width: 0;
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+}
+
+.como-usar__passos li::before {
+  content: counter(passo);
+  display: grid;
+  place-items: center;
+  flex: 0 0 1.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--cor-destaque);
+  color: var(--cor-destaque-texto);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  line-height: 1;
+}
+
+.como-usar__fechar {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  animation: fadeUp 0.3s ease both;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: var(--raio-2);
+  background: transparent;
+  color: var(--cor-texto);
+  cursor: pointer;
 }
 
-.tour-modal {
-  width: 35rem;
-  max-width: 100%;
-  border-radius: 1.625rem;
-  background: var(--surface-modal);
-  border: 1px solid var(--accent-border);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
-  padding: 2.375rem 2.625rem;
+.como-usar__fechar:hover {
+  background: rgb(255 255 255 / 0.06);
 }
 
-.tour-head {
+.como-usar__notas {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-5);
+  margin-top: var(--espaco-3);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
 }
-.tour-step {
-  font-family: var(--font-mono);
-  font-size: 0.65625rem;
-  letter-spacing: 0.2em;
-  color: var(--accent);
+
+.como-usar__finalidade,
+.como-usar__termos {
+  max-width: 62ch;
 }
-.tour-close {
-  background: none;
-  border: none;
-  color: var(--text-5);
-  font-size: 1.375rem;
-  padding: 0.25rem 0.5rem;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+
+@media (max-width: 760px) {
+  .como-usar__passos {
+    flex-direction: column;
+    gap: var(--espaco-2);
+  }
+
+  .como-usar__passos li {
+    flex: none;
+  }
 }
-.tour-close:hover {
-  color: #fff;
+
+/* Cabeçalho de página própria (h1 e uma frase): sem caixa, só espaço. */
+.pagina-topo {
+  max-width: 65ch;
+  padding-top: var(--espaco-7);
+  margin-bottom: var(--espaco-6);
 }
-.tour-title {
-  margin: 0.875rem 0 0;
-  font-size: 2rem;
-  font-weight: 700;
+
+/* Depois do cabeçalho da página, a primeira seção não precisa de fio: o título já separa. */
+.pagina-topo + .secao {
+  padding-top: var(--espaco-4);
+  border-top: 0;
+}
+
+.pagina-titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
   letter-spacing: -0.02em;
-}
-.tour-desc {
-  margin: 0.875rem 0 0;
-  font-size: 1.0625rem;
-  line-height: 1.65;
-  color: var(--text-2);
-  text-wrap: pretty;
-}
-.tour-dots {
-  display: flex;
-  gap: 0.375rem;
-  margin-top: 1.625rem;
-}
-.tour-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  transition: all 0.3s;
-}
-.tour-dot.is-current {
-  width: 1.375rem;
-  background: var(--accent);
-}
-.tour-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.625rem;
-  gap: 0.75rem;
-}
-.tour-btn {
-  font-family: var(--font-display);
-  font-size: 0.9375rem;
-  border-radius: 999px;
-  padding: 0.8125rem 1.75rem;
-  min-height: 3rem;
-  border: 1px solid transparent;
-  transition: all 0.25s;
-}
-.tour-btn-prev {
-  font-weight: 500;
-  color: var(--text-link);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--border-strong);
-}
-.tour-btn-prev:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-.tour-btn-next {
-  font-weight: 600;
-  color: #fff;
-  background: var(--primary-solid);
-  padding: 0.8125rem 1.75rem;
-}
-.tour-btn-next:hover {
-  background: var(--primary-hover);
-}
-.tour-btn-done {
-  font-weight: 600;
-  color: var(--text-invert);
-  background: var(--accent);
-}
-.tour-btn-done:hover {
-  background: var(--accent-hover);
+  line-height: 1.08;
+  margin-bottom: var(--espaco-3);
 }
 
-@media (max-width: 900px) {
-  .screen {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+.pagina-intro {
+  font-size: var(--texto-base);
+  color: var(--cor-texto-suave);
+}
+
+.secao {
+  padding-top: var(--espaco-8);
+  border-top: 1px solid var(--cor-fio);
+}
+
+.secao:first-child,
+.como-usar + .secao {
+  padding-top: var(--espaco-6);
+  border-top: 0;
+}
+
+/* Rodapé: vidro escuro com fio no topo, como o cabeçalho */
+.rodape {
+  margin-top: 0;
+  background: var(--cor-placa);
+  border-top: 1px solid var(--cor-fio);
+  color: var(--cor-placa-suave);
+  padding: var(--espaco-7) 0;
+  font-size: var(--texto-sm);
+}
+
+.rodape a {
+  color: var(--cor-placa-texto);
+  text-decoration-color: var(--cor-acento);
+}
+
+.rodape .aviso {
+  color: var(--cor-placa-texto);
+  font-weight: var(--peso-medio);
+  margin-bottom: var(--espaco-3);
+}
+
+.rodape p + p {
+  margin-top: var(--espaco-1);
+}
+
+/* Entre 721px e 1279px as páginas extras vão para o menu Mais, logo abaixo do botão.
+   Acima de 1280px a linha inteira cabe e todas as páginas aparecem. */
+@media (min-width: 721px) and (max-width: 1279px) {
+  .cabecalho__nav li[data-extra] {
+    display: none;
   }
-  .footer {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+
+  .cabecalho__mais-li {
+    display: block;
+    position: relative;
   }
-  .xp-dock {
-    max-width: calc(100vw - 2.5rem);
+
+  .cabecalho__mais {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 var(--espaco-4);
+    border: 0;
+    border-radius: var(--raio-pilula);
+    background: transparent;
+    color: var(--cor-placa-suave);
+    font: inherit;
+    font-size: var(--texto-sm);
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+  }
+
+  .cabecalho__mais:hover,
+  .cabecalho__mais[aria-expanded='true'] {
+    background: var(--cor-superficie-2);
+    color: var(--cor-placa-texto);
+  }
+
+  .cabecalho__menu-mais {
+    position: absolute;
+    top: calc(100% + var(--espaco-2));
+    right: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 11rem;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-cartao);
+    background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
+    box-shadow: var(--sombra-cartao);
+  }
+
+  .cabecalho__menu-mais .cabecalho__ancora {
+    color: var(--cor-placa-texto);
+  }
+}
+
+/* Entre 721px e 1279px a linha fica mais enxuta (espaços e links menores) para caber sem rolagem.
+   Acima de 1280px nada muda. */
+@media (min-width: 721px) and (max-width: 1279px) {
+  .cabecalho__linha {
+    column-gap: var(--espaco-4);
+  }
+
+  .cabecalho__ancora,
+  .cabecalho__mais {
+    padding: 0 0.75rem;
+  }
+}
+
+/* Tablet em pé e notebook pequeno: logo e links um pouco menores; Leitura só com o ícone.
+   O texto de Leitura continua no DOM (nome acessível), com tamanho zero. */
+@media (min-width: 721px) and (max-width: 960px) {
+  .cabecalho__marca {
+    font-size: 1rem;
+  }
+
+  .cabecalho__ancora,
+  .cabecalho__mais {
+    font-size: 0.875rem;
+  }
+
+  .cabecalho__acoes .leitura__gatilho {
+    gap: 0;
+    justify-content: center;
+    width: 2.75rem;
+    padding: 0;
+    font-size: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  /* No celular o topo rola com a página (marca e controles); a navegação vira a barra inferior. */
+  .cabecalho {
+    position: static;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .cabecalho__linha {
+    flex-wrap: wrap;
+    row-gap: var(--espaco-2);
+  }
+
+  .cabecalho__alerta {
+    max-width: none;
+  }
+
+  /* Minha lista e Leitura encostam na borda direita, com o padding lateral da página */
+  .cabecalho__acoes {
+    margin-left: auto;
+  }
+
+  /* Barra inferior fixa em pílula */
+  .cabecalho__nav {
+    position: fixed;
+    left: 50%;
+    bottom: max(var(--espaco-3), env(safe-area-inset-bottom));
+    z-index: var(--z-barra);
+    flex: none;
+    width: min(calc(100% - 1.5rem), 28rem);
+    transform: translateX(-50%);
+    padding: 6px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-pilula);
+    background: var(--cor-barra);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: var(--sombra-cartao);
+  }
+
+  .cabecalho__nav > ul {
+    justify-content: space-between;
+    gap: 2px;
+    overflow: visible;
+  }
+
+  .cabecalho__nav > ul > li {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* Proventos, Notícias e O modelo ficam no menu Mais */
+  .cabecalho__nav li[data-extra] {
+    display: none;
+  }
+
+  .cabecalho__nav .cabecalho__mais-li {
+    display: block;
+    position: relative;
+  }
+
+  .cabecalho__ancora,
+  .cabecalho__mais {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    min-height: 3rem;
+    padding: var(--espaco-1) 0;
+    border: 0;
+    border-radius: var(--raio-pilula);
+    background: transparent;
+    color: var(--cor-placa-suave);
+    font: inherit;
+    font-size: var(--texto-xs);
+    font-weight: var(--peso-medio);
+    line-height: 1.1;
+    cursor: pointer;
+  }
+
+  .cabecalho__icone {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .cabecalho__ancora[aria-current='page'],
+  .cabecalho__mais[aria-expanded='true'] {
+    background: var(--cor-placa-texto);
+    color: var(--cor-acento-texto);
+  }
+
+  .cabecalho__mais {
+    display: flex;
+  }
+
+  .cabecalho__menu-mais {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.75rem);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 11rem;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-cartao);
+    background: var(--cor-menu);
+    box-shadow: var(--sombra-cartao);
+  }
+
+  .cabecalho__menu-mais .cabecalho__ancora {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--espaco-3);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 var(--espaco-4);
+    border-radius: var(--raio-pilula);
+    color: var(--cor-placa-texto);
+    font-size: var(--texto-sm);
+  }
+
+  /* a barra inferior não cobre o fim da página */
+  body {
+    padding-bottom: calc(var(--altura-barra-inferior) + env(safe-area-inset-bottom));
+  }
+
+  /* O X fica no canto, como em qualquer aviso que se fecha */
+  .como-usar {
+    position: relative;
+  }
+
+  .como-usar__fechar {
+    position: absolute;
+    top: var(--espaco-2);
+    right: var(--espaco-2);
+  }
+
+  .como-usar__resumo {
+    flex-basis: 100%;
+    padding-right: var(--espaco-7);
+  }
+}
+
+/* Aviso de animações desligadas no sistema: discreto, fixo no canto inferior, sem entrada animada */
+.aviso-movimento {
+  position: fixed;
+  right: var(--espaco-4);
+  bottom: var(--espaco-4);
+  z-index: var(--z-painel);
+  width: min(22rem, calc(100% - 2 * var(--espaco-4)));
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
+  box-shadow: var(--sombra-cartao);
+}
+
+.aviso-movimento__titulo {
+  margin: 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  color: var(--cor-texto);
+}
+
+.aviso-movimento__frase {
+  margin: var(--espaco-2) 0 0;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.aviso-movimento__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+}
+
+.aviso-movimento .aviso-movimento__principal {
+  background: var(--cor-destaque);
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque-texto);
+}
+
+.aviso-movimento .aviso-movimento__principal:hover {
+  background: var(--cor-destaque-hover);
+  border-color: var(--cor-destaque-hover);
+}
+
+/* No celular o aviso fica acima da barra inferior fixa */
+@media (max-width: 720px) {
+  .aviso-movimento {
+    bottom: calc(var(--altura-barra-inferior) + var(--espaco-3) + env(safe-area-inset-bottom));
   }
 }

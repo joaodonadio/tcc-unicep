@@ -1,0 +1,650 @@
+/* Página Setores: abas de período, ranking divergente, cartões por setor e o mapa do pregão */
+
+/* ---------- Topo: o que é um setor, com ícones de exemplo ---------- */
+
+.setores-explica {
+  margin-bottom: var(--espaco-6);
+}
+
+.setores-explica-frase {
+  margin: 0 0 var(--espaco-4);
+  max-width: 60ch;
+  font-size: var(--texto-lg);
+  color: var(--cor-texto);
+}
+
+.setores-exemplos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  gap: var(--espaco-3);
+}
+
+.setores-exemplo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  animation: setor-entra 0.35s var(--curva) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.setores-exemplo-nome {
+  display: grid;
+  min-width: 0;
+}
+
+.setores-exemplo-setor {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  color: var(--cor-texto);
+}
+
+.setores-exemplo-dica {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+@keyframes setor-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Abas de período ---------- */
+
+.setores-seletor {
+  margin-bottom: var(--espaco-6);
+}
+
+.setores-como-ler {
+  margin: 0 0 var(--espaco-3);
+  max-width: 65ch;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.setores-abas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-1);
+  padding: var(--espaco-1);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.setores-aba {
+  min-height: 2.75rem;
+  padding: var(--espaco-2) 0.25rem;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duracao) var(--curva),
+    color var(--duracao) var(--curva);
+}
+
+.setores-aba:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.setores-aba[aria-selected='true'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-weight: var(--peso-forte);
+}
+
+.setores-aba:focus-visible,
+.setor-linha:focus-visible,
+.setor-tickers a:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
+}
+
+/* ---------- Títulos das seções ---------- */
+
+/* Título de seção fora de cartão (Cada setor, Todas as ações por setor) */
+.setores-titulo {
+  margin: 0 0 var(--espaco-2);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  line-height: 1.15;
+}
+
+/* Título de cartão: o ranking "Quem subiu e quem caiu" fica dentro de .cartao */
+.setores-ranking .setores-titulo {
+  font-size: var(--texto-xl);
+  line-height: 1.2;
+}
+
+.setores-ranking,
+.setores-cartoes {
+  margin-bottom: var(--espaco-6);
+}
+
+/* ---------- Ranking divergente ---------- */
+
+/* Corpo do cartão: cena 3D e lista. Abaixo de 1100px empilham; no desktop a cena fica à esquerda */
+.setores-ranking__corpo {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+@media (min-width: 1100px) {
+  .setores-ranking__corpo:has(.setores3d) {
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    align-items: start;
+    gap: var(--espaco-6);
+  }
+}
+
+.setores-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+/* Uma linha por setor, separadas por filete fino */
+.setores-lista > li + li {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.setor-linha {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--espaco-3);
+  min-height: 3rem;
+  padding: var(--espaco-2) var(--espaco-3);
+  border-radius: var(--raio-2);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--duracao) var(--curva);
+  scroll-margin-top: 5rem;
+}
+
+.setor-linha:hover {
+  background: var(--cor-superficie-2);
+}
+
+.setor-linha-cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-width: 0;
+}
+
+.setor-linha-texto {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.setor-linha-nome {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.setor-linha-frase {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.setor-linha-barra {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-width: 0;
+}
+
+.setor-linha-valor {
+  text-align: right;
+  font-weight: var(--peso-forte);
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-suave);
+}
+
+.setor-linha-valor[data-sinal] {
+  color: var(--cor-sinal);
+}
+
+.setor-trilho-div {
+  position: relative;
+  display: block;
+  height: 0.375rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.setor-eixo {
+  position: absolute;
+  top: -0.25rem;
+  bottom: -0.25rem;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--cor-texto-suave);
+}
+
+.setor-barra-div {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-sinal, var(--cor-estavel));
+  animation: setor-cresce 0.5s var(--curva) both;
+}
+
+.setor-barra-div[data-sinal='alta'] {
+  left: 50%;
+  transform-origin: left center;
+}
+
+.setor-barra-div[data-sinal='queda'] {
+  right: 50%;
+  transform-origin: right center;
+}
+
+/* Estável (0,0%): sem barra; o marco do zero já diz que não mexeu */
+.setor-barra-div[data-sinal='estavel'] {
+  display: none;
+}
+
+@keyframes setor-cresce {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Cartões por setor ---------- */
+
+.setores-grade {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--espaco-4);
+}
+
+.setores-grade > li {
+  display: flex;
+  min-width: 0;
+}
+
+.setor-cartao {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  height: 100%;
+  min-width: 0;
+  scroll-margin-top: 5rem;
+}
+
+/* Resultado do período e o que vem depois (contagem, botão) vão para o fim: alinham entre cartões da linha */
+.setor-cartao > .setor-bloco:has(> .setor-valor) {
+  margin-top: auto;
+}
+
+.setor-cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.setor-selo-grande {
+  display: inline-grid;
+  flex: none;
+}
+
+.setor-selo-grande .icone-setor {
+  width: 3rem;
+  height: 3rem;
+}
+
+.setor-nome {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto);
+}
+
+.setor-descricao {
+  margin: 0;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--cor-texto-suave);
+}
+
+.setor-bloco {
+  display: grid;
+  gap: var(--espaco-1);
+}
+
+.setor-rotulo {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+.setor-tickers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.setor-tickers a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--espaco-3);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  text-decoration: none;
+}
+
+.setor-valor {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.setor-valor[data-sinal] {
+  color: var(--cor-sinal);
+}
+
+.setor-empilhada {
+  display: flex;
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.setor-empilhada > span {
+  display: block;
+  height: 100%;
+}
+
+.setor-empilhada > span[data-sinal='alta'] {
+  background: var(--cor-alta);
+}
+
+.setor-empilhada > span[data-sinal='queda'] {
+  background: var(--cor-queda);
+}
+
+.setor-contagem {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-3);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.setor-contagem > [data-sinal] {
+  color: var(--cor-sinal);
+}
+
+.setor-tecnico {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-3);
+  font-size: var(--texto-sm);
+}
+
+.setor-expandir {
+  margin-top: 0;
+  justify-self: start;
+}
+
+/* ---------- Lista de ações dentro do cartão: área com rolagem própria ---------- */
+
+.setor-acoes-caixa {
+  position: relative;
+  max-height: 28rem;
+  overflow-y: auto;
+}
+
+.setor-acoes-caixa:not([hidden])::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 2.5rem;
+  margin-top: -2.5rem;
+  background: linear-gradient(to bottom, transparent, var(--cor-superficie));
+  pointer-events: none;
+}
+
+.setor-acoes {
+  list-style: none;
+  margin: 0;
+  padding: var(--espaco-3) 0 var(--espaco-2);
+  border-top: 1px solid var(--cor-fio, var(--cor-borda));
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.setor-acoes[hidden] {
+  display: none;
+}
+
+.setor-acao-linha {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
+  align-items: center;
+  gap: var(--espaco-3);
+  font-size: var(--texto-sm);
+}
+
+.setor-acao-linha .setor-numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.setor-numero[data-sinal] {
+  color: var(--cor-sinal);
+}
+
+.setor-periodos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.setor-periodos th {
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+  text-align: left;
+  padding-bottom: var(--espaco-1);
+}
+
+.setor-periodos td[data-sinal] {
+  color: var(--cor-sinal);
+}
+
+/* Barrinha simples (lista de ações do cartão) */
+.setor-trilho {
+  display: block;
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  overflow: hidden;
+}
+
+.setor-barra {
+  display: block;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-sinal, var(--cor-estavel));
+  transition: width 0.3s ease;
+}
+
+.setor-acao-linha .setor-trilho {
+  height: 0.4rem;
+}
+
+[data-sinal='alta'] {
+  --cor-sinal: var(--cor-alta);
+}
+
+[data-sinal='queda'] {
+  --cor-sinal: var(--cor-queda);
+}
+
+[data-sinal='estavel'] {
+  --cor-sinal: var(--cor-estavel);
+}
+
+/* ---------- Ranking, resumo e vazio ---------- */
+
+.setores-frase {
+  margin: var(--espaco-4) 0 0;
+  max-width: 65ch;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-base);
+}
+
+.setores-vazio {
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Mapa do pregão ---------- */
+
+.setores-mapa {
+  margin-top: var(--espaco-7);
+}
+
+:root[data-movimento='reduzido'] {
+  .setor-barra,
+  .setor-barra-div,
+  .setores-exemplo {
+    animation: none;
+  }
+
+  .setor-barra,
+  .setores-aba,
+  .setor-linha {
+    transition: none;
+  }
+}
+
+/* Link da aba Destaques do Mercado para a página Setores */
+.mercado-ver-setores {
+  margin-bottom: var(--espaco-4);
+}
+
+/* ---------- Dispersão da variação por setor (modo técnico) ---------- */
+
+.setores-dispersao {
+  margin-bottom: var(--espaco-6);
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+.setores-dispersao-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2) var(--espaco-4);
+  margin: 0 0 var(--espaco-4);
+  padding: 0;
+  list-style: none;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.setores-dispersao-legenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.dispersao-amostra {
+  display: inline-block;
+  flex: none;
+}
+
+.dispersao-caixa {
+  width: 1.25rem;
+  height: 0.75rem;
+  border: 2px solid var(--cor-acento);
+  border-radius: 3px;
+  background: var(--cor-acento-suave);
+}
+
+.dispersao-mediana {
+  width: 2px;
+  height: 1rem;
+  background: var(--cor-acento);
+}
+
+.dispersao-atipico {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid var(--cor-acento);
+  border-radius: 50%;
+}
+
+.setores-dispersao-nota {
+  margin: var(--espaco-3) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+/* Linha em destaque (hover ou foco na lista, ou o ponteiro sobre a coluna 3D) */
+.setor-linha[data-destaque='true'] {
+  background: var(--cor-superficie-2);
+  box-shadow: inset 0 0 0 1px var(--cor-acento-borda);
+}
+
+/* Nomes longos quebram e a barra encolhe; a linha nunca passa da largura do cartão */
+@media (max-width: 479px) {
+  .setor-linha {
+    grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+  }
+
+  .setor-linha-barra {
+    grid-template-columns: minmax(0, 1fr) 3.75rem;
+    gap: var(--espaco-2);
+  }
+}

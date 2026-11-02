@@ -1,0 +1,277 @@
+/* Regras: placar de quantas checagens acenderam, como funcionam (dois passos) e a lista por tipo.
+   Cor de cada tipo: a favor (alta), atenção (queda), contexto (lilás). */
+
+.placar-cartao[data-tipo='forte'],
+.placar-segmento[data-tipo='forte'],
+.regras-grupo[data-tipo='forte'] {
+  --tom: var(--cor-alta);
+}
+
+.placar-cartao[data-tipo='atencao'],
+.placar-segmento[data-tipo='atencao'],
+.regras-grupo[data-tipo='atencao'] {
+  --tom: var(--cor-queda);
+}
+
+.placar-cartao[data-tipo='contexto'],
+.placar-segmento[data-tipo='contexto'],
+.regras-grupo[data-tipo='contexto'] {
+  --tom: var(--cor-dado-3);
+}
+
+/* ===== Placar: três cartões de mesma altura e uma fileira com uma barra por regra ===== */
+
+.placar-regras {
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.placar-cartoes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.placar-cartao {
+  --icone: var(--cor-texto-suave);
+  display: grid;
+  align-content: start;
+  gap: var(--espaco-1);
+  min-width: 0;
+  padding: var(--espaco-3) var(--espaco-3) var(--espaco-4);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-top: 3px solid var(--tom);
+  border-radius: var(--raio-3);
+}
+
+.placar-cartao[data-tipo='forte'] {
+  --icone: var(--cor-alta);
+}
+
+.placar-cartao[data-tipo='atencao'] {
+  --icone: var(--cor-queda);
+}
+
+.placar-cartao__icone {
+  margin-top: var(--espaco-1);
+  color: var(--icone);
+}
+
+.placar-cartao__nome {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.placar-cartao__numero {
+  font-family: var(--fonte-numeros);
+  font-size: clamp(2.25rem, 9vw, 3.25rem);
+  font-weight: var(--peso-forte);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--cor-texto);
+}
+
+.placar-cartao__de {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.placar-barra {
+  display: flex;
+  gap: 4px;
+}
+
+.placar-segmento {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 0.625rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda);
+}
+
+.placar-segmento[data-acesa='true'] {
+  background: var(--tom);
+}
+
+.placar-legenda {
+  margin: 0 0 var(--espaco-5);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto);
+}
+
+/* ===== Como funciona: dois passos e a lista por tipo (dentro do recolhível) ===== */
+
+.regras-detalhes > summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-4);
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.regras-detalhes > summary:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.regras-detalhes > .regras-guia {
+  margin-top: var(--espaco-4);
+}
+
+.regras-guia {
+  display: grid;
+  gap: var(--espaco-5);
+}
+
+.regras-passos {
+  display: grid;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.regras-passo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--espaco-3);
+  align-items: start;
+}
+
+/* Número do passo em âmbar sólido: a tinta escura é a --cor-acento-texto */
+.regras-passo__numero {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-weight: var(--peso-forte);
+}
+
+.regras-passo__texto {
+  display: grid;
+  gap: 2px;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--cor-texto);
+}
+
+.regras-passo__titulo {
+  font-weight: var(--peso-titulo);
+}
+
+.regras-link {
+  margin: 0;
+}
+
+.regras-grupo {
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.regras-grupo__titulo {
+  margin: 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.01em;
+  color: var(--tom);
+}
+
+.regras-grupo__texto {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.regras-grade {
+  display: grid;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .regras-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.regras-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--espaco-2) var(--espaco-3);
+  min-width: 0;
+  padding: var(--espaco-3);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+}
+
+.regras-item[data-acesa='true'] {
+  background: color-mix(in srgb, var(--tom) 10%, var(--cor-superficie));
+  border-color: color-mix(in srgb, var(--tom) 45%, transparent);
+}
+
+/* LED: apagado é um anel vazado; aceso é círculo cheio na cor do tipo */
+.regras-led {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-top: 0.3rem;
+  border-radius: 50%;
+  border: 2px solid var(--cor-borda);
+  background: transparent;
+}
+
+.regras-led[data-acesa='true'] {
+  background: var(--tom);
+  border-color: var(--tom);
+}
+
+.regras-item__texto {
+  display: grid;
+  flex: 1 1 10rem;
+  gap: 2px;
+  min-width: 0;
+}
+
+.regras-item__nome {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.regras-item__criterio {
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+  color: var(--cor-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+/* Selo "acendeu hoje": contraste alto, branco quente sobre a tinta escura */
+.regras-selo {
+  flex: none;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-texto);
+  color: var(--cor-fundo);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}

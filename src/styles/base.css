@@ -1,31 +1,82 @@
-/**
- * Base: reset complementar, tipografia, fundo ambiente e animações.
- * Todos os tamanhos em rem para que o zoom (RF-5.3) escale a interface inteira.
- */
+/* Reset mínimo e comportamento do documento. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
 
 html {
-  /* RF-5.3 — zoom por font-size da raiz (rem), não document.body.style.zoom */
-  font-size: calc(16px * var(--ui-zoom));
-  color-scheme: dark;
-  scrollbar-color: rgba(125, 239, 255, 0.25) transparent;
+  /* 100% em vez de 16px: respeita a fonte que o usuário escolheu no navegador */
+  font-size: calc(100% * var(--ui-zoom));
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+  scrollbar-width: thin;
+}
+
+/* Rolagem fina no tom do tema (navegadores WebKit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.16);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--raio-pilula);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(232 184 74 / 0.5);
+  background-clip: padding-box;
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  line-height: 1.5;
-  overflow-x: hidden;
+  min-height: 100dvh;
+  isolation: isolate;
+  overflow-wrap: break-word;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-normal);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-button,
+/* dois brilhos âmbar difusos numa camada fixa (pinta uma vez, não a cada rolagem) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(60rem 42rem at 8% -6%, rgb(232 184 74 / 0.1), transparent 70%),
+    radial-gradient(52rem 38rem at 100% 106%, rgb(232 184 74 / 0.08), transparent 70%);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
 input,
+button,
+select,
 textarea {
-  font-family: inherit;
+  font: inherit;
   color: inherit;
 }
 
@@ -33,88 +84,72 @@ button {
   cursor: pointer;
 }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(125, 239, 255, 0.22);
-  border-radius: 999px;
+h1,
+h2,
+h3 {
+  line-height: 1.15;
 }
 
-/* ---------- utilitários tipográficos do protótipo ---------- */
-
-.mono {
-  font-family: var(--font-mono);
+h4 {
+  line-height: 1.2;
 }
 
-/* rótulo de sistema: mono, caixa alta, letter-spacing largo */
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.22em;
-  color: var(--text-5);
-}
-
-.eyebrow-dot {
-  width: 0.4375rem;
-  height: 0.4375rem;
-  border-radius: 999px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-.label {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.18em;
-  color: var(--text-7);
-}
-
-.h1 {
-  margin: 1.375rem 0 0;
-  font-size: 4rem;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-}
-
-.h2 {
-  margin: 1.125rem 0 0;
-  font-size: 2.875rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-}
-
-.h2-sm {
-  margin: 1rem 0 0;
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-}
-
-.lead {
-  margin: 1rem 0 0;
-  font-size: 1.03125rem;
-  line-height: 1.55;
-  color: var(--text-4);
-  max-width: 40rem;
+p {
   text-wrap: pretty;
 }
 
-.hl {
-  color: var(--accent);
+/* Números em colunas e dados: algarismos de largura fixa */
+td,
+th,
+dd,
+.valor {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Links: texto na cor do contexto, sublinhado amarelo; no hover o texto também fica amarelo */
+a {
+  color: inherit;
+  text-decoration-color: var(--cor-acento);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--cor-acento);
+  text-decoration-thickness: 2px;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+::selection {
+  background: rgb(232 184 74 / 0.85);
+  color: var(--cor-acento-texto);
+}
+
+input,
+textarea {
+  caret-color: var(--cor-acento);
+}
+
+/* Foco: anel âmbar com um halo escuro por fora, visível em qualquer fundo. */
+:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgb(26 24 21 / 0.9);
+  border-radius: var(--raio-1);
 }
 
 .sr-only {
@@ -129,174 +164,34 @@ button {
   border: 0;
 }
 
-/* ---------- superfícies ---------- */
-
-.card {
-  border-radius: var(--radius-card);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 1.625rem 1.75rem;
+.pular-conteudo {
+  position: absolute;
+  left: var(--espaco-4);
+  top: -10rem;
+  z-index: var(--z-pular);
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--cor-destaque);
+  color: var(--cor-destaque-texto);
+  font-weight: var(--peso-titulo);
+  border-radius: var(--raio-pilula);
 }
 
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  font-size: 1.03125rem;
-  font-weight: 700;
+.pular-conteudo:focus {
+  top: var(--espaco-2);
 }
 
-.card-title-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(125, 239, 255, 0.8);
+section[id] {
+  scroll-margin-top: calc(var(--altura-cabecalho) + var(--espaco-4));
 }
 
-/* ---------- botões ---------- */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: var(--font-display);
-  border-radius: 999px;
-  border: 1px solid transparent;
-  transition:
-    background 0.25s,
-    border-color 0.25s,
-    transform 0.25s,
-    box-shadow 0.25s,
-    color 0.25s;
-}
-
-.btn-primary {
-  font-size: 0.96875rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--primary-solid);
-  padding: 1rem 1.75rem;
-  box-shadow: 0 10px 34px rgba(47, 107, 255, 0.4);
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 44px rgba(47, 107, 255, 0.55);
-}
-
-.btn-ghost {
-  font-size: 0.96875rem;
-  font-weight: 500;
-  color: var(--text-1);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--border-strong);
-  padding: 1rem 1.75rem;
-}
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.28);
-}
-
-.btn-accent {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-invert);
-  background: var(--accent);
-  padding: 0.9375rem 1.5rem;
-  min-height: 3rem;
-}
-.btn-accent:hover {
-  background: var(--accent-hover);
-}
-
-.btn-sm {
-  font-size: 0.84375rem;
-  font-weight: 600;
-  padding: 0.6875rem 1.25rem;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.btn-link:hover {
-  color: var(--accent-hover);
-}
-
-/* ---------- animações ---------- */
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes pulseDot {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.45;
-    transform: scale(0.82);
-  }
-}
-
-@keyframes typingDot {
-  0%,
-  60%,
-  100% {
-    opacity: 0.25;
-    transform: translateY(0);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
-}
-
-@keyframes shimmer {
-  from {
-    background-position: -420px 0;
-  }
-  to {
-    background-position: 420px 0;
-  }
-}
-
-.fade-up {
-  animation: fadeUp 0.7s ease both;
-}
-.fade-up-fast {
-  animation: fadeUp 0.5s ease both;
-}
-.delay-1 {
-  animation-delay: 0.15s;
-}
-
-/**
- * Acessibilidade: quem pediu menos movimento não recebe rotação, pulso
- * nem parallax. Os canvas leem esta media query em JS (ver useReducedMotion).
- */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
+:root[data-movimento='reduzido'] {
+  & *,
+  & *::before,
+  & *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-property: opacity, color, background-color, border-color, outline-color !important;
+    transition-delay: 0s !important;
   }
 }

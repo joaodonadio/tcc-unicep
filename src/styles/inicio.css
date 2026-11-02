@@ -1,0 +1,949 @@
+/* Página inicial (tema âmbar): O dia, mapa do pregão, notícias e proventos em cartões translúcidos. */
+
+/* ---------- O dia: fatos do quadro ---------- */
+.dia-fatos {
+  margin: 0;
+}
+
+.dia-fato {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--espaco-4);
+  row-gap: var(--espaco-1);
+  padding: var(--espaco-4) 0;
+  border-bottom: 1px solid var(--cor-fio);
+}
+
+.dia-fato:last-child {
+  border-bottom: 0;
+}
+
+.dia-fato dt,
+.dia-fato dd {
+  margin: 0;
+}
+
+.dia-fato dt {
+  grid-column: 1;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.dia-fato dt.dia-grupo {
+  color: var(--cor-texto);
+  font-weight: var(--peso-medio);
+}
+
+.dia-fato dt.dia-sub {
+  padding-left: var(--espaco-4);
+}
+
+.dia-fato dd {
+  grid-column: 2;
+  text-align: right;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.dia-fato dd.dia-nota {
+  grid-column: 1 / -1;
+  text-align: left;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-normal);
+  line-height: 1.45;
+  color: var(--cor-texto-suave);
+}
+
+.dia-fato a {
+  font-weight: var(--peso-titulo);
+}
+
+/* ---------- Mapa do pregão: mapa de calor por setor ---------- */
+.mapa {
+  margin: 0;
+}
+
+.mapa-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--espaco-2);
+}
+
+.mapa-intro {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-5);
+}
+
+.mapa-linhas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.mapa-linha {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--espaco-4);
+  padding: var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.mapa-setor {
+  display: grid;
+  gap: var(--espaco-1);
+  padding-top: 0.2rem;
+}
+
+.mapa-setor-nome {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-titulo);
+  line-height: 1.25;
+}
+
+.mapa-setor-resumo {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.mapa-blocos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* O tom de fundo vem em linha (color-mix); aqui ficam forma, texto e estados */
+.mapa-bloco a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  box-sizing: border-box;
+  width: 5.5rem;
+  height: 3.25rem;
+  padding: var(--espaco-1) var(--espaco-3);
+  border-radius: var(--raio-2);
+  color: var(--cor-texto);
+  text-decoration: none;
+  transition: transform var(--duracao) var(--curva);
+}
+
+.mapa-bloco a:hover {
+  outline: 2px solid var(--cor-texto);
+  outline-offset: 1px;
+}
+
+.mapa-bloco a:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.mapa-bloco-ticker {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+  line-height: 1;
+}
+
+.mapa-bloco-variacao {
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Escala de cor, só visual: as variações estão nos blocos */
+.mapa-escala {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3) var(--espaco-4);
+  list-style: none;
+  padding: 0;
+  margin: var(--espaco-4) 0 0;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.mapa-escala-item {
+  display: grid;
+  gap: var(--espaco-1);
+  width: 5.5rem;
+}
+
+.mapa-escala-cor {
+  display: block;
+  height: 0.75rem;
+  border-radius: var(--raio-pilula);
+}
+
+/* ---------- Notícias e proventos, lado a lado ---------- */
+/* Cada bloco começa com um fio grosso, sem caixa */
+.dia-bloco {
+  min-width: 0;
+  padding: var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.dia-bloco-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--espaco-4);
+}
+
+.dia-nota {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-3);
+}
+
+.dia-vazio {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.dia-tom {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  margin-bottom: var(--espaco-5);
+}
+
+/* Tom: três números grandes, cada um na cor do seu sinal */
+.dia-contagens {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-3);
+  margin: 0 0 var(--espaco-4);
+}
+
+.dia-contagem {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--espaco-2);
+  padding: var(--espaco-4);
+  background: var(--cor-superficie);
+  border-radius: var(--raio-3);
+}
+
+.dia-contagem dt,
+.dia-contagem dd {
+  margin: 0;
+}
+
+.dia-contagem dt {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+.dia-contagem dd {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+}
+
+.dia-contagem[data-contagem='positivas'] dd,
+.dia-contagem[data-contagem='positivas'] dt {
+  color: var(--cor-alta);
+}
+
+.dia-contagem[data-contagem='neutras'] dd {
+  color: var(--cor-texto-suave);
+}
+
+.dia-contagem[data-contagem='negativas'] dd,
+.dia-contagem[data-contagem='negativas'] dt {
+  color: var(--cor-queda);
+}
+
+/* Barra fina com as três proporções (aria-hidden: os números já estão no texto) */
+.dia-barra {
+  display: flex;
+  height: 10px;
+  gap: 3px;
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  margin-bottom: var(--espaco-5);
+}
+
+.dia-barra span {
+  flex-basis: 0;
+  min-width: 0;
+  border-radius: var(--raio-pilula);
+}
+
+.dia-barra [data-contagem='positivas'] {
+  background: var(--cor-alta);
+}
+
+.dia-barra [data-contagem='neutras'] {
+  background: var(--cor-texto-suave);
+}
+
+.dia-barra [data-contagem='negativas'] {
+  background: var(--cor-queda);
+}
+
+/* Manchetes por tom */
+.dia-manchetes {
+  display: grid;
+  gap: var(--espaco-5);
+  margin-top: var(--espaco-4);
+}
+
+.dia-manchetes-titulo {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-2);
+}
+
+.dia-manchetes-lista {
+  display: grid;
+  gap: var(--espaco-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cada manchete é um bloco com borda fina na cor do tom; sem barra lateral grossa */
+.dia-manchetes-lista li {
+  padding: var(--espaco-3);
+  border: 1px solid color-mix(in srgb, var(--cor-texto-suave) 35%, transparent);
+  border-radius: var(--raio-2);
+  background: color-mix(in srgb, var(--cor-texto-suave) 6%, transparent);
+}
+
+.dia-manchetes-lista li[data-tom='alta'] {
+  border-color: color-mix(in srgb, var(--cor-alta) 35%, transparent);
+  background: color-mix(in srgb, var(--cor-alta) 6%, transparent);
+}
+
+.dia-manchetes-lista li[data-tom='queda'] {
+  border-color: color-mix(in srgb, var(--cor-queda) 35%, transparent);
+  background: color-mix(in srgb, var(--cor-queda) 6%, transparent);
+}
+
+.dia-manchetes-lista li > .pilula {
+  margin-bottom: var(--espaco-2);
+  font-size: var(--texto-xs);
+}
+
+.dia-manchetes-coluna[data-tom='positivo'] .dia-manchetes-titulo {
+  color: var(--cor-alta);
+}
+
+.dia-manchetes-coluna[data-tom='negativo'] .dia-manchetes-titulo {
+  color: var(--cor-queda);
+}
+
+.dia-manchete {
+  color: var(--cor-texto);
+  text-decoration: none;
+  font-size: var(--texto-base);
+  line-height: 1.45;
+}
+
+.dia-manchete:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.dia-manchete-fonte {
+  display: block;
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.dia-mais-manchetes {
+  margin-top: var(--espaco-3);
+  min-height: 2.5rem;
+  padding: 0 var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+  cursor: pointer;
+  transition: background-color var(--duracao) var(--curva);
+}
+
+.dia-mais-manchetes:hover {
+  background: var(--cor-superficie-hover);
+}
+
+.dia-mais-manchetes:active {
+  color: var(--cor-texto-suave);
+}
+
+.dia-mais-manchetes:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Empresas com mais manchetes: tabela */
+.dia-empresas {
+  margin-top: var(--espaco-6);
+}
+
+.dia-tabela-empresas {
+  margin-top: var(--espaco-2);
+}
+
+.dia-tabela-empresas th,
+.dia-tabela-empresas td {
+  padding: var(--espaco-3) var(--espaco-3);
+}
+
+.dia-tabela-empresas thead th {
+  white-space: normal;
+}
+
+.dia-tabela-empresas tbody th {
+  font-weight: var(--peso-titulo);
+}
+
+/* A regra .tabela tira a borda só das células td; a do cabeçalho de linha (th) ficaria sozinha. */
+.dia-tabela-empresas tbody tr:last-child th {
+  border-bottom: 0;
+}
+
+/* Nome da empresa ao lado do ticker: texto suave, sem competir com o ticker */
+.dia-tabela-empresas .dia-empresa-nome {
+  color: var(--cor-texto-suave);
+  font-weight: var(--peso-medio);
+}
+
+.dia-tabela-empresas td[data-contagem='positivas'] {
+  color: var(--cor-alta);
+  font-weight: var(--peso-medio);
+}
+
+.dia-tabela-empresas td[data-contagem='neutras'] {
+  color: var(--cor-texto-suave);
+  font-weight: var(--peso-medio);
+}
+
+.dia-tabela-empresas td[data-contagem='negativas'] {
+  color: var(--cor-queda);
+  font-weight: var(--peso-medio);
+}
+
+/* ---------- Telas menores ---------- */
+@media (max-width: 760px) {
+  .dia-tabela-empresas th,
+  .dia-tabela-empresas td {
+    padding: var(--espaco-2);
+  }
+
+  .mapa-linha {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espaco-2);
+    padding: var(--espaco-4);
+  }
+
+  .dia-bloco {
+    padding: var(--espaco-5) var(--espaco-4);
+  }
+
+  .dia-contagem dd {
+    font-size: var(--texto-2xl);
+  }
+
+  .dia-contagem {
+    padding: var(--espaco-3);
+  }
+
+  .mapa-setor {
+    padding-top: 0;
+  }
+}
+
+/* Depois da explicação, O dia não precisa do respiro inteiro de seção. */
+.como-usar + .secao {
+  padding-top: var(--espaco-6);
+}
+
+/* Primeira vez por aqui (ComoUsar): cartões dos passos, anel com o número e ilustração em loop.
+   Os estados de entrada (data-visivel) só valem com movimento permitido; com reduced motion,
+   tudo fica no quadro final e legível. Só transform e opacity animam. */
+.como-usar .como-usar__passos li::before {
+  content: none;
+}
+
+/* Caminho: os cinco passos em uma linha só a partir de 1440px (ao lado da introdução);
+   abaixo disso, grade de cartões que cabe na largura */
+.como-usar .como-usar__passos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--espaco-3);
+}
+
+@media (min-width: 1440px) {
+  .como-usar .como-usar__passos {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.como-usar .como-usar__passo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  background: var(--cor-superficie);
+}
+
+.como-usar .como-usar__passo:hover {
+  border-color: var(--cor-acento);
+  background: var(--cor-superficie-2);
+}
+
+/* O cartão inteiro é o link: ocupa a largura e a altura do passo */
+.como-usar .como-usar__link {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  width: 100%;
+  color: var(--cor-texto);
+  text-decoration: none;
+  border-radius: var(--raio-2);
+}
+
+.como-usar .como-usar__link:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.como-usar .como-usar__passo-titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  line-height: 1.2;
+}
+
+.como-usar .como-usar__passo-detalhe {
+  display: block;
+  margin-top: var(--espaco-1);
+  color: var(--cor-texto-suave);
+}
+
+.como-usar__anel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.como-usar__anel svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.como-usar__anel circle {
+  fill: none;
+  stroke: var(--cor-acento);
+  stroke-width: 2;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}
+
+.como-usar__numero {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  line-height: 1;
+  color: var(--cor-acento);
+}
+
+.como-usar__texto {
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+}
+
+.como-usar__ilustra {
+  display: block;
+  width: 100%;
+  height: 3.5rem;
+  border-radius: var(--raio-2);
+  background: var(--cor-superficie-2);
+}
+
+.como-usar__ilustra--barras {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: var(--espaco-2) var(--espaco-3);
+}
+
+.como-usar__barra {
+  position: relative;
+  flex: 0 1 1.1rem;
+  min-width: 0;
+  height: 34%;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.12);
+  overflow: hidden;
+}
+
+.como-usar__barra:nth-child(1) {
+  height: 90%;
+}
+
+.como-usar__barra:nth-child(2) {
+  height: 62%;
+}
+
+.como-usar__barra:nth-child(3) {
+  height: 46%;
+}
+
+.como-usar__barra:nth-child(5) {
+  height: 24%;
+}
+
+.como-usar__barra:nth-child(1)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cor-acento);
+  opacity: 0;
+}
+
+.como-usar__ilustra--cartao {
+  display: grid;
+  place-items: center;
+  perspective: 240px;
+}
+
+.como-usar__cartao {
+  position: relative;
+  width: 4.6rem;
+  height: 2.6rem;
+  transform-style: preserve-3d;
+}
+
+.como-usar__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  background: var(--cor-superficie);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.como-usar__face--verso {
+  transform: rotateY(180deg);
+}
+
+.como-usar__linha-falsa {
+  display: block;
+  width: 60%;
+  height: 4px;
+  margin: 3px 0;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.18);
+}
+
+.como-usar__linha-falsa--curta {
+  width: 36%;
+}
+
+.como-usar__face--verso svg {
+  width: 80%;
+  height: 70%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--cor-alta);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.como-usar__face--verso polyline {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.como-usar__ilustra--linha {
+  padding: var(--espaco-2) var(--espaco-3);
+}
+
+.como-usar__ilustra--linha svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--cor-acento);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.como-usar__ilustra--linha polyline {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.como-usar__ilustra--blocos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: var(--espaco-2) var(--espaco-3);
+}
+
+.como-usar__bloco {
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.como-usar__bloco[data-tom='alta'] {
+  background: color-mix(in srgb, var(--cor-alta) 55%, transparent);
+}
+
+.como-usar__bloco[data-tom='queda'] {
+  background: color-mix(in srgb, var(--cor-queda) 50%, transparent);
+}
+
+.como-usar__ilustra--moedas {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--espaco-2) var(--espaco-3);
+}
+
+.como-usar__pilha {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+}
+
+.como-usar__moeda {
+  display: block;
+  width: 1.6rem;
+  height: 0.45rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25);
+}
+
+:root:not([data-movimento='reduzido']) {
+  .como-usar__passo {
+    transition:
+      opacity 360ms var(--curva) var(--atraso, 0ms),
+      transform 360ms var(--curva) var(--atraso, 0ms);
+  }
+
+  .como-usar__passos[data-visivel='false'] .como-usar__passo {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .como-usar__anel circle {
+    transition: stroke-dashoffset 600ms var(--curva) var(--atraso, 0ms);
+  }
+
+  .como-usar__passos[data-visivel='false'] .como-usar__anel circle {
+    stroke-dashoffset: 100;
+  }
+
+  .como-usar__barra:nth-child(1)::after {
+    animation: acende-barra 5s var(--curva) infinite;
+  }
+
+  .como-usar__cartao {
+    animation: vira-cartao 5.5s ease-in-out infinite;
+  }
+
+  .como-usar__face--verso polyline {
+    animation: desenha-linha 5.5s ease-in-out infinite;
+  }
+
+  .como-usar__ilustra--linha polyline {
+    animation: desenha-linha 5s ease-in-out infinite;
+  }
+
+  .como-usar__bloco {
+    animation: pisca-bloco 4s ease-in-out infinite;
+  }
+
+  .como-usar__bloco:nth-child(odd) {
+    animation-delay: 0.6s;
+  }
+
+  .como-usar__bloco:nth-child(3n) {
+    animation-delay: 1.4s;
+  }
+
+  .como-usar__pilha:last-child .como-usar__moeda:last-child {
+    animation: cai-moeda 4.5s var(--curva) infinite;
+  }
+
+  /* Fora da tela os loops ficam pausados (o estado fica onde parou); o pseudo-elemento
+     da barra precisa de seletor próprio porque o * não alcança ::after */
+  .como-usar__passos[data-em-vista='false'] .como-usar__ilustra,
+  .como-usar__passos[data-em-vista='false'] .como-usar__ilustra *,
+  .como-usar__passos[data-em-vista='false'] .como-usar__barra::after {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes pisca-bloco {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes cai-moeda {
+  0%,
+  15% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  35%,
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+@keyframes acende-barra {
+  0%,
+  12% {
+    opacity: 0;
+  }
+  25%,
+  70% {
+    opacity: 1;
+  }
+  85%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes vira-cartao {
+  0%,
+  12% {
+    transform: rotateY(0deg);
+  }
+  38%,
+  82% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@keyframes desenha-linha {
+  0%,
+  36% {
+    stroke-dashoffset: 1;
+  }
+  54%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Abaixo de 1440px a introdução vai para cima, em largura toda, e os passos descem para a grade.
+   O X fica no canto, como no celular, para não ocupar uma linha da introdução. */
+@media (max-width: 1439px) {
+  .como-usar {
+    position: relative;
+  }
+
+  .como-usar__topo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espaco-4);
+  }
+
+  .como-usar__resumo {
+    padding-right: var(--espaco-7);
+  }
+
+  .como-usar__fechar {
+    position: absolute;
+    top: var(--espaco-2);
+    right: var(--espaco-2);
+  }
+}
+
+/* Celular: cada passo vira uma linha (número, título e detalhe); a ilustração some para caber */
+@media (max-width: 479px) {
+  .como-usar .como-usar__link {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--espaco-3);
+  }
+
+  .como-usar .como-usar__link > .como-usar__ilustra {
+    display: none;
+  }
+
+  .como-usar .como-usar__texto {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* Quadro final parado: a ficha mostra o gráfico já desenhado, o coração fica cheio e as barras acesas. */
+:root[data-movimento='reduzido'] {
+  .como-usar__cartao {
+    transform: rotateY(180deg);
+  }
+
+  .como-usar__face--verso polyline {
+    stroke-dashoffset: 0;
+  }
+
+  .como-usar__barra:nth-child(1)::after {
+    opacity: 1;
+  }
+
+}

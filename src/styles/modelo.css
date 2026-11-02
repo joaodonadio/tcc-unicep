@@ -1,0 +1,1246 @@
+/* Página O modelo: abertura, trilho dos dados, o modelo experimental e as menções.
+   Etapas e fatos em cartões arredondados; o âmbar marca as estações, os horários e os nomes. */
+
+.modelo-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 var(--espaco-4);
+}
+
+.modelo-intro {
+  max-width: 60ch;
+  color: var(--cor-texto-suave);
+}
+
+.modelo-destaque {
+  max-width: 34ch;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+  line-height: 1.3;
+  margin: 0 0 var(--espaco-4);
+}
+
+.modelo-abertura__texto p:not(.modelo-destaque) {
+  max-width: 60ch;
+  color: var(--cor-texto-suave);
+}
+
+/* Trilho dos dados: quatro cartões ligados por um trilho onde correm pacotes âmbar.
+   Vertical no celular, horizontal no desktop. Movimento: a entrada em sequência, a barra de
+   progresso, o pulso do conector e os pacotes. Tudo para com movimento reduzido. */
+
+/* --liga: vão entre cartões (no celular, espaço da vertical do trilho). --intervalo: tempo de cada
+   destaque, definido pelo componente (a barra de progresso e o pacote usam o mesmo tempo). */
+.modelo-fluxo {
+  --liga: 3rem;
+  --passo: calc(25% + var(--liga) / 4);
+}
+
+.trilho {
+  --saida: var(--curva);
+  list-style: none;
+  margin: var(--espaco-6) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--liga);
+}
+
+.estacao {
+  position: relative;
+  /* Celular: a régua vertical fica à esquerda do cartão, com o ponto da etapa na borda do cartão */
+  padding-left: 3.5rem;
+  transition:
+    opacity 500ms var(--saida),
+    transform 500ms var(--saida);
+  transition-delay: calc(var(--i) * 90ms);
+}
+
+.estacao::after {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  left: 2.75rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin: -0.3rem 0 0 -0.3rem;
+  border-radius: 50%;
+  background: var(--cor-borda-forte);
+}
+
+.estacao[data-ativo='true']::after {
+  background: var(--cor-acento);
+}
+
+.trilho[data-fase='oculto'] .estacao {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.estacao__cartao {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  transition:
+    border-color 600ms var(--saida),
+    transform 600ms var(--saida);
+}
+
+/* Etapa em destaque: borda sólida âmbar e leve elevação, sem brilho */
+.estacao[data-ativo='true'] .estacao__cartao {
+  border-color: var(--cor-acento-borda);
+  transform: translateY(-2px);
+}
+
+.estacao__cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-3);
+}
+
+.estacao__marcador {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+}
+
+.estacao__hora {
+  color: var(--cor-acento);
+  font-weight: var(--peso-titulo);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--texto-sm);
+  letter-spacing: 0.08em;
+}
+
+.estacao__nome,
+.estacao__texto {
+  max-width: none;
+}
+
+.estacao__nome {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--espaco-2);
+}
+
+.estacao__texto {
+  color: var(--cor-texto-suave);
+  margin: 0 0 var(--espaco-3);
+}
+
+.estacao__fontes {
+  list-style: none;
+  margin: 0 0 var(--espaco-3);
+  padding: 0;
+  font-size: var(--texto-sm);
+}
+
+.estacao__fontes li {
+  padding: var(--espaco-2) 0;
+}
+
+.estacao__pacotes {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin: 0 0 var(--espaco-3);
+}
+
+.estacao__pacotes-rotulo {
+  display: block;
+  color: var(--cor-texto);
+  font-weight: var(--peso-medio);
+}
+
+.estacao__vivo {
+  margin: 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--cor-acento-borda);
+  border-radius: var(--raio-3);
+  line-height: 1.4;
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+  max-width: 100%;
+}
+
+/* A etapa final é a própria interface */
+.estacao[data-final='true'] .estacao__cartao {
+  background: var(--cor-acento-suave);
+  border-color: var(--cor-acento-borda);
+}
+
+/* Anel que se expande e some quando a etapa recebe o dado */
+.estacao__anel {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--cor-acento);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__anel {
+  animation: anel 1.5s var(--saida) var(--atraso) 1 both;
+}
+
+@keyframes anel {
+  from {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.07);
+  }
+}
+
+/* Transformação de cada etapa: a entrada vira a saída em duas pílulas. Na vertical (cartão estreito)
+   a seta aponta para baixo; quando o cartão tem largura, as pílulas ficam lado a lado.
+   A saída em âmbar é a mesma cor que a entrada ganha quando a etapa seguinte fica em destaque. */
+.estacao__cartao {
+  container-type: inline-size;
+}
+
+.estacao__transforma {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  margin: 0 0 var(--espaco-3);
+  font-size: var(--texto-sm);
+  max-width: none;
+  --seta-x: 0;
+  --seta-y: 4px;
+}
+
+.estacao__pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-weight: var(--peso-medio);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.estacao__pilula--sai {
+  background: var(--cor-acento-suave);
+  border-color: var(--cor-acento-borda);
+  color: var(--cor-acento);
+}
+
+.estacao[data-ativo='true'] .estacao__pilula--entra {
+  background: var(--cor-acento-suave);
+  border-color: var(--cor-acento-borda);
+  color: var(--cor-acento);
+}
+
+.estacao__seta {
+  flex: none;
+  margin-left: 0.6rem;
+  color: var(--cor-texto-suave);
+  rotate: 90deg;
+  translate: var(--seta-x) var(--seta-y);
+}
+
+@container (min-width: 26rem) {
+  .estacao__transforma {
+    flex-direction: row;
+    align-items: center;
+    --seta-x: 4px;
+    --seta-y: 0;
+  }
+
+  .estacao__pilula {
+    flex: 1 1 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .estacao__seta {
+    margin-left: 0;
+    rotate: none;
+  }
+}
+
+/* Barra fina no topo do cartão ativo: enche em um intervalo de destaque */
+.estacao__progresso {
+  position: absolute;
+  top: 0;
+  left: var(--espaco-5);
+  right: var(--espaco-5);
+  z-index: 2;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--cor-acento);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__progresso {
+  opacity: 1;
+  animation: progresso-enche var(--intervalo) linear both;
+}
+
+@keyframes progresso-enche {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Sequência do cartão ativo: entra a pílula, a seta pulsa e a saída acende */
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__pilula--entra {
+  animation: pilula-entra 600ms var(--saida) both;
+}
+
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__seta {
+  animation: seta-pulso 900ms ease-in-out 350ms both;
+}
+
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__pilula--sai {
+  animation: pilula-acende 700ms var(--saida) 800ms both;
+}
+
+@keyframes pilula-entra {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes seta-pulso {
+  50% {
+    translate: var(--seta-x) var(--seta-y);
+    transform: scale(1.25);
+  }
+  0%,
+  100% {
+    translate: 0 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes pilula-acende {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+
+/* Conector entre dois cartões: só um traço tracejado com um pontinho âmbar que pulsa. Não tem texto
+   e fica abaixo dos cartões (z-index), limitado ao vão entre eles. No celular é vertical, à esquerda. */
+.estacao__ligacao {
+  position: absolute;
+  top: 100%;
+  left: 2.75rem;
+  z-index: 0;
+  width: 0;
+  height: var(--liga);
+  margin-left: -1px;
+  border-left: 2px dashed var(--cor-borda-forte);
+  pointer-events: none;
+}
+
+.estacao__ligacao::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.25rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+}
+
+/* Só o conector que liga a etapa ativa pulsa, e só enquanto a seção está à vista */
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__ligacao::after {
+  animation: pulso-conector 2.4s ease-in-out infinite;
+}
+
+@keyframes pulso-conector {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.55;
+  }
+}
+
+/* Pacote âmbar que sai do cartão ativo e atravessa o conector até o próximo cartão. Na vertical (celular)
+   desce; no desktop (ver a regra de 56rem) corre da esquerda para a direita. Só aparece no cartão ativo. */
+.estacao__pacote {
+  --pac-de: translate(-50%, 0);
+  --pac-ate: translate(-50%, calc(var(--liga) - 100%));
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--raio-1);
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  opacity: 0;
+  transform: var(--pac-de);
+}
+
+.modelo-fluxo[data-anima='true'] .estacao[data-ativo='true'] .estacao__pacote {
+  animation: pacote-viaja 1.2s ease-in-out 0.9s both;
+}
+
+@keyframes pacote-viaja {
+  0% {
+    opacity: 0;
+    transform: var(--pac-de);
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: var(--pac-ate);
+  }
+}
+
+@media (min-width: 48rem) {
+  .modelo-fluxo {
+    --liga: 3.5rem;
+  }
+
+  /* Tablet e notebook: dois cartões por linha; quatro colunas só a partir de 1280px */
+  .trilho {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--espaco-6);
+  }
+
+  .estacao {
+    padding-left: 0;
+  }
+
+  .estacao::after {
+    content: none;
+  }
+
+  .estacao__ligacao {
+    top: 50%;
+    left: 100%;
+    width: var(--liga);
+    height: 0;
+    margin: -1px 0 0;
+    border-left: 0;
+    border-top: 2px dashed var(--cor-borda-forte);
+  }
+
+  .estacao__ligacao::after {
+    top: 0;
+    left: 50%;
+    margin: -0.25rem 0 0 -0.25rem;
+  }
+
+  /* No desktop o pacote corre na horizontal, da esquerda para a direita do conector */
+  .estacao__pacote {
+    --pac-de: translate(0, -50%);
+    --pac-ate: translate(calc(var(--liga) - 100%), -50%);
+    top: 50%;
+  }
+}
+
+/* Dois por linha: o conector da direita do segundo cartão não teria vizinho na mesma linha, então some */
+@media (min-width: 48rem) and (max-width: 79.99rem) {
+  .estacao:nth-child(2n) .estacao__ligacao {
+    display: none;
+  }
+}
+
+@media (min-width: 80rem) {
+  .trilho {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+:root[data-movimento='reduzido'] {
+
+  .trilho[data-fase='oculto'] .estacao {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Parado e legível: sem barra de progresso nem pacote em trânsito; pílulas e seta no estado final */
+  .modelo-fluxo .estacao__progresso,
+  .modelo-fluxo .estacao__pacote {
+    display: none;
+  }
+
+  .modelo-fluxo .estacao__pilula,
+  .modelo-fluxo .estacao__seta {
+    animation: none;
+  }
+}
+
+/* Cartões do modelo experimental */
+.modelo-cartoes {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.modelo-cartao {
+  padding: var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.modelo-cartao__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--espaco-2);
+}
+
+.modelo-cartao__texto {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  max-width: 55ch;
+}
+
+.modelo-cartao[data-cartao='naoE'] {
+  border-color: var(--cor-acento-borda);
+}
+
+@media (min-width: 48rem) {
+  .modelo-cartoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modelo-cartao[data-cartao='naoE'] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Menções honrosas */
+.mencoes {
+  list-style: none;
+  margin: var(--espaco-5) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-4) var(--espaco-7);
+}
+
+.mencoes__nome {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaco-3);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+  line-height: 1.25;
+}
+
+.mencoes__nome::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  transform: translateY(-0.1em);
+}
+
+.modelo-mencoes {
+  padding-bottom: var(--espaco-8);
+}
+
+/* Menções honrosas em destaque: um cartão próprio com os nomes grandes. */
+.modelo-mencoes {
+  margin-top: var(--espaco-8);
+  padding: var(--espaco-7) var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.modelo-mencoes .mencoes {
+  margin-top: var(--espaco-5);
+  gap: var(--espaco-4) var(--espaco-7);
+}
+
+.modelo-mencoes .mencoes__nome {
+  font-size: var(--texto-xl);
+  letter-spacing: -0.01em;
+}
+
+/* Abertura: título grande, lead e uma ilustração em camadas (a interface é só a ponta) */
+.modelo-abertura {
+  --saida: var(--curva);
+  display: grid;
+  gap: var(--espaco-6);
+  align-items: center;
+}
+
+.modelo-titulo--grande {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-wrap: balance;
+  margin-bottom: var(--espaco-5);
+}
+
+.modelo-titulo__acento {
+  color: var(--cor-acento);
+}
+
+.modelo-destaque--lead {
+  max-width: 40ch;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  line-height: 1.3;
+}
+
+.estratos {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  max-width: 28rem;
+  justify-self: center;
+  padding: var(--espaco-2) 0;
+}
+
+.estrato {
+  width: var(--larg);
+  transition:
+    opacity 800ms var(--saida),
+    transform 800ms var(--saida);
+  transition-delay: calc(var(--i) * 220ms);
+}
+
+.modelo-abertura[data-visto='false'] .estrato {
+  opacity: 0;
+  transform: translateY(-1.25rem);
+}
+
+.estrato[data-camada='interface'] {
+  --larg: 62%;
+}
+.estrato[data-camada='coleta'] {
+  --larg: 78%;
+}
+.estrato[data-camada='processamento'] {
+  --larg: 90%;
+}
+.estrato[data-camada='modelo'] {
+  --larg: 100%;
+}
+
+.estrato__corpo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+  padding: var(--espaco-4) var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  line-height: 1.25;
+  color: var(--cor-texto-suave);
+}
+
+.estrato__corpo svg {
+  flex: none;
+}
+
+.estrato[data-camada='interface'] .estrato__corpo {
+  margin-top: 0;
+  padding-block: var(--espaco-5);
+  background: var(--cor-acento);
+  border-color: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-size: var(--texto-base);
+  box-shadow: 0 1rem 2rem -1rem color-mix(in srgb, var(--cor-acento) 60%, transparent);
+}
+
+.estrato[data-camada='coleta'] .estrato__corpo {
+  background: color-mix(in srgb, var(--cor-superficie-2) 90%, var(--cor-fundo));
+}
+.estrato[data-camada='processamento'] .estrato__corpo {
+  background: color-mix(in srgb, var(--cor-superficie-2) 60%, var(--cor-fundo));
+}
+.estrato[data-camada='modelo'] .estrato__corpo {
+  background: color-mix(in srgb, var(--cor-superficie-2) 30%, var(--cor-fundo));
+}
+
+/* Superfície da água: separa a interface do resto */
+.estratos__agua {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  overflow: hidden;
+}
+
+.estratos__agua::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 200%;
+  height: 2px;
+  margin-top: -1px;
+  background: repeating-linear-gradient(90deg, var(--cor-acento) 0 0.75rem, transparent 0.75rem 1.5rem);
+  opacity: 0.7;
+}
+
+.modelo-abertura[data-anima='true'] .estratos__agua::before {
+  animation: agua 6s linear infinite;
+}
+
+.modelo-abertura[data-anima='true'] .estrato__corpo {
+  animation: flutua 5s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -1.1s);
+}
+
+@keyframes agua {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes flutua {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+.modelo-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  max-width: none;
+  margin: 0;
+  padding: var(--espaco-4) var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  color: var(--cor-texto-suave);
+}
+
+.modelo-nota svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--cor-acento);
+}
+
+@media (min-width: 56rem) {
+  .modelo-abertura {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--espaco-7) var(--espaco-8);
+  }
+
+  .modelo-nota {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Máquina do modelo: entradas, modelo, chance e Top 5, tudo em movimento leve (decorativo) */
+.maq {
+  --comp: 2.5rem;
+  --saida: var(--curva);
+  display: grid;
+  gap: var(--espaco-4);
+  justify-items: center;
+  margin: var(--espaco-6) 0;
+  padding: var(--espaco-6) var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.maq__no {
+  display: grid;
+  justify-items: center;
+  gap: var(--espaco-2);
+  text-align: center;
+  min-width: 0;
+}
+
+.maq__nome {
+  color: var(--cor-acento);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+}
+
+.maq__item {
+  max-width: 18ch;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  line-height: 1.3;
+}
+
+/* Entradas: chips que soltam pontinhos */
+.maq__chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-3);
+}
+
+.maq__entrada {
+  display: grid;
+  justify-items: center;
+}
+
+.maq__chip {
+  padding: 2px 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--texto-sm);
+  white-space: nowrap;
+}
+
+/* Fila de pontinhos: vertical no celular */
+.maq__trilha {
+  position: relative;
+  display: block;
+  width: 2px;
+  height: var(--comp);
+  background: var(--cor-borda);
+  border-radius: 1px;
+}
+
+.maq__trilha i {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: -0.2rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  transform: translateY(calc(var(--comp) * 0.5));
+}
+
+.maq__trilha i:nth-child(2) {
+  display: none;
+}
+
+/* Núcleo do modelo: anéis em velocidades diferentes e um brilho que pulsa na chegada */
+.maq__nucleo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+.maq__nucleo > span {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.maq__brilho {
+  inset: -0.5rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--cor-acento) 45%, transparent), transparent 68%);
+  opacity: 0.55;
+}
+
+.maq__anel--1 {
+  inset: 0;
+  border: 1px dashed var(--cor-acento);
+}
+.maq__anel--2 {
+  inset: 0.85rem;
+  border: 2px solid transparent;
+  border-top-color: var(--cor-acento);
+  border-bottom-color: var(--cor-borda-forte);
+}
+.maq__anel--3 {
+  inset: 1.7rem;
+  border: 1px dotted var(--cor-texto-suave);
+}
+
+.maq__miolo {
+  inset: 2.4rem;
+  background: var(--cor-acento);
+  box-shadow: 0 0 1rem color-mix(in srgb, var(--cor-acento) 60%, transparent);
+}
+
+/* Chance: medidor em meia-lua */
+.maq__medidor {
+  width: 8rem;
+  height: auto;
+  overflow: visible;
+}
+
+.maq__arco {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.maq__arco--tracos {
+  stroke-width: 2;
+  stroke-dasharray: 1 12;
+  transform: scale(0.82);
+  transform-origin: 60px 62px;
+}
+
+.maq__ponteiro {
+  transform-origin: 60px 62px;
+  transform: rotate(18deg);
+}
+
+.maq__ponteiro line {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* Top 5: grade de pontinhos (um por ação), 5 sobem para um pódio de 5 vagas */
+.maq__vagas {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+  max-width: 11rem;
+  margin-bottom: 0.75rem;
+}
+
+.maq__vaga {
+  position: relative;
+  height: 1.5rem;
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-1);
+}
+
+.maq__vaga::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--cor-acento);
+}
+
+.maq__campo {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.3rem;
+  width: 100%;
+  max-width: 11rem;
+  height: 5rem;
+  padding: 0.2rem;
+  overflow: hidden;
+  mask-image: linear-gradient(#000 70%, transparent);
+}
+
+.maq__campo i {
+  flex: none;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--cor-borda-forte);
+}
+
+/* Sem dados, a grade não tem quantidade definida: só o padrão de pontos */
+.maq__campo[data-indefinido='true'] {
+  background-image: radial-gradient(circle, var(--cor-borda-forte) 0.18rem, transparent 0.2rem);
+  background-size: 0.65rem 0.65rem;
+}
+
+/* As bolinhas que sobem ficam por cima do campo, sem corte */
+.maq__no--top5 .maq__campo {
+  overflow: visible;
+  mask-image: none;
+}
+
+.maq__sobe {
+  position: absolute;
+  left: calc((var(--j) + 0.5) * 20%);
+  top: var(--y0);
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-left: -0.3rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  box-shadow: 0 0 0.6rem color-mix(in srgb, var(--cor-acento) 70%, transparent);
+  opacity: 0;
+}
+
+.maq__sobe:nth-of-type(1) {
+  --y0: 3.2rem;
+}
+.maq__sobe:nth-of-type(2) {
+  --y0: 1.4rem;
+}
+.maq__sobe:nth-of-type(3) {
+  --y0: 3.9rem;
+}
+.maq__sobe:nth-of-type(4) {
+  --y0: 2.4rem;
+}
+.maq__sobe:nth-of-type(5) {
+  --y0: 3.5rem;
+}
+
+/* Movimento: só com a máquina à vista e sem preferência por menos movimento */
+.maq[data-anima='true'] .maq__trilha i {
+  animation: maq-vertical 2.4s linear infinite;
+  animation-delay: calc(var(--k, 0) * 0.15s);
+  opacity: 0;
+  transform: none;
+}
+
+.maq[data-anima='true'] .maq__trilha i:nth-child(2) {
+  display: block;
+  animation-delay: calc(var(--k, 0) * 0.15s + 1.2s);
+}
+
+.maq[data-anima='true'] .maq__anel--1 {
+  animation: gira 14s linear infinite;
+}
+.maq[data-anima='true'] .maq__anel--2 {
+  animation: gira 6s linear infinite reverse;
+}
+.maq[data-anima='true'] .maq__anel--3 {
+  animation: gira 3.2s linear infinite;
+}
+
+.maq[data-anima='true'] .maq__brilho,
+.maq[data-anima='true'] .maq__miolo {
+  animation: pulsa 1.2s ease-out infinite;
+}
+
+.maq[data-anima='true'] .maq__ponteiro {
+  animation: oscila 5s ease-in-out infinite;
+}
+
+.maq[data-anima='true'] .maq__sobe {
+  --sobe: calc(var(--y0) + 2.25rem);
+  animation: sobe 9s var(--saida) infinite;
+  animation-delay: calc(var(--j) * 0.3s);
+}
+
+.maq[data-anima='true'] .maq__vaga::after {
+  animation: vaga 9s var(--saida) infinite;
+  animation-delay: calc(var(--j) * 0.3s);
+}
+
+@keyframes maq-vertical {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--comp));
+  }
+}
+
+@keyframes maq-horizontal {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--comp));
+  }
+}
+
+@keyframes gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulsa {
+  0%,
+  60% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+}
+
+@keyframes oscila {
+  0% {
+    transform: rotate(-58deg);
+  }
+  25% {
+    transform: rotate(30deg);
+  }
+  50% {
+    transform: rotate(-20deg);
+  }
+  75% {
+    transform: rotate(58deg);
+  }
+  100% {
+    transform: rotate(-58deg);
+  }
+}
+
+@keyframes sobe {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  8%,
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  55%,
+  88% {
+    opacity: 1;
+    transform: translateY(calc(var(--sobe) * -1)) scale(1);
+  }
+  96%,
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--sobe) * -1)) scale(0.6);
+  }
+}
+
+@keyframes vaga {
+  0%,
+  50% {
+    opacity: 0;
+  }
+  58%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 56rem) {
+  .maq {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) var(--comp) minmax(0, 1fr) var(--comp) minmax(0, 1.2fr);
+    align-items: center;
+    gap: var(--espaco-3);
+    padding: var(--espaco-6);
+  }
+
+  .maq__chips {
+    grid-template-columns: 1fr;
+    justify-items: end;
+    gap: var(--espaco-2);
+  }
+
+  .maq__entrada {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .maq__trilha {
+    width: var(--comp);
+    height: 2px;
+  }
+
+  .maq__trilha i {
+    top: 50%;
+    left: 0;
+    margin: -0.2rem 0 0;
+    transform: translateX(calc(var(--comp) * 0.5));
+  }
+
+  .maq[data-anima='true'] .maq__trilha i {
+    animation-name: maq-horizontal;
+  }
+}
+
+:root[data-movimento='reduzido'] {
+  .maq *,
+  .estratos__agua::before,
+  .estrato__corpo {
+    animation: none !important;
+  }
+
+  .estrato,
+  .modelo-cartao {
+    transition: none;
+  }
+
+  .modelo-abertura[data-visto='false'] .estrato,
+  .modelo-cartoes[data-visto='false'] .modelo-cartao {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Cartões explicativos entram em sequência */
+.modelo-cartao {
+  transition:
+    opacity 400ms var(--curva),
+    transform 400ms var(--curva);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+.modelo-cartoes[data-visto='false'] .modelo-cartao {
+  opacity: 0;
+  transform: translateY(1rem);
+}

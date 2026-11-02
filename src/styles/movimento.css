@@ -1,0 +1,131 @@
+/* Movimento do site, num lugar só. Regras: só transform e opacity (no hover, também translate,
+   border-color e background-color). Nada de quique, elástico, rotação ou confete. Com
+   movimento reduzido (data-movimento=reduzido), tudo fica parado e legível. Importado por último em index.css. */
+
+:root {
+  --mov-curta: var(--duracao);
+  --mov-media: 320ms;
+  --mov-curva: var(--curva);
+}
+
+/* ---------- 1. Entrada ao rolar (sem JS) ----------
+   Só com suporte a animation-timeline e sem pedido de pouco movimento. Sem suporte, o conteúdo
+   aparece normal. Não entra em painéis com rolagem interna nem no cabeçalho fixo. */
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  :root:not([data-movimento='reduzido']) {
+    .secao,
+    .pagina-topo {
+      animation: surgir 360ms var(--curva) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+/* ---------- 3. Entrada da página ao trocar de rota ---------- */
+@keyframes rota-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root:not([data-movimento='reduzido']) {
+  .rota-entrada {
+    animation: rota-entra var(--mov-media) var(--mov-curva) both;
+  }
+}
+
+/* ---------- 4 e 5. Hover e foco: cartões clicáveis, abas e ícones de "Ver a ficha" ---------- */
+.top5-item,
+.destaque {
+  transition:
+    translate var(--mov-curta) var(--mov-curva),
+    border-color var(--mov-curta) var(--mov-curva),
+    background-color var(--mov-curta) var(--mov-curva);
+}
+
+.top5-aba {
+  transition:
+    background-color var(--mov-curta) var(--mov-curva),
+    color var(--mov-curta) var(--mov-curva),
+    border-color var(--mov-curta) var(--mov-curva);
+}
+
+.top5-ficha svg,
+.destaque__ficha svg {
+  transition: translate var(--mov-curta) var(--mov-curva);
+}
+
+.top5-item:not([aria-pressed='true']):hover,
+.destaque:hover {
+  border-color: color-mix(in srgb, var(--cor-acento) 40%, transparent);
+}
+
+:root:not([data-movimento='reduzido']) {
+  /* o ícone de "Ver a ficha" desliza 3px quando o link (ou o cartão inteiro) é tocado */
+  .top5-ficha:hover svg,
+  .top5-ficha:focus-visible svg,
+  .destaque:hover .destaque__ficha svg,
+  .destaque:focus-within .destaque__ficha svg {
+    translate: 3px 0;
+  }
+}
+
+/* ---------- 7. Esqueleto com brilho que desliza (substitui o pulso) ---------- */
+.esqueleto {
+  position: relative;
+  overflow: hidden;
+  animation: none;
+}
+
+.esqueleto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.07), transparent);
+  transform: translateX(-100%);
+  animation: esqueleto-brilho 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes esqueleto-brilho {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------- 8. Pedido de pouco movimento: fica parado ---------- */
+:root[data-movimento='reduzido'] {
+  .esqueleto::after {
+    display: none;
+    animation: none;
+  }
+
+  .rota-entrada {
+    animation: none;
+  }
+
+  .top5-item,
+  .destaque,
+  .top5-aba,
+  .top5-ficha svg,
+  .destaque__ficha svg {
+    transition: none;
+  }
+}

@@ -14,8 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -239,3 +239,12 @@ logs/
 *.njsproj
 *.sln
 *.sw?
+
+# ferramentas de IA (skills locais, não fazem parte do site)
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.impeccable/

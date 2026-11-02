@@ -1,0 +1,760 @@
+/* As ações, Top 5 do experimento e O modelo acerta?. Tema âmbar: cada ação é uma faixa arredondada,
+   cada vaga do Top 5 e o acerto são cartões translúcidos, com muito respiro e quase nenhum fio. */
+
+/* ---------- As ações ---------- */
+.lista-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4) var(--espaco-6);
+  margin-bottom: var(--espaco-5);
+}
+
+.lista-cabecalho__texto {
+  flex: 1 1 26rem;
+  min-width: 0;
+}
+
+.lista-titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: var(--espaco-3);
+}
+
+.lista-intro {
+  max-width: 65ch;
+  color: var(--cor-texto-suave);
+}
+
+/* Filtros e busca numa linha; a busca tem lupa dentro do campo, sem rótulo visível */
+.lista-ferramentas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
+.lista-busca {
+  position: relative;
+  display: flex;
+  flex: 1 1 14rem;
+  max-width: 20rem;
+}
+
+.lista-busca__icone {
+  position: absolute;
+  top: 50%;
+  left: var(--espaco-4);
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--cor-texto-suave);
+  pointer-events: none;
+}
+
+.lista-busca input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: var(--espaco-2) var(--espaco-3) var(--espaco-2) 2.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+}
+
+.lista-busca input::placeholder {
+  color: var(--cor-texto-suave);
+}
+
+.lista-busca input:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.lista-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3) var(--espaco-4);
+  margin-bottom: var(--espaco-3);
+}
+
+.lista-filtro-ajuda {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-3);
+}
+
+.lista-contagem {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A tabela: fio de placa em cima, cabeçalho de colunas, uma linha por ação */
+.lista-tabela {
+  --lista-grade: 5.5rem minmax(7rem, 1.2fr) minmax(8rem, 1fr) 6.5rem 5rem minmax(13rem, 1.8fr) 7rem;
+  overflow-x: auto;
+}
+
+.lista-colunas,
+.lista-linha {
+  display: grid;
+  grid-template-columns: var(--lista-grade);
+  align-items: center;
+  gap: var(--espaco-4);
+  padding-inline: var(--espaco-5);
+}
+
+.lista-colunas {
+  padding-block: var(--espaco-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+.lista-acoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+/* Cada ação é uma faixa arredondada, sem fio; o hover só clareia o fundo */
+.lista-linha {
+  padding-block: var(--espaco-4);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  transition:
+    background-color var(--duracao) var(--curva),
+    border-color var(--duracao) var(--curva);
+}
+
+.lista-linha:hover,
+.lista-linha:focus-within {
+  background: var(--cor-superficie-2);
+  border-color: var(--cor-borda);
+}
+
+.lista-col--num,
+.lista-preco,
+.lista-variacao {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lista-ticker {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.01em;
+}
+
+.lista-empresa {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Setor: texto pequeno, sem cor */
+.lista-setor {
+  min-width: 0;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  line-height: 1.3;
+}
+
+.lista-preco,
+.lista-variacao {
+  font-size: var(--texto-base);
+}
+
+/* Sinais: texto suave (o JSX entrega uma frase só; pílulas dependem de marcação própria) */
+.lista-sinais {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-left: var(--espaco-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+}
+
+/* Guardar: texto pequeno, sem borda. Pressionado = ícone cheio e "Guardada" */
+.lista-linha .botao-compacto {
+  justify-self: end;
+  min-height: 2.75rem;
+  padding: 0 var(--espaco-2);
+  border: 0;
+  background: transparent;
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  border-radius: var(--raio-pilula);
+  padding-inline: var(--espaco-3);
+}
+
+.lista-linha .botao-compacto:hover {
+  background: var(--cor-superficie-2);
+}
+
+.lista-linha .botao-compacto[aria-pressed='true'] {
+  background: transparent;
+  color: var(--cor-acento);
+}
+
+.lista-linha .botao-compacto[aria-pressed='true'] svg {
+  fill: currentColor;
+}
+
+.lista-linha .botao-compacto:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* "Mostrar mais": botão secundário, centralizado */
+.lista-area > .botao {
+  display: flex;
+  width: max-content;
+  margin: var(--espaco-5) auto 0;
+  border: 1px solid var(--cor-borda);
+  background: transparent;
+}
+
+.lista-area > .botao:hover {
+  background: var(--cor-superficie-2);
+}
+
+/* Estados dentro da lista e do Top 5: faixa suave, sem tracejado */
+.lista .estado:not(.estado--erro),
+.top5 > .estado:not(.estado--erro) {
+  padding: var(--espaco-5) var(--espaco-6);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+}
+
+/* ---------- Top 5 do experimento: o estilo do Top 5 fica em hoje.css (carregado antes; aqui não se repete) ---------- */
+.acerto-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: var(--espaco-3);
+}
+
+.acerto-intro {
+  max-width: 65ch;
+  color: var(--cor-texto-suave);
+  margin-bottom: var(--espaco-6);
+}
+
+.top5 > .estado {
+  margin-bottom: var(--espaco-4);
+}
+
+/* ---------- O modelo acerta? ---------- */
+.acerto .estado {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.acerto .estado h3 {
+  font-weight: var(--peso-titulo);
+}
+
+.acerto-resultado {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+}
+
+.acerto-veredito {
+  font-weight: var(--peso-forte);
+  color: var(--cor-acento);
+}
+
+/* Régua do acaso: trilho arredondado; o acaso é um traço com rótulo, o modelo um ponto âmbar */
+.acerto-regua {
+  position: relative;
+  height: 4rem;
+  margin: var(--espaco-5) 0 var(--espaco-3);
+  padding: 0;
+  border: 0;
+}
+
+.acerto-regua::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.5rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.acerto-acaso,
+.acerto-modelo {
+  position: absolute;
+  bottom: 0;
+  left: var(--pos);
+  transform: translateX(-50%);
+  padding-bottom: var(--espaco-4);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+.acerto-acaso::after,
+.acerto-modelo::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.acerto-acaso::after {
+  bottom: -0.25rem;
+  width: 3px;
+  height: 1rem;
+  border-radius: 2px;
+  background: var(--cor-texto-suave);
+}
+
+.acerto-modelo::after {
+  bottom: -0.375rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.5);
+}
+
+@media (max-width: 1099px) {
+  .lista-cabecalho__texto {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .lista-colunas {
+    display: none;
+  }
+
+  /* Cada ação vira dois blocos: código, empresa, preço e variação em cima; setor, sinais e Guardar embaixo */
+  .lista-linha {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'ticker variacao'
+      'empresa preco'
+      'setor setor'
+      'sinais guardar';
+    row-gap: var(--espaco-1);
+    column-gap: var(--espaco-3);
+    align-items: center;
+  }
+
+  .lista-ticker {
+    grid-area: ticker;
+  }
+
+  .lista-empresa {
+    grid-area: empresa;
+  }
+
+  .lista-preco {
+    grid-area: preco;
+  }
+
+  .lista-variacao {
+    grid-area: variacao;
+  }
+
+  .lista-setor {
+    grid-area: setor;
+  }
+
+  .lista-sinais {
+    grid-area: sinais;
+    justify-content: flex-start;
+    padding-left: 0;
+    margin-top: var(--espaco-1);
+  }
+
+  .lista-linha > .botao-compacto {
+    grid-area: guardar;
+  }
+
+  .lista-linha {
+    padding-inline: var(--espaco-4);
+  }
+}
+
+/* ---------- Filtros e vista: controle segmentado (grupo cinza, opção ativa mais clara) ---------- */
+.lista-filtros {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  scrollbar-width: none;
+}
+
+.lista-filtros::-webkit-scrollbar {
+  display: none;
+}
+
+.lista-filtro {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--espaco-4);
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.lista-filtro:hover {
+  color: var(--cor-texto);
+}
+
+.lista-filtro[aria-selected='true'],
+.lista-filtro[aria-pressed='true'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-weight: var(--peso-medio);
+}
+
+.lista-filtro[aria-selected='true'] .lista-filtro__contagem,
+.lista-filtro[aria-pressed='true'] .lista-filtro__contagem {
+  color: var(--cor-acento-texto);
+}
+
+.lista-filtro__contagem {
+  margin-left: var(--espaco-1);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-normal);
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-suave);
+}
+
+.lista-filtro:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.lista-vista {
+  flex: 0 0 auto;
+}
+
+/* ---------- Destaques por setor: um cartão grande por setor ---------- */
+/* Cartões da mesma linha têm a mesma altura (stretch); o porquê fica embaixo de cada um */
+.destaques {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  align-items: stretch;
+  gap: var(--espaco-4);
+  margin: var(--espaco-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.destaque {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  min-width: 0;
+  padding: var(--espaco-5);
+}
+
+.destaque__setor {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin: 0;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+.destaque__ticker {
+  align-self: flex-start;
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+/* O link cobre o cartão inteiro, para o toque cair em qualquer ponto */
+.destaque__ticker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--raio-cartao);
+}
+
+.destaque__ticker:focus-visible {
+  outline: none;
+}
+
+.destaque__ticker:focus-visible::after {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.destaque__empresa {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--cor-texto-suave);
+}
+
+.destaque__preco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin: var(--espaco-2) 0 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.destaque__sinais {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Por que está em destaque: rótulo em âmbar e a frase numa caixa levemente âmbar */
+.destaque__porque {
+  margin: var(--espaco-4) 0 0;
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid color-mix(in srgb, var(--cor-acento) 35%, transparent);
+  border-radius: var(--raio-3);
+  background: color-mix(in srgb, var(--cor-acento) 7%, var(--cor-superficie-2));
+}
+
+.destaque__porque-rotulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin: 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-acento);
+}
+
+.destaque__porque-rotulo svg {
+  flex: 0 0 auto;
+}
+
+.destaque__porque-texto {
+  margin: var(--espaco-2) 0 0;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+/* Rodapé do cartão, alinhado à base (os cartões da linha têm a mesma altura) */
+.destaque__ficha {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  align-self: flex-end;
+  margin-top: auto;
+  padding-top: var(--espaco-2);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-acento);
+}
+
+/* ---------- Legenda e selos de sinais: a mesma leitura nos cartões, na lista e na legenda ---------- */
+/* Frase única: os selos ficam na linha do texto e quebram de linha com ele */
+.lista-legenda {
+  margin: var(--espaco-4) 0 0;
+  font-size: var(--texto-sm);
+  line-height: 2.2;
+  color: var(--cor-texto-suave);
+}
+
+.lista-legenda .selo-sinal {
+  min-height: 1.75rem;
+  margin: 0 var(--espaco-1);
+  vertical-align: middle;
+}
+
+/* Selo: ícone e texto na cor do sinal, sobre o mesmo fundo nas três cores */
+.selo-sinal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 2rem;
+  padding: 0 var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1.2;
+}
+
+.selo-sinal svg {
+  flex: 0 0 auto;
+}
+
+.selo-sinal[data-tom='alta'] svg {
+  color: var(--cor-alta);
+}
+
+.selo-sinal[data-tom='queda'] svg {
+  color: var(--cor-queda);
+}
+
+.selo-sinal[data-tom='neutro'] svg {
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Área das vistas: mesma altura mínima nas duas; a troca desvanece em 150ms ---------- */
+.lista-area {
+  min-height: 28rem;
+  animation: lista-area-entra 150ms var(--curva);
+}
+
+@keyframes lista-area-entra {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+:root[data-movimento='reduzido'] {
+  .lista-area {
+    animation: none;
+  }
+}
+
+/* ---------- Nível Técnica: P/L e DY viram colunas da lista, sem rolagem horizontal da página ---------- */
+.lista--tecnico .lista-tabela {
+  --lista-grade: 5rem minmax(0, 1.2fr) minmax(0, 1fr) 5.5rem 4.5rem 4.5rem 4.5rem minmax(0, 1.8fr) 6.5rem;
+}
+
+.lista--tecnico .lista-colunas,
+.lista--tecnico .lista-linha {
+  gap: var(--espaco-3);
+}
+
+.lista--tecnico .lista-linha {
+  padding-block: var(--espaco-2);
+  border-radius: var(--raio-3);
+}
+
+.lista-indicador {
+  position: relative;
+  font-size: var(--texto-sm);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* O rótulo do indicador é só para leitor de tela e para o celular, onde a lista não tem cabeçalho */
+.lista-indicador__rotulo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .lista-filtros {
+    flex-wrap: wrap;
+    overflow: visible;
+    border-radius: var(--raio-cartao);
+  }
+
+  .lista--tecnico .lista-linha {
+    grid-template-areas:
+      'ticker variacao'
+      'empresa preco'
+      'setor setor'
+      'pl dy'
+      'sinais guardar';
+  }
+
+  .lista-pl {
+    grid-area: pl;
+  }
+
+  .lista-dy {
+    grid-area: dy;
+  }
+
+  .lista-indicador {
+    text-align: left;
+  }
+
+  .lista-indicador__rotulo {
+    position: static;
+    width: auto;
+    height: auto;
+    margin-right: var(--espaco-1);
+    overflow: visible;
+    clip: auto;
+    color: var(--cor-texto-suave);
+    font-size: var(--texto-xs);
+  }
+}
+
+/* ---------- Tablet e notebook pequeno (761 a 1099px): a coluna Setor sai e as demais encolhem ----------
+   Com as sete colunas, a soma das larguras mínimas passava da largura da página e o cabeçalho Regras vazava. */
+@media (min-width: 761px) and (max-width: 1099px) {
+  .lista-colunas > :nth-child(3),
+  .lista-linha > .lista-setor {
+    display: none;
+  }
+
+  .lista-tabela {
+    --lista-grade: 5.5rem minmax(0, 1fr) 6.5rem 5rem minmax(9rem, 1.4fr) 7rem;
+  }
+
+  .lista--tecnico .lista-tabela {
+    --lista-grade: 5rem minmax(0, 1.2fr) 5.5rem 4.5rem 4.5rem 4.5rem minmax(8rem, 1.6fr) 6.5rem;
+  }
+
+  .lista-sinais {
+    padding-left: var(--espaco-2);
+  }
+}

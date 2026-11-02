@@ -1,121 +1,151 @@
-/**
- * Design tokens — ARQUITETURA-INTERFACE.md §4.2
- *
- * Fonte única de verdade das cores/tipografia extraídas do protótipo.
- * O Modo Calmo (RF-5.2) troca APENAS as variáveis de perda/alerta na
- * classe `.modo-calmo` do <html> — nunca componente a componente.
- * O zoom (RF-5.3) escala a raiz em px; todo o resto é rem.
+/*
+ * Tokens. Tema âmbar sobre cinza-quente escuro, a pedido dos usuários do TCC.
+ * Fundo quase marrom-grafite (nunca preto puro), cartões translúcidos com fio claro,
+ * texto em branco quente. Cor só onde informa: âmbar marca o ativo e a ação principal,
+ * sálvia e rosa-terra marcam alta e queda, em tons suaves que não brilham.
  */
-
-@import 'tailwindcss';
-
-@theme {
-  --color-background: #04070f;
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-strong: rgba(10, 16, 28, 0.85);
-  --color-border: rgba(255, 255, 255, 0.09);
-
-  --color-primary: #2f6bff;
-  --color-primary-hover: #4a7eff;
-  --color-accent: #7defff;
-  --color-accent-hover: #b7f3ff;
-  --color-success: #3fd99a;
-  --color-warning: #ffc466;
-  --color-danger: #ff7a7a;
-
-  --color-text: #eef3fb;
-  --color-text-muted: #93a5bf;
-  --color-text-faint: #5c6b84;
-
-  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-}
-
 :root {
-  /* zoom global — RF-5.3 (90% a 130%, passos de 10%) */
   --ui-zoom: 1;
+  color-scheme: dark;
 
-  --bg: #04070f;
-  --surface: rgba(255, 255, 255, 0.03);
-  --surface-2: rgba(255, 255, 255, 0.04);
-  --surface-inset: rgba(4, 7, 15, 0.5);
-  --surface-float: rgba(10, 16, 28, 0.85);
-  --surface-nav: rgba(10, 16, 28, 0.72);
-  --surface-modal: rgba(12, 19, 34, 0.98);
-  --border: rgba(255, 255, 255, 0.09);
-  --border-soft: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  /* Chão e superfícies (cartões translúcidos sobre o fundo) */
+  --cor-fundo: #1a1815;
+  --cor-superficie: rgb(255 255 255 / 0.045);
+  --cor-superficie-2: rgb(255 255 255 / 0.08);
+  --cor-borda: rgb(255 255 255 / 0.09);
+  --cor-fio: rgb(255 255 255 / 0.06);
+  --cor-borda-forte: rgb(243 239 231 / 0.5);
+  --cor-faixa: var(--cor-superficie);
 
-  --primary: #2f6bff;
-  /* Superfícies que carregam texto branco usam um azul um passo mais escuro:
-     o #2f6bff do protótipo dá 4,49:1 com branco — reprova o mínimo 4,5 da WCAG
-     por uma casa decimal. O tom de marca permanece onde é decorativo. */
-  --primary-solid: #2a62f0;
-  --primary-hover: #4a7eff;
-  --primary-line: #4a8dff;
-  --accent: #7defff;
-  --accent-hover: #b7f3ff;
-  --accent-soft: rgba(125, 239, 255, 0.06);
-  --accent-border: rgba(125, 239, 255, 0.25);
-  --success: #3fd99a;
-  --success-soft: rgba(63, 217, 154, 0.08);
-  --success-border: rgba(63, 217, 154, 0.3);
-  --success-text: #9fe8c8;
+  /* Tinta */
+  --cor-texto: #f3efe7;
+  --cor-texto-suave: #b8b1a5;
 
-  /* — canal "atenção/perda": os 5 tokens que o Modo Calmo reescreve — */
-  --warning: #ffc466;
-  --warning-soft: rgba(255, 196, 102, 0.08);
-  --warning-border: rgba(255, 196, 102, 0.3);
-  --danger: #ff7a7a;
-  --danger-soft: rgba(255, 122, 122, 0.08);
-  --danger-border: rgba(255, 122, 122, 0.35);
-  --stat-risk: #ffc466;
-  --neutral-dim: #93a5bf;
-  /* usado para desligar brilhos que "gritam" no Modo Calmo */
-  --glow-alert: 0 0 10px currentColor;
+  /* Placa (cabeçalho e rodapé): vidro escuro, nunca preto chapado */
+  --cor-placa: rgb(26 24 21 / 0.72);
+  --cor-placa-texto: #f3efe7;
+  --cor-placa-suave: #a8a196;
 
-  --text: #eef3fb;
-  --text-1: #dce7f7;
-  --text-2: #c2d0e6;
-  --text-3: #b6c5dd;
-  --text-4: #93a5bf;
-  --text-5: #8aa0bf;
-  --text-6: #7a8ba6;
-  --text-7: #6a7d99;
-  /* Os dois tons mais escuros do protótipo (#5c6b84 e #46546c) davam 3,6:1 e
-     2,6:1 — reprovam a WCAG 1.4.3 em textos abaixo de 18px, e o segundo deles
-     pintava justamente o disclaimer obrigatório (RF-0.4). Ambos sobem para o
-     piso de legibilidade; a hierarquia "discreta" continua sendo dada por
-     tamanho, caixa e espaçamento, não por contraste insuficiente. */
-  --text-8: #70839f;
-  --text-9: #70839f;
-  --text-link: #a9c0de;
-  --text-invert: #04070f;
-  --text-on-accent-soft: #a9e9f5;
+  /* Acento: âmbar. Marca o que está ativo, o foco, a ação principal e a série principal. */
+  --cor-acento: #e8b84a;
+  --cor-acento-hover: #f1c968;
+  --cor-acento-texto: #1a1815;
+  --cor-acento-suave: rgb(232 184 74 / 0.12);
 
-  --map-neutral: #a0b9e6;
+  /* Ação: botão principal âmbar com texto escuro; foco no mesmo âmbar */
+  --cor-destaque: var(--cor-acento);
+  --cor-destaque-hover: var(--cor-acento-hover);
+  --cor-destaque-texto: var(--cor-acento-texto);
+  --cor-foco: var(--cor-acento);
 
-  --radius-pill: 999px;
-  --radius-card: 1.375rem;
-  --radius-card-sm: 1.25rem;
-  --radius-inner: 0.875rem;
+  /* Direção do preço: sálvia e rosa-terra, legíveis no escuro sem brilhar */
+  --cor-alta: #8fc4a0;
+  --cor-alta-suave: rgb(143 196 160 / 0.14);
+  --cor-queda: #e38b7f;
+  --cor-queda-suave: rgb(227 139 127 / 0.14);
+  --cor-estavel: #b8b1a5;
 
-  --shadow-card: 0 22px 60px rgba(0, 0, 0, 0.45);
-  --shadow-float: 0 12px 36px rgba(0, 0, 0, 0.45);
-  --shadow-nav: 0 14px 44px rgba(0, 0, 0, 0.45);
+  /* Sinais das regras: a cor fica no texto; o fundo é um véu da própria cor */
+  --cor-forte: #8fc4a0;
+  --cor-forte-fundo: rgb(143 196 160 / 0.14);
+  --cor-atencao: #e8b84a;
+  --cor-atencao-fundo: rgb(232 184 74 / 0.14);
+  --cor-contexto: #c9c3b8;
+  --cor-contexto-fundo: rgb(255 255 255 / 0.08);
 
-  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --cor-veu: rgb(10 9 8 / 0.65);
+
+  /* Dados (barras, gráficos): âmbar, sálvia, lavanda, azul-aço e cinza */
+  --cor-dado-1: #e8b84a;
+  --cor-dado-2: #8fc4a0;
+  --cor-dado-3: #b8a6e8;
+  --cor-dado-4: #7d93bd;
+  --cor-dado-5: #8e887d;
+  --cor-dado-6: #6fbfc4;
+  --cor-dado-7: #d6a0c4;
+
+  /* Séries de gráfico (nomes antigos) */
+  --cor-serie-1: var(--cor-dado-1);
+  --cor-serie-2: var(--cor-dado-2);
+  --cor-serie-3: var(--cor-dado-3);
+  --cor-serie-4: var(--cor-dado-4);
+
+  /* Setores: família de tons suaves (o nome do setor sempre acompanha) */
+  --linha-financeiro: #e8b84a;
+  --linha-consumo-ciclico: #8fc4a0;
+  --linha-utilidade-publica: #b8a6e8;
+  --linha-consumo-nao-ciclico: #7d93bd;
+  --linha-materiais-basicos: #d9a27a;
+  --linha-petroleo: #e38b7f;
+  --linha-bens-industriais: #9fb8a8;
+  --linha-saude: #c9a8c4;
+  --linha-tecnologia: #8fb3c9;
+  --linha-comunicacoes: #c4b88a;
+  --linha-outros: #8e887d;
+
+  /* Tipo: Manrope; escala de razão ~1,2 com título de página grande */
+  --fonte-texto: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
+  --fonte-numeros: var(--fonte-texto);
+  --texto-xs: 0.8125rem;
+  --texto-sm: 0.9375rem;
+  --texto-base: 1.0625rem;
+  --texto-lg: 1.25rem;
+  --texto-xl: 1.5rem;
+  --texto-2xl: 1.875rem;
+  --texto-3xl: 2.75rem;
+
+  /* Pesos: corpo 400, destaque 600, títulos 700, títulos de página 800 */
+  --peso-normal: 400;
+  --peso-medio: 600;
+  --peso-titulo: 700;
+  --peso-forte: 800;
+
+  /* Espaço */
+  --espaco-1: 0.25rem;
+  --espaco-2: 0.5rem;
+  --espaco-3: 0.75rem;
+  --espaco-4: 1rem;
+  --espaco-5: 1.5rem;
+  --espaco-6: 2rem;
+  --espaco-7: 3rem;
+  --espaco-8: 4.5rem;
+  --espaco-9: 6rem;
+
+  /* Forma: cartões bem arredondados e pílulas */
+  --raio-1: 6px;
+  --raio-2: 10px;
+  --raio-3: 14px;
+  --raio-cartao: 22px;
+  --raio-pilula: 999px;
+
+  --sombra-cartao: 0 10px 30px -12px rgb(0 0 0 / 0.5);
+
+  --altura-cabecalho: 5.5rem;
+  --altura-barra-inferior: 4.5rem;
+  --largura-max: 80rem;
+  --duracao: 180ms;
+  --curva: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Superfícies de hover e bordas de acento */
+  --cor-superficie-hover: rgb(255 255 255 / 0.13);
+  --cor-borda-hover: rgb(255 255 255 / 0.18);
+  --cor-acento-borda: rgb(232 184 74 / 0.45);
+  --cor-alta-borda: rgb(143 196 160 / 0.45);
+  --cor-queda-borda: rgb(227 139 127 / 0.45);
+  --cor-barra: rgb(34 31 27 / 0.92);
+  --cor-menu: #26231f;
+
+  /* Camadas */
+  --z-cabecalho: 40;
+  --z-painel: 50;
+  --z-barra: 60;
+  --z-balao: 90;
+  --z-pular: 100;
 }
 
-/**
- * RF-5.2 — MODO CALMO.
- * Suaviza o canal de perda/alerta para cinza-azulado. Os textos e os níveis
- * de risco continuam idênticos: a cor nunca é o único canal (WCAG 1.4.1).
- */
-:root.modo-calmo {
-  --danger: #93a5bf;
-  --danger-soft: rgba(147, 165, 191, 0.08);
-  --danger-border: rgba(147, 165, 191, 0.3);
-  --stat-risk: #c2d0e6;
-  --glow-alert: none;
+@media (max-width: 720px) {
+  :root {
+    --altura-cabecalho: 0rem;
+    --texto-3xl: 2.125rem;
+  }
 }

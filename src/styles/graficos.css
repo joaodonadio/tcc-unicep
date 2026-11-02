@@ -1,0 +1,72 @@
+/* Gráfico interativo (src/components/graficos): ECharts em SVG. Grade quase invisível, espaço de sobra. */
+
+.chart-bloco {
+  margin-top: var(--espaco-4);
+  min-width: 0;
+}
+
+.chart-stage {
+  position: relative;
+  width: 100%;
+  min-height: 12rem;
+  max-height: 22rem;
+  transition: opacity 0.2s ease;
+}
+
+.chart-stage svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Legenda HTML (acessível) abaixo do gráfico: bolinhas e rótulo. */
+.chart-legenda {
+  list-style: none;
+  margin: var(--espaco-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2) var(--espaco-4);
+  font-size: var(--texto-sm);
+}
+
+.chart-legenda li {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chart-legenda i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--cor);
+  flex: none;
+}
+
+/* Série tracejada: a bolinha vira anel, igual ao traço pontilhado do gráfico. */
+.chart-legenda i[data-tracejada] {
+  background: transparent;
+  border: 2px dashed var(--cor);
+  box-sizing: border-box;
+}
+
+.chart-legenda-nota {
+  color: var(--cor-texto-suave);
+}
+
+.chart-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-movimento='reduzido'] {
+  .chart-stage {
+    transition: none;
+  }
+}

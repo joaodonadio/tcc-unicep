@@ -1,36 +1,49 @@
-import { Outlet, ScrollRestoration } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
 import { PreferenciasProvider } from '../../context/PreferenciasProvider.jsx';
-import { DecisoesProvider } from '../../context/DecisoesProvider.jsx';
-import { TourProvider } from '../../context/TourProvider.jsx';
-import { FundoAmbiente } from './FundoAmbiente.jsx';
-import { Navbar } from './Navbar.jsx';
+import { ListaProvider } from '../../context/ListaProvider.jsx';
+import Cabecalho from './Cabecalho.jsx';
+import AvisoMovimento from './AvisoMovimento.jsx';
 import { Rodape } from './Rodape.jsx';
-import { ControlesExperiencia } from '../experiencia/ControlesExperiencia.jsx';
-import { BotaoAjuda } from '../experiencia/BotaoAjuda.jsx';
-import { TourGuiado } from '../experiencia/TourGuiado.jsx';
+import { TEXTOS } from '../../lib/textos.js';
 
 /**
- * Layout único: navbar, rodapé e a camada de experiência montam uma só vez e
- * sobrevivem à troca de rota — por isso o Modo Calmo, o zoom e o tour são
- * transversais às 4 telas sem nenhum estado global de servidor.
+ * Layout único: cabeçalho e rodapé montam uma só vez e sobrevivem à troca de rota.
+ * Os providers de preferências e lista ficam aqui.
  */
 export function AppLayout() {
+  const { pathname, hash } = useLocation();
+  const ultimoCaminho = useRef(pathname);
+
+  // ao trocar de tela, o foco vai para o conteúdo (leitor de tela anuncia a nova página);
+  // com âncora na URL, a própria âncora manda na rolagem e o foco fica como está
+  useEffect(() => {
+    if (ultimoCaminho.current === pathname) return;
+    ultimoCaminho.current = pathname;
+    if (hash) return;
+    document.getElementById('conteudo')?.focus({ preventScroll: true });
+  }, [pathname, hash]);
+
   return (
     <PreferenciasProvider>
-      <DecisoesProvider>
-        <TourProvider>
-          {/* trocar de tela leva ao topo da nova tela, em vez de manter a
-              rolagem da anterior (o Data Router não faz isso sozinho) */}
-          <ScrollRestoration />
-          <FundoAmbiente />
-          <Navbar />
-          <Outlet />
-          <Rodape />
-          <ControlesExperiencia />
-          <BotaoAjuda />
-          <TourGuiado />
-        </TourProvider>
-      </DecisoesProvider>
+      <ListaProvider>
+        {/* trocar de tela leva ao topo da nova tela, em vez de manter a
+            rolagem da anterior (o Data Router não faz isso sozinho) */}
+        <ScrollRestoration />
+        <a className="pular-conteudo" href="#conteudo">
+          {TEXTOS.cabecalho.pularConteudo}
+        </a>
+        <Cabecalho />
+        {/* fixo no canto inferior: não empurra o conteúdo nem rouba o foco */}
+        <AvisoMovimento />
+        <main id="conteudo" tabIndex={-1}>
+          {/* a chave por rota refaz o wrapper a cada troca de tela, então a entrada suave roda de novo */}
+          <div key={pathname} className="rota-entrada">
+            <Outlet />
+          </div>
+        </main>
+        <Rodape />
+      </ListaProvider>
     </PreferenciasProvider>
   );
 }

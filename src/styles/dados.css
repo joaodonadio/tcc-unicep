@@ -1,0 +1,305 @@
+/* De onde vêm os números?: resumo do topo, cartões de fontes e pacotes, avisos da coleta.
+   Cartões com a mesma borda e o mesmo raio; grades que quebram sozinhas, sem rolagem horizontal. */
+
+.dados__titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin: 0 0 var(--espaco-5);
+  text-wrap: balance;
+}
+
+.dados p {
+  max-width: 65ch;
+}
+
+.dados__subtitulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: var(--espaco-7) 0 var(--espaco-4);
+}
+
+.dados__bloco {
+  min-width: 0;
+}
+
+/* Topo: situação e fatos principais */
+.dados__resumo {
+  display: grid;
+  gap: var(--espaco-5);
+  padding: var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+}
+
+.dados__resumo .pilula {
+  justify-self: start;
+  font-size: var(--texto-base);
+  padding: var(--espaco-2) var(--espaco-4);
+}
+
+.dados__fatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--espaco-5);
+  margin: 0;
+}
+
+.dados__fato dt {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.dados__fato dd {
+  margin: var(--espaco-1) 0 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Grade de cartões (fontes e pacotes) */
+.dados__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--espaco-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dados__cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  min-width: 0;
+  padding: var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+}
+
+.dados__cartao p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.dados__cartao-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.dados__icone {
+  color: var(--cor-acento);
+  flex: none;
+}
+
+.dados__quantidade {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.dados__arquivo,
+.dados__cru {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Selos no pé do cartão: alinham entre cartões com e sem a linha de quantidade */
+.dados__selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: auto;
+}
+
+.dados__selos:empty {
+  display: none;
+}
+
+/* Avisos: resumo em lista curta, texto cru recolhido */
+.dados__avisos,
+.dados__avisos-cru {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 65ch;
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.dados__avisos li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4) var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+}
+
+.dados__avisos li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dados__avisos .dados__icone {
+  margin-top: 0.15em;
+}
+
+/* Avisos crus: cada aviso é um cartão com etiqueta da categoria e texto legível */
+.dados__avisos-cru {
+  gap: var(--espaco-2);
+}
+
+.dados__avisos-cru li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--espaco-2) var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+  font-size: var(--texto-sm);
+  line-height: 1.55;
+  color: var(--cor-texto);
+}
+
+.dados__etiqueta {
+  flex-shrink: 0;
+  padding: 0.15em 0.6em;
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  line-height: 1.5;
+  color: var(--cor-acento);
+  background: color-mix(in srgb, var(--cor-acento) 12%, transparent);
+}
+
+.dados__aviso-texto {
+  flex: 1 1 16rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dados__aviso-texto code {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.05em 0.35em;
+  border-radius: var(--raio-1);
+  background: color-mix(in srgb, var(--cor-texto) 8%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.dados__aviso-texto time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Selo da coleta: ícone verde quando consultada, âmbar quando não */
+.dados__selo-coleta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto);
+}
+
+.dados__selo-coleta svg {
+  flex-shrink: 0;
+}
+
+.dados__selo-coleta[data-tom='alta'] svg {
+  color: var(--cor-alta);
+}
+
+.dados__selo-coleta[data-tom='acento'] svg {
+  color: var(--cor-acento);
+}
+
+.dados__detalhes {
+  margin-top: var(--espaco-4);
+  max-width: 65ch;
+}
+
+/* Summary com aparência de botão; o marcador nativo some e a seta gira ao abrir */
+.dados__detalhes > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-4);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  cursor: pointer;
+  list-style: none;
+}
+
+.dados__detalhes > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dados__detalhes > summary:hover {
+  background: var(--cor-superficie-2);
+}
+
+.dados__detalhes > summary svg {
+  flex-shrink: 0;
+  transition: transform 150ms var(--curva);
+}
+
+.dados__detalhes[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+:root[data-movimento='reduzido'] .dados__detalhes > summary svg {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dados__detalhes > summary svg {
+    transition: none;
+  }
+}
+
+.dados__detalhes > summary:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.dados__detalhes > :not(summary) {
+  margin-top: var(--espaco-3);
+}
+
+.dados__nota {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+/* Celular: o título e os fatos respiram menos, sem estourar a largura */
+@media (max-width: 479px) {
+  .dados__titulo {
+    font-size: var(--texto-2xl);
+  }
+
+  .dados__resumo {
+    padding: var(--espaco-4);
+  }
+
+  .dados__cartao {
+    padding: var(--espaco-4);
+  }
+}

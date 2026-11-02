@@ -1,0 +1,54 @@
+/**
+ * Perguntas da ficha da ação: em vez de abas, cada pergunta reúne os
+ * indicadores que a responde. Funções puras; os textos ficam nas telas.
+ *
+ * As chaves `simples` e `tecnico` são as `chave` de montarIndicadoresFicha
+ * (fichaIndicadores.js); `extraTecnico` nomeia uma seção extra da ficha.
+ */
+
+/** Ordem das perguntas na ficha. */
+export const PERGUNTAS = [
+  { id: 'regras' },
+  { id: 'divida', simples: ['dl_ebitda', 'dl_pl'], tecnico: ['ebitda', 'roe'], extraTecnico: 'balancos' },
+  { id: 'cara', simples: ['pl', 'pvp', 'roe'], tecnico: ['margem_bruta', 'margem_liquida', 'ebitda', 'dividend_yield'], extraTecnico: 'historico' },
+  { id: 'proventos', simples: ['dividend_yield', 'payout'], tecnico: ['pl', 'roe'] },
+  { id: 'oscila', simples: ['volatilidade', 'beta'], tecnico: ['volume_relativo', 'dividend_yield'] },
+  { id: 'preco', extraTecnico: 'retornos' },
+  { id: 'noticias' },
+];
+
+/** Nomes antigos das abas, para links que ainda usam ?aba=. */
+const ABAS_ANTIGAS = {
+  visao: 'regras',
+  graficos: 'preco',
+  balancos: 'divida',
+  proventos: 'proventos',
+  historico: 'cara',
+};
+
+const IDS = new Set(PERGUNTAS.map((p) => p.id));
+
+/** Pergunta da URL: ?pergunta= tem prioridade; sem ele, converte ?aba= antigo; o resto cai em 'regras'. */
+export function perguntaDaUrl(searchParams) {
+  const pergunta = searchParams?.get('pergunta');
+  if (pergunta != null) return IDS.has(pergunta) ? pergunta : 'regras';
+  const aba = searchParams?.get('aba');
+  const convertida = aba == null ? undefined : ABAS_ANTIGAS[aba];
+  return convertida ?? 'regras';
+}
+
+/** Pergunta anterior e próxima (ids), ou null nas pontas e para id desconhecido. */
+export function vizinhas(id) {
+  const indice = PERGUNTAS.findIndex((p) => p.id === id);
+  return {
+    anterior: indice > 0 ? PERGUNTAS[indice - 1].id : null,
+    proxima: indice >= 0 && indice < PERGUNTAS.length - 1 ? PERGUNTAS[indice + 1].id : null,
+  };
+}
+
+/** Chaves de indicadores da pergunta; no nível técnico soma as chaves `tecnico`. */
+export function chavesDaPergunta(id, nivel) {
+  const pergunta = PERGUNTAS.find((p) => p.id === id);
+  if (!pergunta) return [];
+  return [...(pergunta.simples ?? []), ...(nivel === 'tecnico' ? (pergunta.tecnico ?? []) : [])];
+}

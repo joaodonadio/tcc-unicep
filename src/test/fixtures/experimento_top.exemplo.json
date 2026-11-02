@@ -1,0 +1,63 @@
+{
+  "_nota": "Exemplo só para testes; nunca exibido na tela.",
+  "versao_contrato": "1.0",
+  "data_referencia": "2026-10-22",
+  "selo": "em_avaliacao",
+  "avisos": [],
+  "top3": [
+    {
+      "posicao": 1,
+      "ticker": "PETR4",
+      "chance": { "valor": 0.54, "media": 0.5, "exibir": false },
+      "motivos": [
+        {
+          "fator": "tom_noticias_noite",
+          "valor": 0.42,
+          "efeito": "ajudou",
+          "texto": "Notícias da noite com tom positivo (3 notícias)"
+        },
+        {
+          "fator": "retorno_5d",
+          "valor": -0.031,
+          "efeito": "ajudou",
+          "texto": "Caiu mais que a média nos últimos 5 dias"
+        }
+      ],
+      "noticias_usadas": ["n305750"]
+    },
+    {
+      "posicao": 2,
+      "ticker": "VALE3",
+      "chance": { "valor": 0.52, "media": 0.5, "exibir": false },
+      "motivos": [
+        {
+          "fator": "volatilidade_20d",
+          "valor": 0.028,
+          "efeito": "atrapalhou",
+          "texto": "Volatilidade de 20 dias acima da média do grupo"
+        },
+        {
+          "fator": "tom_noticias_noite",
+          "valor": 0.05,
+          "efeito": "neutro",
+          "texto": "Notícias da noite sem tom definido (2 notícias)"
+        }
+      ],
+      "noticias_usadas": ["n305811"]
+    },
+    {
+      "posicao": 3,
+      "ticker": "ITUB4",
+      "chance": { "valor": 0.51, "media": 0.5, "exibir": false },
+      "motivos": [
+        {
+          "fator": "retorno_5d",
+          "valor": 0.012,
+          "efeito": "ajudou",
+          "texto": "Subiu um pouco acima da média nos últimos 5 dias"
+        }
+      ],
+      "noticias_usadas": []
+    }
+  ]
+}

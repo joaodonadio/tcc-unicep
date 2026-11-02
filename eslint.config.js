@@ -4,7 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
-  { ignores: ['dist', 'node_modules'] },
+  {
+    // Pastas de ferramentas de IA (skills e configurações), não código do projeto.
+    ignores: ['dist', 'node_modules', '.agent', '.agents', '.claude', '.codex', '.cursor', '.gemini', '.impeccable'],
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

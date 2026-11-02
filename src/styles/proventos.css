@@ -1,0 +1,941 @@
+/* Seção Proventos: faixas de largura total, pares de cartões com a mesma altura,
+   lista com rolagem própria e ilustração do "Como funciona". Só transform e opacity animam. */
+
+.proventos-topo {
+  max-width: 65ch;
+}
+
+.proventos-titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin-bottom: var(--espaco-3);
+  text-wrap: balance;
+}
+
+.proventos-intro {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-base);
+}
+
+/* Faixas: cada uma ocupa a largura toda do conteúdo da seção */
+.proventos-faixa {
+  min-width: 0;
+  margin-top: var(--espaco-6);
+}
+
+/* Duas colunas com a mesma altura: as duas bordas fecham juntas */
+.proventos-faixa-duas {
+  display: grid;
+  gap: var(--espaco-5);
+  align-items: stretch;
+}
+
+.proventos-faixa-duas > * {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.proventos-faixa-duas > .proventos-bloco > .proventos-grafico {
+  flex: 1;
+}
+
+/* O cartão do gráfico não estica até a altura do vizinho: sem vazio embaixo do gráfico */
+.proventos-faixa-duas > .proventos-bloco[aria-labelledby="proventos-grafico-titulo"] {
+  align-self: start;
+}
+
+@media (min-width: 960px) {
+  .proventos-faixa-duas {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* Bloco: cartão translúcido com título, uma frase de como ler e o conteúdo */
+.proventos-bloco {
+  min-width: 0;
+  padding: var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.proventos-bloco-titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--espaco-2);
+}
+
+.proventos-com-icone {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.proventos-com-icone > svg {
+  flex: none;
+  color: var(--cor-acento);
+}
+
+/* Frase curta que diz o que o bloco mostra e como lê-lo */
+.proventos-como-ler {
+  max-width: 65ch;
+  margin-bottom: var(--espaco-4);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+}
+
+.proventos-status,
+.proventos-vazio {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.proventos-nota {
+  max-width: 65ch;
+  margin-top: var(--espaco-3);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.proventos-rodape {
+  margin-top: var(--espaco-3);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+/* Gráfico de barras: rodapé com o primeiro e o último mês */
+.proventos-grafico .chart-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--espaco-2);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ranking: rolagem horizontal só se a tabela não couber */
+.proventos-rolagem {
+  overflow-x: auto;
+}
+
+.proventos-rolagem:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.proventos-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.proventos-tabela thead th {
+  padding: 0 var(--espaco-2) var(--espaco-3) 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.proventos-tabela tbody td {
+  border-top: 1px solid var(--cor-fio);
+  padding: var(--espaco-4) var(--espaco-2) var(--espaco-4) 0;
+  vertical-align: middle;
+}
+
+.proventos-tabela .proventos-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.proventos-tabela tbody td:first-child {
+  width: 3rem;
+}
+
+/* Nome da empresa: coluna com largura mínima para o nome não quebrar em três linhas */
+.proventos-tabela tbody td:nth-child(3) {
+  min-width: 8rem;
+}
+
+/* Celular: a empresa some da tabela (o ticker já identifica a ação) */
+@media (max-width: 767px) {
+  .proventos-tabela th:nth-child(3),
+  .proventos-tabela td:nth-child(3) {
+    display: none;
+  }
+}
+
+.proventos-tabela a {
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.proventos-tabela a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.proventos-tabela a:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.proventos-dy {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.proventos-dy-valor {
+  display: block;
+  font-weight: var(--peso-medio);
+}
+
+/* Barra proporcional ao maior dividend yield: 10px, pílula, sem borda */
+.proventos-barra {
+  display: block;
+  width: 8rem;
+  max-width: 100%;
+  height: 10px;
+  margin: var(--espaco-2) 0 0 auto;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-fio);
+  overflow: hidden;
+}
+
+.proventos-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-dado-1);
+}
+
+/* Como funciona: três passos, uma moedinha que percorre a trilha */
+.proventos-passos {
+  position: relative;
+}
+
+.proventos-trilha {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5rem;
+  pointer-events: none;
+}
+
+.proventos-trilha::before {
+  content: '';
+  position: absolute;
+  left: calc(100% / 6);
+  right: calc(100% / 6);
+  top: 50%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cor-borda);
+}
+
+/* Cada moedinha ocupa uma coluna: 100% do próprio quadro é uma coluna inteira */
+.proventos-moeda {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% / 3);
+  height: 100%;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+}
+
+/* A moedinha só percorre os passos enquanto a seção está à vista (data-anima vem de useEmVista) */
+[data-anima='true'] .proventos-moeda {
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: proventos-moeda-x 11s ease-in-out infinite;
+}
+
+.proventos-moeda-disco {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--cor-acento);
+  box-shadow: inset 0 0 0 3px var(--cor-acento-texto), 0 3px 10px var(--cor-acento-suave);
+}
+
+.proventos-passos-lista {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 2.5rem 0 0;
+  list-style: none;
+}
+
+.proventos-passo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--espaco-3);
+  text-align: center;
+  animation: proventos-entrada 0.4s var(--curva) var(--atraso, 0s) both;
+}
+
+.proventos-passo-icone {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: 50%;
+  background: var(--cor-superficie-2);
+  color: var(--cor-acento);
+}
+
+.proventos-passo-titulo {
+  margin-bottom: var(--espaco-1);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  line-height: 1.3;
+}
+
+.proventos-passo-texto p {
+  max-width: 34ch;
+  margin: 0 auto;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+}
+
+/* Alertas: cartões com ícone, data em destaque e o prazo na pílula */
+.proventos-alertas-grade {
+  display: grid;
+  gap: var(--espaco-4);
+}
+
+.proventos-alerta {
+  padding: var(--espaco-4);
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: calc(var(--raio-cartao) - 6px);
+}
+
+.proventos-alerta-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  margin-bottom: var(--espaco-2);
+}
+
+.proventos-alerta-titulo svg {
+  color: var(--cor-acento);
+  flex: none;
+}
+
+.proventos-alerta-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.proventos-alerta-lista li + li,
+.proventos-cal-lista li + li {
+  border-top: 1px solid var(--cor-fio);
+}
+
+.proventos-alerta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) 0;
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+}
+
+.proventos-alerta-texto {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--espaco-2) var(--espaco-3);
+  min-width: 0;
+}
+
+.proventos-alerta-item:hover .proventos-alerta-texto > span:first-child {
+  text-decoration: underline;
+}
+
+.proventos-alerta-item:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Bloco de data: dia grande e mês pequeno (avisos e agenda) */
+.proventos-data-bloco {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  padding: var(--espaco-2);
+  border-radius: var(--raio-3);
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.proventos-data-dia {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+}
+
+.proventos-data-mes {
+  margin-top: 0.2rem;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.01em;
+}
+
+.proventos-data-vazia {
+  padding: var(--espaco-2) var(--espaco-3);
+  background: var(--cor-superficie);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  text-align: center;
+}
+
+/* Prazo: pílula de texto âmbar sobre âmbar translúcido, com relógio */
+.proventos-prazo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.8em;
+  border: 1px solid var(--cor-acento);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Calendário */
+.proventos-cal-cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--espaco-4) 0 var(--espaco-3);
+}
+
+.proventos-cal-mes {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+}
+
+.proventos-cal-nav {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.proventos-cal-nav:hover {
+  background: var(--cor-superficie-2);
+}
+
+.proventos-cal-nav:focus-visible,
+.proventos-cal-dia:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.proventos-cal-grade {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: var(--espaco-2);
+  border-radius: calc(var(--raio-cartao) - 6px);
+  background: var(--cor-superficie-2);
+}
+
+.proventos-cal-semana {
+  text-align: center;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  padding-bottom: var(--espaco-2);
+}
+
+.proventos-cal-dia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: var(--raio-3);
+  background: transparent;
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.proventos-cal-dia[data-hoje] {
+  box-shadow: inset 0 0 0 1px var(--cor-texto-suave);
+}
+
+/* Dia com pagamento: célula âmbar suave, contorno âmbar e número em destaque */
+.proventos-cal-dia-pag {
+  border: 1px solid var(--cor-acento);
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+  font-weight: var(--peso-titulo);
+  cursor: pointer;
+}
+
+.proventos-cal-dia-pag:hover {
+  border-color: var(--cor-acento-hover);
+}
+
+/* Dia selecionado: âmbar sólido com tinta escura */
+.proventos-cal-dia-pag[aria-pressed='true'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+}
+
+/* Uma bolinha sólida por pagamento (máximo três), mais um "+" quando passa disso */
+.proventos-cal-pontos {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 5px;
+  line-height: 1;
+}
+
+.proventos-cal-ponto {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cor-acento);
+}
+
+.proventos-cal-mais {
+  margin-left: 1px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  color: var(--cor-acento);
+}
+
+.proventos-cal-dia-pag[aria-pressed='true'] .proventos-cal-ponto {
+  background: var(--cor-acento-texto);
+}
+
+.proventos-cal-dia-pag[aria-pressed='true'] .proventos-cal-mais {
+  color: var(--cor-acento-texto);
+}
+
+.proventos-cal-lista {
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: 1px solid var(--cor-fio);
+}
+
+.proventos-cal-lista ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.proventos-cal-lista-titulo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+}
+
+/* Próximos pagamentos: lista com altura máxima e rolagem própria */
+.proventos-ag-moldura {
+  position: relative;
+}
+
+/* Sombra de fim de lista, só quando "Mostrar todos" abre a lista inteira */
+.proventos-ag-moldura::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3rem;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent, var(--cor-superficie));
+  transition: opacity 0.3s ease-out;
+}
+
+.proventos-ag-moldura[data-expandida]::after {
+  opacity: 1;
+}
+
+.proventos-ag-rolagem {
+  max-height: 28rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: var(--espaco-2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-borda) transparent;
+}
+
+.proventos-ag-rolagem:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.proventos-ag-grupo + .proventos-ag-grupo {
+  margin-top: var(--espaco-4);
+}
+
+.proventos-ag-grupo-titulo {
+  margin-bottom: var(--espaco-2);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+}
+
+.proventos-ag-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.proventos-ag-lista li + li {
+  border-top: 1px solid var(--cor-fio);
+}
+
+.proventos-ag-item {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto minmax(6.5rem, auto);
+  align-items: center;
+  gap: var(--espaco-3) var(--espaco-4);
+  padding: var(--espaco-3) 0;
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+}
+
+.proventos-ag-item:hover .proventos-ag-ticker {
+  text-decoration: underline;
+}
+
+.proventos-ag-item:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Colunas flexíveis da agenda podem encolher: nada vaza do contêiner */
+.proventos-ag-item > *,
+.proventos-ag-meta > * {
+  min-width: 0;
+}
+
+.proventos-ag-meta {
+  display: contents;
+}
+
+.proventos-ag-quem {
+  min-width: 0;
+}
+
+.proventos-ag-ticker {
+  font-weight: var(--peso-forte);
+}
+
+.proventos-ag-com {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.proventos-ag-tipo {
+  justify-self: start;
+  padding: 0.2em 0.75em;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+.proventos-ag-tipo[data-tipo='jcp'] {
+  border-color: transparent;
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+}
+
+.proventos-ag-valor {
+  display: block;
+  text-align: right;
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.proventos-ag-valor small {
+  display: block;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-normal);
+}
+
+.proventos-ag-mais {
+  margin-top: var(--espaco-4);
+  min-height: 2.75rem;
+  padding: 0 var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+}
+
+.proventos-ag-mais:hover {
+  background: var(--cor-superficie-2);
+}
+
+.proventos-ag-mais[aria-expanded='true'] {
+  border-color: var(--cor-acento);
+  color: var(--cor-acento);
+}
+
+.proventos-ag-mais:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Telas estreitas: passos em coluna com a moedinha descendo pela esquerda */
+@media (max-width: 759px) {
+  .proventos-bloco {
+    padding: var(--espaco-5) var(--espaco-4);
+  }
+
+  .proventos-barra {
+    width: 5rem;
+  }
+
+  .proventos-trilha {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: 3.5rem;
+    height: auto;
+  }
+
+  .proventos-trilha::before {
+    top: calc(100% / 6);
+    bottom: calc(100% / 6);
+    left: 50%;
+    right: auto;
+    width: 2px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .proventos-moeda {
+    width: 100%;
+    height: calc(100% / 3);
+  }
+
+  [data-anima='true'] .proventos-moeda {
+    animation-name: proventos-moeda-y;
+  }
+
+  .proventos-passos-lista {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0;
+  }
+
+  .proventos-passo {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    min-height: 6.5rem;
+    padding: 0 0 0 4.5rem;
+    text-align: left;
+    animation-name: proventos-entrada;
+  }
+
+  .proventos-passo-icone {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin: 0;
+    transform: translateY(-50%);
+  }
+
+  .proventos-passo-texto p {
+    margin: 0;
+  }
+
+  .proventos-ag-item {
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+  }
+
+  .proventos-ag-item > .proventos-data-bloco {
+    grid-row: 1 / span 2;
+  }
+
+  .proventos-ag-meta {
+    display: flex;
+    min-width: 0;
+    grid-column: 2;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--espaco-3);
+  }
+
+  .proventos-ag-valor {
+    text-align: right;
+  }
+
+  .proventos-ag-tipo,
+  .proventos-ag-valor {
+    flex-shrink: 0;
+  }
+
+  .proventos-ag-rolagem {
+    max-height: 28rem;
+  }
+}
+
+@keyframes proventos-moeda-x {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  30% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  45% {
+    transform: translateX(100%);
+    opacity: 1;
+  }
+  62% {
+    transform: translateX(100%);
+    opacity: 1;
+  }
+  78% {
+    transform: translateX(200%);
+    opacity: 1;
+  }
+  92% {
+    transform: translateX(200%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+@keyframes proventos-moeda-y {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(100%);
+    opacity: 1;
+  }
+  62% {
+    transform: translateY(100%);
+    opacity: 1;
+  }
+  78% {
+    transform: translateY(200%);
+    opacity: 1;
+  }
+  92% {
+    transform: translateY(200%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(200%);
+    opacity: 0;
+  }
+}
+
+@keyframes proventos-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root[data-movimento='reduzido'] {
+  .proventos-passo {
+    animation: none;
+  }
+
+  [data-anima='true'] .proventos-moeda {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .proventos-ag-moldura::after {
+    transition: none;
+  }
+}
+
+/* Nota dos tipos de pagamento separada da caixa de avisos */
+.proventos-alertas .proventos-nota {
+  margin-bottom: var(--espaco-4);
+}

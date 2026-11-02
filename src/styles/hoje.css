@@ -1,0 +1,940 @@
+/* Painel "Hoje": página curta do dia. Cartões arredondados translúcidos, rótulos pequenos em caixa alta, muito respiro. */
+
+.hoje {
+  padding: var(--espaco-7) 0 var(--espaco-9);
+  color: var(--cor-texto);
+}
+
+/* Cabeçalho do dia */
+.hoje-titulo {
+  margin: 0 0 var(--espaco-4);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.hoje-resumo {
+  max-width: 65ch;
+  margin: 0;
+  font-size: var(--texto-base);
+  line-height: 1.6;
+}
+
+.hoje-ouvir {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+  min-height: 2.75rem;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+}
+
+.hoje-ouvir[aria-pressed='true'] {
+  border-color: var(--cor-acento);
+  color: var(--cor-acento);
+  background: var(--cor-acento-suave);
+}
+
+.hoje-ouvir:hover {
+  border-color: var(--cor-borda-hover);
+  background: var(--cor-superficie-hover);
+}
+
+.hoje-ouvir:active {
+  background: var(--cor-superficie-2);
+}
+
+.hoje-ouvir:focus-visible,
+.hoje-ver:focus-visible,
+.hoje-link:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Seções: só espaço entre elas; os cartões agrupam o conteúdo. */
+.hoje-secao {
+  margin-top: var(--espaco-8);
+}
+
+.hoje-secao--primeira {
+  margin-top: var(--espaco-7);
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Faixa dos números: grade de cartões que cabe na largura (2 colunas no celular, 3 no tablet, 6 numa linha no desktop) */
+.hoje-numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  row-gap: var(--espaco-5);
+  padding: var(--espaco-6) var(--espaco-5);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.hoje-numero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+  padding: 0 var(--espaco-3);
+}
+
+.hoje-numero-rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.hoje-numero-valor {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.hoje-numero-nota {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fonte dos números: linha inteira da grade, abaixo dos seis números */
+.hoje-numeros-fonte {
+  grid-column: 1 / -1;
+  margin-top: var(--espaco-3);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+/* 6 não cabem em 3 colunas auto-fit sem sobrar uma: no tablet são 3 por linha (3 + 3) */
+@media (min-width: 520px) and (max-width: 1279px) {
+  .hoje-numeros {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .hoje-numeros {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    row-gap: 0;
+  }
+}
+
+@media (min-width: 960px) {
+  .hoje-numero-valor {
+    font-size: var(--texto-2xl);
+  }
+}
+
+/* Duas colunas: gráfico e destaques (abaixo de 1024px, o gráfico ocupa a largura toda) */
+.hoje-duas {
+  display: grid;
+  gap: var(--espaco-7);
+}
+
+@media (min-width: 1024px) {
+  .hoje-duas {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+}
+
+/* Os dois cartões da linha têm a mesma altura (grid estica). Dentro deles, o conteúdo
+   ocupa a altura: a lista espalha as linhas e o gráfico vem com a altura de 260px. */
+.hoje-duas > .hoje-bloco {
+  display: flex;
+  flex-direction: column;
+}
+
+.hoje-duas .hoje-lista {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Três blocos curtos: cartões de pelo menos 19rem (2 por linha em até ~1024px, 3 no desktop, 1 no celular) */
+.hoje-trios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: var(--espaco-7);
+}
+
+/* Tablet e notebook pequeno: a agenda de pagamentos ocupa a linha toda e os outros dois dividem a de baixo */
+@media (min-width: 640px) and (max-width: 1279px) {
+  .hoje-trios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espaco-5);
+  }
+
+  .hoje-trios > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Bloco: cartão translúcido, título grande e pesado, link no fim.
+   É o contêiner das consultas @container: a linha de destaque se adapta à largura do cartão. */
+.hoje-bloco {
+  container-type: inline-size;
+  min-width: 0;
+  padding: var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.hoje-bloco-titulo {
+  margin: 0 0 var(--espaco-5);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Título de seção vira rótulo pequeno em caixa alta acima dos cartões */
+.hoje-secao-titulo {
+  margin: 0 0 var(--espaco-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+.hoje-texto,
+.hoje-nota,
+.hoje-vazio {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.hoje-nota,
+.hoje-vazio {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.hoje-texto {
+  margin-top: var(--espaco-3);
+}
+
+.hoje-nota {
+  margin-top: var(--espaco-1);
+}
+
+/* Listas de linhas: fio fino entre elas, valor alinhado à direita */
+.hoje-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hoje-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-1) var(--espaco-3);
+  padding: var(--espaco-4) 0;
+  border-top: 1px solid var(--cor-fio);
+  min-width: 0;
+}
+
+.hoje-linha:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.hoje-linha-rotulo {
+  min-width: 6.5rem;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.hoje-linha-empresa {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.hoje-linha-valor {
+  margin-left: auto;
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Destaques: a mesma grade em todas as linhas (rótulo | ticker e empresa | valor à direita) */
+.hoje-linha--grade {
+  display: grid;
+  grid-template-columns: 6.25rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--espaco-1) var(--espaco-3);
+}
+
+.hoje-linha--grade .hoje-linha-rotulo {
+  min-width: 0;
+}
+
+.hoje-linha-quem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--espaco-2);
+  min-width: 0;
+}
+
+.hoje-linha--grade .hoje-linha-valor {
+  margin-left: 0;
+  justify-self: end;
+}
+
+/* Cartão estreito: o rótulo vai para a linha de cima e o ticker fica com a empresa embaixo dele,
+   sem espremer o nome da empresa numa coluna fina. */
+@container (max-width: 22rem) {
+  .hoje-linha--grade {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .hoje-linha--grade .hoje-linha-rotulo {
+    grid-column: 1 / -1;
+  }
+
+  .hoje-linha--grade .hoje-linha-quem {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+/* Linha sem rótulo (grupo "Muita gente negociando"): o ticker começa na borda, sem coluna vazia */
+.hoje-linha--grade.hoje-linha--sem-rotulo {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* Subtítulo do grupo de volume: uma vez, antes das linhas dele */
+.hoje-subgrupo {
+  padding: var(--espaco-4) 0 var(--espaco-1);
+  border-top: 1px solid var(--cor-fio);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.hoje-subgrupo:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Variação: cor pela direção do movimento */
+.hoje-var {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--peso-medio);
+}
+
+.hoje-var[data-sinal='up'] {
+  color: var(--cor-alta);
+}
+
+.hoje-var[data-sinal='down'] {
+  color: var(--cor-queda);
+}
+
+.hoje-var[data-sinal='flat'] {
+  color: var(--cor-estavel);
+}
+
+/* Links: texto sublinhado, sem caixa */
+.hoje-link,
+.hoje-ver {
+  color: var(--cor-texto);
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.hoje-link:hover,
+.hoje-ver:hover {
+  text-decoration-thickness: 2px;
+}
+
+.hoje-ver {
+  display: inline-block;
+  margin-top: var(--espaco-4);
+}
+
+/* Barra de tom: fina, decorativa (a contagem vem em texto ao lado) */
+.hoje-tom-barra {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  gap: 3px;
+  border-radius: var(--raio-pilula);
+}
+
+.hoje-tom-barra > span {
+  border-radius: var(--raio-pilula);
+}
+
+.hoje-tom-barra > span {
+  display: block;
+  height: 100%;
+}
+
+.hoje-tom-positivas {
+  background: var(--cor-alta);
+}
+
+.hoje-tom-neutras {
+  background: var(--cor-texto-suave);
+}
+
+.hoje-tom-negativas {
+  background: var(--cor-queda);
+}
+
+/* Gráfico do bloco: o rodapé de datas segue o estilo geral do gráfico */
+.hoje-bloco .chart-foot {
+  margin-top: var(--espaco-2);
+}
+
+/* Top 5 para estudar hoje: lista à esquerda, o porquê ao lado (abaixo no celular) */
+.top5 {
+  margin-bottom: var(--espaco-7);
+  padding: var(--espaco-7) var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-cartao);
+}
+
+/* título do Top 5 na escala de página (h1). O clamp antigo nunca valeu: acoes.css o sobrescrevia */
+.top5-titulo {
+  margin: 0 0 var(--espaco-3);
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.top5-ambar {
+  color: var(--cor-acento);
+}
+
+.top5-apoio {
+  margin: 0 0 var(--espaco-5);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-base);
+}
+
+/* Lista e painel têm a mesma altura (grid estica). No celular empilham e cada um tem a sua altura. */
+.top5-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-5);
+}
+
+.top5-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .top5-grade {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    /* a lista dita a altura da linha; o painel ignora o próprio conteúdo (contain: size),
+       estica até a mesma altura e rola por dentro */
+    grid-template-rows: minmax(30rem, auto);
+  }
+
+  .top5-lista > li {
+    display: flex;
+    flex: 1 1 auto;
+  }
+
+  .top5-lista > li > .top5-item {
+    flex: 1 1 auto;
+  }
+
+  .top5-painel {
+    contain: size;
+    min-height: 0;
+  }
+
+  .top5-painel-corpo {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+.top5-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  width: 100%;
+  padding: var(--espaco-4);
+  border: 1px solid transparent;
+  border-radius: var(--raio-3);
+  background: var(--cor-superficie);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.top5-item:hover {
+  background: var(--cor-superficie-2);
+}
+
+.top5-item[aria-pressed='true'] {
+  border-color: var(--cor-acento);
+  background: var(--cor-acento-suave);
+}
+
+.top5-pos {
+  min-width: 1.5ch;
+  color: var(--cor-acento);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-titulo);
+  line-height: 1;
+}
+
+/* Posição no cabeçalho do painel: selo pequeno com borda de acento, na linha do ticker */
+.top5-pos--grande {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  min-width: 0;
+  border: 1px solid var(--cor-acento);
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-sm);
+}
+
+.top5-item-corpo {
+  display: grid;
+  min-width: 0;
+  gap: var(--espaco-1);
+}
+
+.top5-item-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.top5-ticker {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-forte);
+}
+
+.top5-empresa {
+  display: block;
+  margin-top: var(--espaco-1);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.top5-item .hoje-var,
+.top5-painel-preco .hoje-var {
+  padding: 0.1rem 0.6rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--texto-xs);
+}
+
+.top5-motivo {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+.top5-tecnico {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-3);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.top5-painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  min-width: 0;
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie-2);
+  scroll-margin-top: var(--espaco-4);
+}
+
+.top5-painel-topo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-4);
+}
+
+/* O selo fica na linha do ticker, e não entre o ticker e o setor */
+.top5-painel-topo .top5-pos--grande {
+  margin-top: 0.25rem;
+}
+
+.top5-painel-cabeca {
+  min-width: 0;
+}
+
+/* Setor com o ícone: selo pequeno e o nome ao lado */
+.top5-setor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+/* Abas do painel: controles de verdade, com área de toque de 40px */
+.top5-abas-painel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.top5-abas-painel .top5-aba {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+/* Até 1279px: três abas do mesmo tamanho; o rótulo quebra dentro da aba, centralizado */
+@media (max-width: 1279px) {
+  .top5-abas-painel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .top5-abas-painel .top5-aba {
+    flex: none;
+    min-width: 0;
+    padding: 0.4rem 0.5rem;
+    line-height: 1.25;
+    white-space: normal;
+  }
+}
+
+/* Conteúdo da aba: a rolagem fica dentro do painel no desktop */
+.top5-painel-corpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.top5-aba-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.top5-intro {
+  margin: 0 0 var(--espaco-6);
+  max-width: 65ch;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.top5-chance {
+  display: block;
+  margin: var(--espaco-1) 0 0;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.top5-painel-ticker {
+  margin: 0;
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+}
+
+.top5-painel-meta {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+/* Preço e variação do dia numa linha só, logo abaixo do nome da empresa; o preço é o número principal */
+.top5-painel-preco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin: var(--espaco-1) 0 0;
+}
+
+.top5-painel-valor {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* Contagem em números grandes: a favor (alta) e de atenção (queda) */
+.top5-contagem {
+  display: grid;
+  gap: var(--espaco-2);
+}
+
+.top5-contagem-titulo {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Dois cartões do mesmo tamanho: ícone, número grande e o que ele conta */
+.top5-contagem-cartoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-3);
+}
+
+.top5-contagem-item {
+  --tom: var(--cor-alta);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--espaco-3);
+  margin: 0;
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid color-mix(in srgb, var(--tom) 35%, var(--cor-borda));
+  border-radius: var(--raio-3);
+  background: color-mix(in srgb, var(--tom) 8%, var(--cor-superficie));
+}
+
+.top5-contagem-item[data-tom='atencao'] {
+  --tom: var(--cor-queda);
+}
+
+.top5-contagem-icone {
+  grid-row: span 2;
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tom) 18%, transparent);
+  color: var(--tom);
+}
+
+.top5-contagem-item strong {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+}
+
+.top5-contagem-rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Até três frases: um item por ponto, com ícone pequeno da cor do tipo */
+.top5-frases {
+  display: grid;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.top5-frase {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--raio-3);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.top5-frase svg {
+  flex: none;
+  margin-top: 0.2em;
+}
+
+.top5-frase[data-tom='favor'] svg {
+  color: var(--cor-alta);
+}
+
+.top5-frase[data-tom='atencao'] svg {
+  color: var(--cor-queda);
+}
+
+/* "Mais N na ficha" encosta no botão: os dois formam o rodapé do painel */
+.top5-mais + .top5-ficha {
+  margin-top: var(--espaco-3);
+}
+
+.top5-mais {
+  margin: auto 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.top5-vazio {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.top5-pilulas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.top5-pilula {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  font-size: var(--texto-sm);
+}
+
+.top5-pilula span {
+  color: var(--cor-texto-suave);
+}
+
+.top5-abas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-3);
+}
+
+.top5-aba {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+}
+
+.top5-aba:focus-visible,
+.top5-item:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.top5-aba[aria-selected='true'] {
+  border-color: var(--cor-acento);
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+}
+
+/* O palco 3D já é um cartão; aqui só reservamos a altura (sem corte nos cantos, que comia a 1ª letra das frases). */
+/* Aba do objeto: o quadro 3D ocupa a altura que sobra no painel, sem rolagem interna */
+.top5-aba-corpo--objeto {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.top5-objeto {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 12rem;
+}
+
+.top5-objeto .modelo3d {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top5-objeto .modelo3d-quadro {
+  flex: 1 1 auto;
+  min-height: 11rem;
+}
+
+.top5-objeto .modelo3d-palco {
+  height: 100%;
+  min-height: 11rem;
+}
+
+.top5-ficha {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-5);
+}
+
+.top5-origem {
+  margin: var(--espaco-5) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+@media (max-width: 519px) {
+  .top5 {
+    padding: var(--espaco-5) var(--espaco-4);
+  }
+
+  .hoje-bloco {
+    padding: var(--espaco-5);
+  }
+}
+
+/* Celular estreito: os dois cartões da contagem empilham, cada um com o ícone e o rótulo na linha */
+@media (max-width: 479px) {
+  .top5-contagem-cartoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Celular: abas do painel com cantos menos redondos, texto menor e painel com menos recuo */
+@media (max-width: 599px) {
+  .top5-painel {
+    padding: var(--espaco-4);
+  }
+
+  .top5-abas-painel .top5-aba {
+    border-radius: var(--raio-3);
+    font-size: var(--texto-xs);
+    min-height: 2.75rem;
+  }
+}

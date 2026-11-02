@@ -1,0 +1,174 @@
+{
+  "pacote": "mercado_dia",
+  "versao_contrato": "1.0",
+  "chave": [
+    "data_referencia"
+  ],
+  "gerado_em": "2026-10-24T23:23:45-03:00",
+  "dados_ate": "2026-10-23T08:00:00-03:00",
+  "registros": [
+    {
+      "versao_contrato": "1.0",
+      "gerado_em": "2026-10-24T23:23:45-03:00",
+      "dados_ate": "2026-10-23T08:00:00-03:00",
+      "data_referencia": "2026-10-22",
+      "IBOV": {
+        "fechamento": {
+          "valor": 204120.0,
+          "status": "ok"
+        },
+        "variacao_dia": {
+          "valor": -0.011501489140172905,
+          "status": "ok"
+        },
+        "unidade": "pontos"
+      },
+      "USDBRL": {
+        "fechamento": {
+          "valor": 5.033299922943115,
+          "status": "ok"
+        },
+        "variacao_dia": {
+          "valor": 0.0025713008367840295,
+          "status": "ok"
+        },
+        "unidade": "BRL/USD"
+      },
+      "BRENT": {
+        "fechamento": {
+          "valor": 113.16999816894531,
+          "status": "ok"
+        },
+        "variacao_dia": {
+          "valor": 0.0399742555258249,
+          "status": "ok"
+        },
+        "unidade": "USD/barril"
+      },
+      "cdi_dia": {
+        "valor": 0.00050788,
+        "status": "ok"
+      },
+      "cdi_data": "2026-10-21",
+      "ipca_12m": {
+        "valor": 0.04576119675071877,
+        "status": "ok"
+      },
+      "ipca_ate": {
+        "valor": "2026-09",
+        "status": "ok"
+      },
+      "indices": {
+        "CDI": {
+          "d1": {
+            "valor": 0.0005078800000000161,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": 0.010719822473548746,
+            "status": "ok"
+          },
+          "m6": {
+            "valor": 0.06809259968148806,
+            "status": "ok"
+          },
+          "a1": {
+            "valor": 0.1459383650610524,
+            "status": "ok"
+          }
+        },
+        "IPCA": {
+          "d1": {
+            "valor": 0.0,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": 0.008199999999999985,
+            "status": "ok"
+          },
+          "m6": {
+            "valor": 0.01991654743044169,
+            "status": "ok"
+          },
+          "a1": {
+            "valor": 0.04576119675071877,
+            "status": "ok"
+          }
+        },
+        "IDIV": {
+          "d1": {
+            "valor": -0.009092788596906987,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "m6": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "a1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          }
+        },
+        "SMLL": {
+          "d1": {
+            "valor": -0.01395548922579748,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "m6": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "a1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          }
+        },
+        "IFIX": {
+          "d1": {
+            "valor": -0.00042013266390517057,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "m6": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          },
+          "a1": {
+            "valor": null,
+            "status": "historico_insuficiente"
+          }
+        },
+        "IVVB11": {
+          "d1": {
+            "valor": -0.008967110572148163,
+            "status": "ok"
+          },
+          "m1": {
+            "valor": -0.023378103371434533,
+            "status": "ok"
+          },
+          "m6": {
+            "valor": 0.08987642266165108,
+            "status": "ok"
+          },
+          "a1": {
+            "valor": 0.07790120442708326,
+            "status": "ok"
+          }
+        }
+      }
+    }
+  ],
+  "removidos": []
+}

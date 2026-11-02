@@ -1,4 +1,4 @@
-import { AlertTriangle, Inbox } from 'lucide-react';
+import { TEXTOS } from '../../lib/textos.js';
 
 /**
  * Os 4 estados de cada bloco: skeleton / dados / vazio / erro (§3).
@@ -9,53 +9,42 @@ export function Linhas({ quantidade = 3, larguras = ['100%', '86%', '64%'] }) {
   return (
     <div aria-hidden="true">
       {Array.from({ length: quantidade }, (_, i) => (
-        <div
-          key={i}
-          className="skeleton skeleton-line"
-          style={{ width: larguras[i % larguras.length] }}
-        />
+        <span key={i} className="esqueleto" style={{ width: larguras[i % larguras.length] }} />
       ))}
     </div>
   );
 }
 
-export function CardSkeleton({ altura = '9rem', rotulo = 'Carregando análise…' }) {
+export function CardSkeleton({ altura = '9rem', rotulo = TEXTOS.estados.carregando }) {
   return (
-    <div className="skeleton-card" role="status" aria-live="polite">
+    <div className="cartao" role="status" aria-live="polite">
       <span className="sr-only">{rotulo}</span>
-      <div className="skeleton" style={{ height: altura }} aria-hidden="true" />
+      <span className="esqueleto" style={{ height: altura }} aria-hidden="true" />
     </div>
   );
 }
 
-export function BlocoErro({ titulo = 'Não foi possível carregar', mensagem, onTentarNovamente }) {
+export function BlocoErro({ titulo = TEXTOS.estados.erroTitulo, mensagem, onTentarNovamente, nivel = 3 }) {
+  const Titulo = `h${nivel}`;
   return (
-    <div className="state-block is-error" role="alert">
-      <div className="state-title">
-        <AlertTriangle size={18} aria-hidden="true" />
-        {titulo}
-      </div>
-      <p className="state-text">
-        {mensagem || 'O sistema de análise está indisponível no momento.'} Os demais blocos da tela
-        continuam funcionando normalmente.
-      </p>
+    <div className="estado estado--erro" role="alert">
+      <Titulo>{titulo}</Titulo>
+      <p>{mensagem ?? TEXTOS.estados.erroTexto}</p>
       {onTentarNovamente && (
-        <button type="button" className="state-retry" onClick={onTentarNovamente}>
-          Tentar de novo
+        <button type="button" className="botao" onClick={onTentarNovamente}>
+          {TEXTOS.estados.tentarDeNovo}
         </button>
       )}
     </div>
   );
 }
 
-export function BlocoVazio({ titulo = 'Nada por aqui hoje', mensagem }) {
+export function BlocoVazio({ titulo = TEXTOS.estados.vazio, mensagem, nivel = 3 }) {
+  const Titulo = `h${nivel}`;
   return (
-    <div className="state-block">
-      <div className="state-title">
-        <Inbox size={18} aria-hidden="true" />
-        {titulo}
-      </div>
-      <p className="state-text">{mensagem}</p>
+    <div className="estado estado--vazio">
+      <Titulo>{titulo}</Titulo>
+      {mensagem && <p>{mensagem}</p>}
     </div>
   );
 }
@@ -70,18 +59,13 @@ export function BlocoVazio({ titulo = 'Nada por aqui hoje', mensagem }) {
  */
 export function CarregandoTela() {
   return (
-    <main
-      className="screen screen-wide"
-      role="status"
-      aria-live="polite"
-      style={{ minHeight: '100vh' }}
-    >
-      <span className="sr-only">Carregando a tela…</span>
-      <div className="skeleton" style={{ height: '2.5rem', width: '18rem' }} aria-hidden="true" />
+    <div className="pagina" role="status" aria-live="polite" style={{ minHeight: '100dvh' }}>
+      <span className="sr-only">{TEXTOS.estados.carregando}</span>
+      <span className="esqueleto" style={{ height: '2.5rem', width: '18rem' }} aria-hidden="true" />
       <div style={{ marginTop: '2rem', display: 'grid', gap: '1.125rem' }} aria-hidden="true">
         <CardSkeleton altura="7rem" />
         <CardSkeleton altura="7rem" />
       </div>
-    </main>
+    </div>
   );
 }

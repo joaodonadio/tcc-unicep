@@ -1,0 +1,15 @@
+/* Notícias: a tabela de empresas por tom cabe na largura do celular sem rolar a página.
+   O restante do bloco de notícias (cores, cabeçalho) continua em inicio.css. */
+
+.dia-empresas {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Celular estreito: células mais justas para a tabela de quatro colunas caber em 390px */
+@media (max-width: 479px) {
+  .dia-tabela-empresas th,
+  .dia-tabela-empresas td {
+    padding: var(--espaco-2) var(--espaco-1);
+  }
+}

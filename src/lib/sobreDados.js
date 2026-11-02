@@ -1,0 +1,208 @@
+/**
+ * Transparência sobre a atualização: funções puras que leem o registro de
+ * `execucao` e montam o resumo do topo, os cartões de pacotes e os avisos da
+ * seção "De onde vêm os números?". Nenhum texto literal aqui: tudo sai de TEXTOS.dados.
+ *
+ * Regra central: ausência nunca vira 0. Número que não chegou fica null
+ * (a tela mostra "—") e o fato que faltar sai do resumo.
+ */
+
+import { dataBR, dataHoraBR, diaMes, horaBR } from './datas.js';
+import { TEXTOS } from './textos.js';
+
+const { dados } = TEXTOS;
+
+/** Leitura de chave própria de um mapa de textos (evita pegar propriedades herdadas). */
+const lerMapa = (mapa, chave) => (Object.prototype.hasOwnProperty.call(mapa, chave) ? mapa[chave] : null);
+
+/** Nome legível de um pacote; nome desconhecido sai como veio. */
+export function nomePacote(pacote) {
+  return lerMapa(dados.pacotes, pacote) ?? String(pacote ?? '');
+}
+
+/** Status da atualização em texto: ok -> concluída, parcial, falhou -> com falha. */
+export function situacaoRotulo(status) {
+  return lerMapa(dados.situacao, status);
+}
+
+/** Número do campo, ou null se não for um número finito. */
+const numeroOuNulo = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+/** "2026-10-24T23:23:45-03:00" -> "24/10" (dia e mês no fuso de São Paulo). */
+function diaDoInstante(iso) {
+  const m = /^(\d{2})\/(\d{2})/.exec(dataHoraBR(iso));
+  return m ? `${m[1]}/${m[2]}` : '';
+}
+
+/**
+ * Cartões de "O que chegou": um item por pacote enviado.
+ * `selo`: 'atualizado' (registros > 0), 'semMudanca' (0) ou null (número ausente).
+ * `retirados`: quantidade removida, só quando é maior que zero; senão null.
+ */
+export function linhasDePacotes(execucao) {
+  const pacotes = Array.isArray(execucao?.pacotes_enviados) ? execucao.pacotes_enviados : [];
+  return pacotes.map((p, i) => {
+    const registros = numeroOuNulo(p?.registros);
+    const removidos = numeroOuNulo(p?.removidos);
+    return {
+      chave: `${p?.pacote ?? 'pacote'}-${i}`,
+      nome: nomePacote(p?.pacote),
+      registros,
+      removidos,
+      selo: registros === null ? null : registros > 0 ? 'atualizado' : 'semMudanca',
+      retirados: removidos !== null && removidos > 0 ? removidos : null,
+      arquivo: typeof p?.arquivo === 'string' && p.arquivo.trim() !== '' ? p.arquivo : null,
+    };
+  });
+}
+
+/** A coleta foi consultada nesta atualização? true/false; sem o campo, null (nunca presume). */
+export function coletaConsultada(execucao) {
+  const consultado = execucao?.coleta_status?.consultado;
+  return typeof consultado === 'boolean' ? consultado : null;
+}
+
+/** Avisos em texto, como vieram do processamento. */
+export function avisosDaAtualizacao(execucao) {
+  const avisos = Array.isArray(execucao?.avisos) ? execucao.avisos : [];
+  return avisos.filter((texto) => typeof texto === 'string' && texto.trim() !== '');
+}
+
+/** Nota da coleta, se houver. */
+export function notaColeta(execucao) {
+  const nota = execucao?.coleta_status?.nota;
+  return typeof nota === 'string' && nota.trim() !== '' ? nota : '';
+}
+
+/**
+ * Frase de cabeçalho da seção. Exemplo completo:
+ * "Pregão de 22/10. Atualização número 8, de 23h23 a 23h25 de 24/10. Situação: concluída."
+ * Cada trecho que faltar (pregão, rodada, horário, data, situação) sai da frase.
+ */
+export function montarFraseAtualizacao({ dataReferencia, execucao } = {}) {
+  const f = dados.frase;
+  const reg = execucao ?? {};
+
+  const pregao = diaMes(dataReferencia);
+  const hi = horaBR(reg.inicio);
+  const hf = horaBR(reg.fim);
+  const dia = diaDoInstante(reg.inicio) || diaDoInstante(reg.fim);
+  const rodada = Number.isInteger(reg.rodada) ? reg.rodada : null;
+
+  const cabeca = rodada !== null ? f.atualizacao(rodada) : hi || hf || dia ? f.atualizacaoSemRodada : '';
+  const horas = hi && hf ? f.intervalo(hi, hf) : hi ? f.inicio(hi) : hf ? f.fim(hf) : '';
+  const trecho = [horas, dia ? f.dia(dia) : ''].filter(Boolean).join(' ');
+  const atualizacao = [cabeca, trecho].filter(Boolean).join(', ');
+
+  const rotulo = situacaoRotulo(reg.status);
+
+  return [
+    pregao ? f.pregao(pregao) : '',
+    atualizacao ? `${atualizacao}.` : '',
+    rotulo ? f.situacao(rotulo) : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+const SITUACOES = ['ok', 'parcial', 'falhou'];
+const TOM_SITUACAO = { ok: 'alta', parcial: 'acento', falhou: 'queda' };
+
+/** Pílula do topo: texto e tom (alta, acento, queda; neutro quando o status não é conhecido). */
+export function situacaoPainel(status) {
+  const chave = SITUACOES.includes(status) ? status : 'desconhecida';
+  return { rotulo: dados.situacaoPainel[chave], tom: TOM_SITUACAO[chave] ?? 'neutro' };
+}
+
+/**
+ * Fatos do topo. Cada um vem já em texto, ou null quando o dado não chegou (o fato some da tela).
+ * `periodo` (início e fim) só interessa ao modo técnico.
+ */
+export function fatosDaAtualizacao({ dataReferencia, execucao } = {}) {
+  const v = dados.valores;
+  const reg = execucao ?? {};
+  const pregao = dataBR(dataReferencia) || null;
+  const diaFim = diaDoInstante(reg.fim);
+  const horaFim = horaBR(reg.fim);
+  const horaInicio = horaBR(reg.inicio);
+  return {
+    pregao,
+    publicado: diaFim && horaFim ? v.publicado(diaFim, horaFim) : null,
+    atualizacao: Number.isInteger(reg.rodada) ? v.numero(reg.rodada) : null,
+    periodo: horaInicio && horaFim ? v.periodo(horaInicio, horaFim) : null,
+  };
+}
+
+/** Regras que transformam um aviso técnico em frase simples (a primeira que casar entra no resumo). */
+const REGRAS_AVISO = [
+  { padrao: /modelo provis[óo]rio|teste|top 5 n[ãa]o oficial/i, frase: dados.avisosResumo.modelo },
+  { padrao: /composi[çc][ãa]o do ibovespa|cobertura/i, frase: dados.avisosResumo.ibovespa },
+  { padrao: /depois das 10h/i, frase: dados.avisosResumo.horario },
+];
+
+/**
+ * Frases simples que resumem os avisos do processamento, sem o texto cru.
+ * Sem avisos: "Nenhum aviso". Avisos que nenhuma regra reconhece: frase genérica.
+ */
+export function resumoAvisos(execucao) {
+  const textos = avisosDaAtualizacao(execucao);
+  if (textos.length === 0) return [dados.avisosResumo.nenhum];
+  const frases = REGRAS_AVISO.filter(({ padrao }) => textos.some((t) => padrao.test(t))).map(({ frase }) => frase);
+  return frases.length > 0 ? frases : [dados.avisosResumo.generico];
+}
+
+/** Minúsculas e sem acento, para casar palavras-chave. */
+const semAcento = (texto) => texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+/**
+ * Regras da categoria de cada aviso cru, na ordem em que valem (a primeira que casar entra).
+ * "top 5" vem antes de "modelo": um texto que fala de top 5 e de modelo é do top 5.
+ */
+const REGRAS_CATEGORIA = [
+  ['ibovespa', /ibovespa|composicao/],
+  ['horario', /\b10h\b|depois das/],
+  // só "experimento" solto (ex.: registros do experimento) não é sobre o Top 5
+  ['top5', /top 5|historico do experimento|experimento_/],
+  ['modelo', /modelo/],
+  ['agenda', /agenda|cron|consulta/],
+];
+
+/** Categoria do aviso cru: ibovespa, modelo, horario, top5, agenda ou outro. */
+export function categoriaDoAviso(texto) {
+  const t = semAcento(typeof texto === 'string' ? texto : '');
+  const regra = REGRAS_CATEGORIA.find(([, padrao]) => padrao.test(t));
+  return regra ? regra[0] : 'outro';
+}
+
+/**
+ * Partes de um aviso cru, para exibir com formatação. Os caracteres são preservados:
+ * - 'data': AAAA-MM-DD vira DD/MM/AAAA; AAAA-MM vira MM/AAAA (`iso` guarda a data original).
+ * - 'codigo': expressões `palavra = valor`, opções que começam com --, identificadores com ponto ou sublinhado.
+ * - 'texto': o resto.
+ */
+const PADRAO_PARTES =
+  /(?<data>\b(?<a>\d{4})-(?<m>\d{2})-(?<d>\d{2})\b)|(?<mes>\b(?<ma>\d{4})-(?<mm>\d{2})\b(?!-\d))|(?<expr>(?<![\p{L}\p{N}_.])[\p{L}\p{N}]+(?:[._][\p{L}\p{N}]+)+ = [\p{L}\p{N}_.-]+)|(?<opcao>(?<![\p{L}\p{N}-])--[\p{L}\p{N}][\p{L}\p{N}-]*)|(?<ident>(?<![\p{L}\p{N}_.])[\p{L}\p{N}]+(?:[._][\p{L}\p{N}]+)+)/gu;
+
+export function partesDoAviso(texto) {
+  const original = typeof texto === 'string' ? texto : '';
+  const partes = [];
+  let ultimo = 0;
+  const empurrarTexto = (fim) => {
+    if (fim > ultimo) partes.push({ tipo: 'texto', valor: original.slice(ultimo, fim) });
+  };
+
+  for (const m of original.matchAll(PADRAO_PARTES)) {
+    empurrarTexto(m.index);
+    const g = m.groups;
+    if (g.data) {
+      partes.push({ tipo: 'data', valor: `${g.d}/${g.m}/${g.a}`, iso: g.data });
+    } else if (g.mes) {
+      partes.push({ tipo: 'data', valor: `${g.mm}/${g.ma}`, iso: g.mes });
+    } else {
+      partes.push({ tipo: 'codigo', valor: m[0] });
+    }
+    ultimo = m.index + m[0].length;
+  }
+  empurrarTexto(original.length);
+  return partes;
+}

@@ -1,0 +1,567 @@
+/* Componentes compartilhados. Estado visual sempre por atributos aria. */
+
+/* Botões: primário âmbar em pílula; secundário translúcido; discreto é só texto */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duracao) var(--curva),
+    border-color var(--duracao) var(--curva),
+    color var(--duracao) var(--curva),
+    transform 100ms var(--curva);
+}
+
+.botao:hover {
+  background: var(--cor-superficie-hover);
+  border-color: var(--cor-borda-hover);
+}
+
+.botao:active {
+  transform: translateY(1px);
+}
+
+.botao:disabled,
+.botao[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.botao[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.botao--icone {
+  min-width: 2.75rem;
+  padding-inline: var(--espaco-2);
+}
+
+.botao svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex-shrink: 0;
+}
+
+.botao[aria-pressed='true'] {
+  background: var(--cor-destaque);
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque-texto);
+}
+
+/* Grupo segmentado em pílula (modo de leitura, períodos): trilho escuro e opção ativa em âmbar */
+.segmentado {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+/* Opções do segmentado e das abas são controles de verdade: alvo de 40px ou mais, texto
+   de 0.9375rem em peso 600, inativas em cor de texto cheia e a ativa em âmbar cheio. */
+.segmentado .botao {
+  min-height: 2.5rem;
+  border-color: transparent;
+  background: transparent;
+  padding-inline: var(--espaco-4);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.segmentado .botao:hover {
+  background: var(--cor-superficie);
+  border-color: transparent;
+}
+
+.segmentado .botao[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+}
+
+/* Abas em pílula: a ativa ganha o fundo âmbar */
+.abas {
+  display: flex;
+  gap: var(--espaco-2);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: var(--espaco-1);
+  scrollbar-width: none;
+}
+
+.aba {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 2.5rem;
+  padding: var(--espaco-2) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+  color: var(--cor-texto);
+  transition:
+    background-color var(--duracao) var(--curva),
+    color var(--duracao) var(--curva);
+}
+
+.aba:hover {
+  color: var(--cor-texto);
+  background: var(--cor-superficie);
+}
+
+.aba[aria-selected='true'] {
+  color: var(--cor-acento-texto);
+  background: var(--cor-acento);
+  border-color: var(--cor-acento);
+}
+
+/* Cartão: vidro fosco translúcido com fio claro. É o contêiner padrão das páginas. */
+.cartao {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+  padding: var(--espaco-6);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Rótulo de seção: pequeno, caixa alta espaçada, com respiro generoso acima */
+.rotulo-secao {
+  margin-top: var(--espaco-7);
+  margin-bottom: var(--espaco-3);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+}
+
+/* Pílula de status: fundo translúcido e borda na cor do tom */
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 4px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.pilula[data-tom='acento'] {
+  background: var(--cor-acento-suave);
+  border-color: var(--cor-acento-borda);
+  color: var(--cor-acento);
+}
+
+.pilula[data-tom='alta'] {
+  background: var(--cor-alta-suave);
+  border-color: var(--cor-alta-borda);
+  color: var(--cor-alta);
+}
+
+.pilula[data-tom='queda'] {
+  background: var(--cor-queda-suave);
+  border-color: var(--cor-queda-borda);
+  color: var(--cor-queda);
+}
+
+/* Pílula ao lado de texto na mesma linha: respiro de 0.5rem entre as duas (pílula com pílula fica como está) */
+.pilula + :not(.pilula),
+:not(.pilula) + .pilula {
+  margin-inline-start: 0.5rem;
+}
+
+.pilula[data-tom='neutro'] {
+  background: var(--cor-superficie-2);
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-suave);
+}
+
+/* Marcadores de sinal: forma + cor + palavra */
+/* Pílula baixa: o sinal aparece pela forma, pela cor e pela palavra */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+}
+
+.chip::before {
+  content: '';
+  width: 0.7em;
+  height: 0.7em;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+}
+
+.chip--forte {
+  background: var(--cor-forte-fundo);
+  color: var(--cor-forte);
+}
+
+.chip--forte::before {
+  background: currentColor;
+}
+
+.chip--atencao {
+  background: var(--cor-atencao-fundo);
+  color: var(--cor-atencao);
+}
+
+.chip--atencao::before {
+  border-radius: 1px;
+  transform: rotate(45deg) scale(0.85);
+}
+
+.chip--contexto {
+  background: var(--cor-contexto-fundo);
+  color: var(--cor-contexto);
+}
+
+.chip--contexto::before {
+  border-width: 2px;
+  background: transparent;
+}
+
+/* Valores: sempre com sinal ou palavra além da cor */
+.valor {
+  font-family: var(--fonte-numeros);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--peso-titulo);
+}
+
+.valor--alta {
+  color: var(--cor-alta);
+}
+
+.valor--queda {
+  color: var(--cor-queda);
+}
+
+.valor--estavel {
+  color: var(--cor-estavel);
+}
+
+.valor-motivo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+/* Aviso fixo e notas */
+.aviso {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+}
+
+/* Estados: fio em cima, sem caixa */
+.estado {
+  padding: var(--espaco-5) 0;
+  border-top: 1px solid var(--cor-borda);
+  background: none;
+}
+
+.estado h3 {
+  font-size: var(--texto-lg);
+  margin-bottom: var(--espaco-2);
+}
+
+.estado p {
+  max-width: 62ch;
+  color: var(--cor-texto-suave);
+}
+
+.estado .botao {
+  margin-top: var(--espaco-4);
+}
+
+.estado--erro {
+  border-top: 2px solid var(--cor-queda);
+}
+
+.estado--vazio {
+  text-align: left;
+}
+
+.esqueleto {
+  display: block;
+  min-height: 1.2em;
+  border-radius: var(--raio-1);
+  background: var(--cor-superficie-2);
+}
+
+.esqueleto + .esqueleto {
+  margin-top: var(--espaco-2);
+}
+
+/* Gráfico sem dados depois da consulta: texto suave, centralizado, sem animação. */
+.grafico-vazio {
+  margin: var(--espaco-3) 0 0;
+  padding: var(--espaco-3) var(--espaco-4);
+  text-align: center;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Tabela de números: linhas altas, fio quase invisível e cabeçalho em rótulo pequeno */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabela caption {
+  text-align: left;
+  font-weight: var(--peso-titulo);
+  font-size: var(--texto-base);
+  padding-bottom: var(--espaco-3);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-4) var(--espaco-3);
+  border-bottom: 1px solid var(--cor-fio);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabela thead th {
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-titulo);
+  letter-spacing: 0.01em;
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.tabela td.num,
+.tabela th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabela tbody tr:hover {
+  background: var(--cor-superficie);
+}
+
+/* Termo explicado dentro do texto: sublinhado pontilhado (para não parecer link), âmbar cheio no hover e com o balão aberto */
+.termo-botao {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: color-mix(in srgb, var(--cor-acento) 70%, transparent);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.2em;
+}
+
+.termo-botao:hover,
+.termo-botao[aria-expanded='true'] {
+  color: var(--cor-acento);
+  text-decoration-color: var(--cor-acento);
+}
+
+.termo-botao:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Alvo de toque: links e termos dentro de células de tabela com pelo menos 24px de altura */
+td a,
+th a,
+td .termo-botao,
+th .termo-botao {
+  display: inline-block;
+  padding-block: 0.25rem;
+}
+
+/* Balão da explicação do termo: abre logo abaixo (ou acima) do termo clicado */
+.termo-balao {
+  position: fixed;
+  z-index: var(--z-balao);
+  box-sizing: border-box;
+  width: min(22rem, 100vw - 32px);
+  padding: var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
+  box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  color: var(--cor-texto);
+  outline: none;
+  animation: termo-balao-entra 160ms var(--curva);
+}
+
+/* setinha que aponta para o termo; a posição horizontal vem de --seta-x */
+.termo-balao::before {
+  content: '';
+  position: absolute;
+  left: var(--seta-x, 50%);
+  top: -7px;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%) rotate(45deg);
+  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
+  border-top: 1px solid var(--cor-borda);
+  border-left: 1px solid var(--cor-borda);
+}
+
+.termo-balao[data-posicao='acima']::before {
+  top: auto;
+  bottom: -7px;
+  border-top: 0;
+  border-left: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  border-right: 1px solid var(--cor-borda);
+}
+
+.termo-balao__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.termo-balao__titulo {
+  margin: 0;
+  color: var(--cor-acento);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-titulo);
+}
+
+.termo-balao__fechar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px -10px 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: none;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.termo-balao__fechar:hover {
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+}
+
+.termo-balao__fechar:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.termo-balao__texto {
+  margin-top: var(--espaco-2);
+  font-size: var(--texto-sm);
+  line-height: 1.55;
+}
+
+.termo-balao__texto p {
+  margin: 0;
+}
+
+.termo-balao__texto p + p {
+  margin-top: var(--espaco-2);
+}
+
+@keyframes termo-balao-entra {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+:root[data-movimento='reduzido'] {
+  .termo-balao {
+    animation: none;
+  }
+}
+
+/* Regras: detalhes recolhíveis (estilo da explicação em regras.css) */
+.regras-detalhes {
+  margin-top: var(--espaco-3);
+}
+
+.regras-detalhes > summary {
+  cursor: pointer;
+  font-weight: var(--peso-medio);
+}
+
+/* Campo de busca: altura de toque, fio fino e foco amarelo */
+input[type='search'] {
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 var(--espaco-4);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+input[type='search']:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Selo do ícone de setor (IconeSetor) */
+.icone-setor {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+}
