@@ -17,6 +17,19 @@ export const PERGUNTAS = [
   { id: 'noticias' },
 ];
 
+/**
+ * Mancha de cor de cada pergunta da ficha, pelo assunto (cores em componentes.css).
+ * "oscila" fica sem mancha: é comparação de faixas, não tema.
+ */
+export const BRILHO_DA_PERGUNTA = {
+  regras: 'acento',
+  divida: 'aco',
+  cara: 'dado',
+  proventos: 'alta',
+  preco: 'dado',
+  noticias: 'lavanda',
+};
+
 /** Nomes antigos das abas, para links que ainda usam ?aba=. */
 const ABAS_ANTIGAS = {
   visao: 'regras',

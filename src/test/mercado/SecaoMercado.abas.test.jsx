@@ -24,7 +24,7 @@ describe('SecaoMercado: abas', () => {
 
     expect(screen.getByRole('tab', { name: TEXTOS.mercado.abas.indices })).toHaveAttribute('aria-selected', 'true');
     expect(await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { level: 3, name: TEXTOS.mercado.jurosTitulo })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Juros/ })).not.toBeInTheDocument();
   });
 
   it('o painel é o tabpanel ligado à aba selecionada', async () => {
@@ -67,26 +67,20 @@ describe('SecaoMercado: abas', () => {
 
   it('setas trocam de aba com volta no fim, e Home e End vão às pontas', () => {
     renderizar(<SecaoMercado />);
-
-    fireEvent.keyDown(abaSelecionada(), { key: 'ArrowRight' });
-    expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.juros);
-
     fireEvent.keyDown(abaSelecionada(), { key: 'ArrowRight' });
     expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.destaques);
-
-    fireEvent.keyDown(abaSelecionada(), { key: 'ArrowLeft' });
-    expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.juros);
-
-    fireEvent.keyDown(abaSelecionada(), { key: 'End' });
-    expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.destaques);
-
     fireEvent.keyDown(abaSelecionada(), { key: 'ArrowRight' });
     expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.indices);
-
     fireEvent.keyDown(abaSelecionada(), { key: 'ArrowLeft' });
     expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.destaques);
-
     fireEvent.keyDown(abaSelecionada(), { key: 'Home' });
     expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.indices);
+    fireEvent.keyDown(abaSelecionada(), { key: 'End' });
+    expect(abaSelecionada()).toHaveTextContent(TEXTOS.mercado.abas.destaques);
+  });
+
+  it('?aba=juros (aba que saiu) cai em Índices', async () => {
+    renderizar(<SecaoMercado />, { rota: '/?aba=juros' });
+    expect(screen.getByRole('tab', { name: TEXTOS.mercado.abas.indices })).toHaveAttribute('aria-selected', 'true');
   });
 });

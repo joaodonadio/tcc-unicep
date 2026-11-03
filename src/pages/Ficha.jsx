@@ -19,7 +19,7 @@ import { PainelNegociacao } from '../components/ficha/PainelNegociacao.jsx';
 import { Fundamentos } from '../components/ficha/Fundamentos.jsx';
 import { BlocoObjeto3D } from '../components/modelos3d/BlocoObjeto3D.jsx';
 import { textoTipoAcao } from '../lib/fichaIndicadores.js';
-import { PERGUNTAS, chavesDaPergunta, perguntaDaUrl } from '../lib/perguntasFicha.js';
+import { BRILHO_DA_PERGUNTA, PERGUNTAS, chavesDaPergunta, perguntaDaUrl } from '../lib/perguntasFicha.js';
 import { brl, pct } from '../lib/formato.js';
 import { corDoSetor } from '../lib/setores.js';
 import { TEXTOS, porNivel } from '../lib/textos.js';
@@ -35,6 +35,22 @@ function termoTipo(tipo) {
   if (tipo.startsWith('ON')) return 'acao_on';
   if (tipo.startsWith('PN')) return 'acao_pn';
   return null;
+}
+
+/**
+ * Só o número da variação fica em Atkinson Hyperlegible Mono: o texto ao redor ("no dia") segue em Atkinson Hyperlegible Next.
+ * Sem número (variação zero), a frase inteira vai como veio.
+ */
+function variacaoComNumeroEmMono(texto, numero) {
+  const inicio = numero ? texto.indexOf(numero) : -1;
+  if (inicio < 0) return texto;
+  return (
+    <>
+      {texto.slice(0, inicio)}
+      <span className="ficha-variacao__numero">{numero}</span>
+      {texto.slice(inicio + numero.length)}
+    </>
+  );
 }
 
 /**
@@ -87,12 +103,13 @@ export default function Ficha() {
   const fechamento = valorOuNulo(resumo.data?.cotacao?.fechamento);
   const variacao = valorOuNulo(resumo.data?.cotacao?.variacao_dia);
   const direcao = variacao == null ? null : variacao > 0 ? 'alta' : variacao < 0 ? 'queda' : 'estavel';
+  const numeroVariacao = direcao == null || direcao === 'estavel' ? null : pct(Math.abs(variacao), { sinal: false });
   const textoVariacao =
     direcao == null
       ? null
       : direcao === 'estavel'
         ? TEXTOS.ficha.variacao.estavel
-        : TEXTOS.ficha.variacao[direcao](pct(Math.abs(variacao), { sinal: false }));
+        : TEXTOS.ficha.variacao[direcao](numeroVariacao);
 
   const naoEncontrada = acoes.isSuccess && !acao && resumo.isSuccess && !resumo.data;
 
@@ -144,7 +161,11 @@ export default function Ficha() {
           ) : (
             <p className="ficha-preco">
               <span className="ficha-preco-valor">{fechamento == null ? '—' : brl(fechamento)}</span>
-              {textoVariacao && <span className={`ficha-variacao valor--${direcao}`}>{textoVariacao}</span>}
+              {textoVariacao && (
+                <span className={`ficha-variacao valor--${direcao}`}>
+                  {variacaoComNumeroEmMono(textoVariacao, numeroVariacao)}
+                </span>
+              )}
             </p>
           )}
           <BotaoGuardar ticker={ticker} />
@@ -233,6 +254,7 @@ export default function Ficha() {
       <section
         ref={painelRef}
         className="ficha-painel"
+        data-brilho={BRILHO_DA_PERGUNTA[id]}
         role="tabpanel"
         id={'painel-' + id}
         aria-labelledby={'aba-' + id}

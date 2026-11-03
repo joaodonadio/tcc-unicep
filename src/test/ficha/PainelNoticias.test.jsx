@@ -4,7 +4,6 @@ import { PainelNoticias } from '../../components/ficha/PainelNoticias.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { TEXTOS } from '../../lib/textos.js';
 
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
 vi.mock('../../hooks/useDados.js', () => ({
   useNoticiasAcao: () => ({
     isPending: false,

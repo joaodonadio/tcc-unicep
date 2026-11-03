@@ -1,5 +1,6 @@
 /* Página O modelo: abertura, trilho dos dados, o modelo experimental e as menções.
-   Etapas e fatos em cartões arredondados; o âmbar marca as estações, os horários e os nomes. */
+   O trilho, a máquina e os cartões são vidro; as etapas são sub-superfícies ligadas por fio.
+   O branco marca a etapa ativa, o horário e a interface; números e horários em Atkinson Hyperlegible Mono. */
 
 .modelo-titulo {
   font-size: var(--texto-2xl);
@@ -27,7 +28,7 @@
   color: var(--cor-texto-suave);
 }
 
-/* Trilho dos dados: quatro cartões ligados por um trilho onde correm pacotes âmbar.
+/* Trilho dos dados: quatro cartões ligados por um trilho onde correm pacotes claros.
    Vertical no celular, horizontal no desktop. Movimento: a entrada em sequência, a barra de
    progresso, o pulso do conector e os pacotes. Tudo para com movimento reduzido. */
 
@@ -36,6 +37,11 @@
 .modelo-fluxo {
   --liga: 3rem;
   --passo: calc(25% + var(--liga) / 4);
+  padding: var(--espaco-5);
+  background: var(--vidro);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
 .trilho {
@@ -83,17 +89,19 @@
   z-index: 1;
   height: 100%;
   padding: var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-cartao);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  box-shadow: var(--sub-luz);
   transition:
     border-color 600ms var(--saida),
     transform 600ms var(--saida);
 }
 
-/* Etapa em destaque: borda sólida âmbar e leve elevação, sem brilho */
+/* Etapa em destaque: véu claro leve, aresta clara e leve elevação, sem brilho */
 .estacao[data-ativo='true'] .estacao__cartao {
-  border-color: var(--cor-acento-borda);
+  background: color-mix(in srgb, var(--cor-acento) 9%, transparent);
+  border-color: color-mix(in srgb, var(--cor-acento) 42%, transparent);
   transform: translateY(-2px);
 }
 
@@ -117,10 +125,12 @@
 
 .estacao__hora {
   color: var(--cor-acento);
-  font-weight: var(--peso-titulo);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--texto-sm);
-  letter-spacing: 0.08em;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-size: var(--texto-xs);
+  letter-spacing: -0.02em;
 }
 
 .estacao__nome,
@@ -130,7 +140,7 @@
 
 .estacao__nome {
   font-size: var(--texto-xl);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
   letter-spacing: -0.02em;
   margin: 0 0 var(--espaco-2);
 }
@@ -170,18 +180,18 @@
   font-variant-numeric: tabular-nums;
   display: inline-block;
   padding: 6px 12px;
-  border: 1px solid var(--cor-acento-borda);
-  border-radius: var(--raio-3);
+  border: 1px solid color-mix(in srgb, var(--cor-acento) 30%, transparent);
+  border-radius: var(--raio-pilula);
   line-height: 1.4;
-  background: var(--cor-acento-suave);
+  background: color-mix(in srgb, var(--cor-acento) 12%, transparent);
   color: var(--cor-acento);
   max-width: 100%;
 }
 
 /* A etapa final é a própria interface */
 .estacao[data-final='true'] .estacao__cartao {
-  background: var(--cor-acento-suave);
-  border-color: var(--cor-acento-borda);
+  background: color-mix(in srgb, var(--cor-acento) 9%, transparent);
+  border-color: color-mix(in srgb, var(--cor-acento) 42%, transparent);
 }
 
 /* Anel que se expande e some quando a etapa recebe o dado */
@@ -211,7 +221,7 @@
 
 /* Transformação de cada etapa: a entrada vira a saída em duas pílulas. Na vertical (cartão estreito)
    a seta aponta para baixo; quando o cartão tem largura, as pílulas ficam lado a lado.
-   A saída em âmbar é a mesma cor que a entrada ganha quando a etapa seguinte fica em destaque. */
+   A saída em branco é a mesma cor que a entrada ganha quando a etapa seguinte fica em destaque. */
 .estacao__cartao {
   container-type: inline-size;
 }
@@ -357,17 +367,17 @@
 }
 
 
-/* Conector entre dois cartões: só um traço tracejado com um pontinho âmbar que pulsa. Não tem texto
+/* Conector entre dois cartões: só um traço tracejado com um pontinho claro que pulsa. Não tem texto
    e fica abaixo dos cartões (z-index), limitado ao vão entre eles. No celular é vertical, à esquerda. */
 .estacao__ligacao {
   position: absolute;
   top: 100%;
   left: 2.75rem;
   z-index: 0;
-  width: 0;
+  width: 2px;
   height: var(--liga);
   margin-left: -1px;
-  border-left: 2px dashed var(--cor-borda-forte);
+  background: repeating-linear-gradient(to bottom, var(--cor-borda-forte) 0 5px, transparent 5px 10px);
   pointer-events: none;
 }
 
@@ -400,7 +410,7 @@
   }
 }
 
-/* Pacote âmbar que sai do cartão ativo e atravessa o conector até o próximo cartão. Na vertical (celular)
+/* Pacote claro que sai do cartão ativo e atravessa o conector até o próximo cartão. Na vertical (celular)
    desce; no desktop (ver a regra de 56rem) corre da esquerda para a direita. Só aparece no cartão ativo. */
 .estacao__pacote {
   --pac-de: translate(-50%, 0);
@@ -462,10 +472,9 @@
     top: 50%;
     left: 100%;
     width: var(--liga);
-    height: 0;
+    height: 2px;
     margin: -1px 0 0;
-    border-left: 0;
-    border-top: 2px dashed var(--cor-borda-forte);
+    background: repeating-linear-gradient(to right, var(--cor-borda-forte) 0 5px, transparent 5px 10px);
   }
 
   .estacao__ligacao::after {
@@ -522,15 +531,16 @@
 
 .modelo-cartao {
   padding: var(--espaco-6);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
 .modelo-cartao__titulo {
   font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.01em;
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
   margin: 0 0 var(--espaco-2);
 }
 
@@ -541,7 +551,7 @@
 }
 
 .modelo-cartao[data-cartao='naoE'] {
-  border-color: var(--cor-acento-borda);
+  --aresta-topo: 0.4;
 }
 
 @media (min-width: 48rem) {
@@ -583,17 +593,14 @@
   transform: translateY(-0.1em);
 }
 
-.modelo-mencoes {
-  padding-bottom: var(--espaco-8);
-}
-
-/* Menções honrosas em destaque: um cartão próprio com os nomes grandes. */
+/* Menções honrosas em destaque: um cartão de vidro neutro com os nomes grandes. */
 .modelo-mencoes {
   margin-top: var(--espaco-8);
   padding: var(--espaco-7) var(--espaco-6);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
 .modelo-mencoes .mencoes {
@@ -675,8 +682,10 @@
   gap: var(--espaco-3);
   margin-top: var(--espaco-2);
   padding: var(--espaco-4) var(--espaco-5);
-  border: 1px solid var(--cor-borda);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-3);
+  box-shadow: var(--sub-luz);
   font-size: var(--texto-sm);
   font-weight: var(--peso-titulo);
   line-height: 1.25;
@@ -697,15 +706,7 @@
   box-shadow: 0 1rem 2rem -1rem color-mix(in srgb, var(--cor-acento) 60%, transparent);
 }
 
-.estrato[data-camada='coleta'] .estrato__corpo {
-  background: color-mix(in srgb, var(--cor-superficie-2) 90%, var(--cor-fundo));
-}
-.estrato[data-camada='processamento'] .estrato__corpo {
-  background: color-mix(in srgb, var(--cor-superficie-2) 60%, var(--cor-fundo));
-}
-.estrato[data-camada='modelo'] .estrato__corpo {
-  background: color-mix(in srgb, var(--cor-superficie-2) 30%, var(--cor-fundo));
-}
+/* As demais camadas são a mesma sub-superfície; a largura do estrato já marca a hierarquia */
 
 /* Superfície da água: separa a interface do resto */
 .estratos__agua {
@@ -759,9 +760,10 @@
   max-width: none;
   margin: 0;
   padding: var(--espaco-4) var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
   color: var(--cor-texto-suave);
 }
 
@@ -791,9 +793,10 @@
   justify-items: center;
   margin: var(--espaco-6) 0;
   padding: var(--espaco-6) var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
 .maq__no {
@@ -804,11 +807,14 @@
   min-width: 0;
 }
 
+/* Rótulos dos nós: tags curtas (Top 5, Chance) em Atkinson Hyperlegible Mono */
 .maq__nome {
   color: var(--cor-acento);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
   font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .maq__item {
@@ -882,9 +888,10 @@
   border-radius: 50%;
 }
 
+/* Disco chapado que pulsa atrás do núcleo: sem halo */
 .maq__brilho {
   inset: -0.5rem;
-  background: radial-gradient(circle, color-mix(in srgb, var(--cor-acento) 45%, transparent), transparent 68%);
+  background: color-mix(in srgb, var(--cor-acento) 14%, transparent);
   opacity: 0.55;
 }
 
@@ -906,7 +913,6 @@
 .maq__miolo {
   inset: 2.4rem;
   background: var(--cor-acento);
-  box-shadow: 0 0 1rem color-mix(in srgb, var(--cor-acento) 60%, transparent);
 }
 
 /* Chance: medidor em meia-lua */
@@ -1007,7 +1013,6 @@
   margin-left: -0.3rem;
   border-radius: 50%;
   background: var(--cor-acento);
-  box-shadow: 0 0 0.6rem color-mix(in srgb, var(--cor-acento) 70%, transparent);
   opacity: 0;
 }
 

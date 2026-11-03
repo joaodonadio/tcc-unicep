@@ -55,6 +55,12 @@ export function amplitudePendulo(beta) {
   return finito(beta) ? limitar(AMPLITUDE_BOLSA * beta, 0.06, 1) : null;
 }
 
+/** Altura visível do palco (unidades do mundo): cabe o objeto na altura e na largura do quadro. Proximidade > 1 aproxima. */
+export function alturaVisivel({ altura, largura, proximidade = 1 }, asp) {
+  // a proximidade só aproxima pela altura: a largura do objeto sempre cabe no quadro
+  return Math.max(altura / (proximidade || 1), (largura || 0) / asp);
+}
+
 /** 'menos' | 'igual' | 'mais' do valor contra o setor (5% de folga); sem setor, null. */
 export function compararComSetor(valor, setor) {
   if (!finito(valor) || !finito(setor)) return null;

@@ -7,6 +7,26 @@
 
 * {
   margin: 0;
+
+  /*
+   * Receita do vidro, montada em cada elemento para ler as variáveis herdadas do cartão.
+   * Camadas (de cima para baixo): mancha principal, mancha secundária no canto oposto
+   * (tamanho fixo em rem: tomam um cartão curto inteiro e só os cantos de um alto),
+   * corpo opaco, e por último a aresta em degradê, visível só na faixa da borda.
+   * Os degradês interpolam em oklab para a mancha se desfazer sem faixas nem cinza.
+   */
+  --vidro:
+    radial-gradient(var(--poca-1-tam) at var(--poca-1-pos) in oklab, color-mix(in srgb, var(--brilho) var(--brilho-forca), transparent), transparent 72%) padding-box,
+    radial-gradient(var(--poca-2-tam) at var(--poca-2-pos) in oklab, color-mix(in srgb, var(--brilho-2, var(--brilho)) calc(var(--brilho-forca) * 0.85), transparent), transparent 72%) padding-box,
+    linear-gradient(var(--vidro-base), var(--vidro-base)) padding-box,
+    linear-gradient(
+        180deg,
+        rgb(255 255 255 / var(--aresta-topo)) 0%,
+        rgb(255 255 255 / var(--aresta-meio)) 35%,
+        rgb(255 255 255 / var(--aresta-meio)) 75%,
+        rgb(255 255 255 / var(--aresta-base)) 100%
+      )
+      border-box;
 }
 
 html {
@@ -35,7 +55,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(232 184 74 / 0.5);
+  background: rgb(255 255 255 / 0.32);
   background-clip: padding-box;
 }
 
@@ -54,16 +74,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* dois brilhos âmbar difusos numa camada fixa (pinta uma vez, não a cada rolagem) */
-body::before {
-  content: '';
+/* malha de pontos (FundoPontos.jsx): sobre o fundo neutro, abaixo de todo o conteúdo */
+.fundo-pontos {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image:
-    radial-gradient(60rem 42rem at 8% -6%, rgb(232 184 74 / 0.1), transparent 70%),
-    radial-gradient(52rem 38rem at 100% 106%, rgb(232 184 74 / 0.08), transparent 70%);
 }
 
 img,
@@ -88,8 +104,9 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--fonte-titulo);
   font-weight: var(--peso-titulo);
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
@@ -115,7 +132,21 @@ dd,
   font-variant-numeric: tabular-nums;
 }
 
-/* Links: texto na cor do contexto, sublinhado amarelo; no hover o texto também fica amarelo */
+/*
+ * Número de dado: Atkinson Hyperlegible Mono, a voz de painel de cotação.
+ * Vale para valores (preço, variação, indicador), nunca para texto corrido.
+ * O mono desenha mais largo que o texto: 0.92em compensa e mantém a linha.
+ */
+.num {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* Links: texto na cor do contexto, sublinhado no acento branco; no hover o texto também vai para o acento */
 a {
   color: inherit;
   text-decoration-color: var(--cor-acento);
@@ -135,7 +166,7 @@ ol[role='list'] {
 }
 
 ::selection {
-  background: rgb(232 184 74 / 0.85);
+  background: rgb(244 244 245 / 0.9);
   color: var(--cor-acento-texto);
 }
 
@@ -144,11 +175,11 @@ textarea {
   caret-color: var(--cor-acento);
 }
 
-/* Foco: anel âmbar com um halo escuro por fora, visível em qualquer fundo. */
+/* Foco: anel branco com um halo escuro por fora, visível em qualquer fundo. */
 :focus-visible {
   outline: 2px solid var(--cor-foco);
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgb(26 24 21 / 0.9);
+  box-shadow: 0 0 0 5px rgb(11 11 12 / 0.9);
   border-radius: var(--raio-1);
 }
 

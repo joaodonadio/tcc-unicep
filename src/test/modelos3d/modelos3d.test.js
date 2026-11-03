@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  alturaVisivel,
   amplitudePendulo,
   blocosBalanca,
   compararComSetor,
@@ -114,5 +115,28 @@ describe('dados do resumo', () => {
     expect(temDado('balanca', { dlEbitda: null })).toBe(false);
     expect(temDado('balanca', { dlEbitda: 0 })).toBe(true);
     expect(temDado('moedas', { pl: -2 })).toBe(false);
+  });
+});
+
+describe('alturaVisivel', () => {
+  it('sem proximidade, mantém a altura do objeto ou a da largura, a que for maior', () => {
+    expect(alturaVisivel({ altura: 10, largura: 4 }, 2)).toBe(10);
+    expect(alturaVisivel({ altura: 10, largura: 4 }, 2)).toBe(alturaVisivel({ altura: 10, largura: 4, proximidade: 1 }, 2));
+  });
+
+  it('proximidade acima de 1 reduz a altura visível (objeto aparece maior)', () => {
+    expect(alturaVisivel({ altura: 10, largura: 4, proximidade: 1.12 }, 2)).toBeCloseTo(10 / 1.12);
+  });
+
+  it('quadro estreito: a largura domina a altura visível', () => {
+    expect(alturaVisivel({ altura: 10, largura: 30 }, 0.5)).toBe(60);
+  });
+
+  it('quadro estreito: a proximidade não corta as laterais do objeto', () => {
+    expect(alturaVisivel({ altura: 10, largura: 30, proximidade: 1.12 }, 0.5)).toBe(60);
+  });
+
+  it('proximidade ausente ou zero conta como 1', () => {
+    expect(alturaVisivel({ altura: 10, largura: 4, proximidade: 0 }, 2)).toBe(10);
   });
 });

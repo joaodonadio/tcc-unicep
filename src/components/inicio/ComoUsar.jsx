@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { usePreferencias } from '../../context/contextos.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 import { BotaoTermo } from '../ui/BotaoTermo.jsx';
+import Mascote from '../ui/Mascote.jsx';
 
 /** Chave do localStorage que guarda o bloco fechado pelo X. */
 const CHAVE_FECHADO = 'painel-b3:como-usar-fechado';
@@ -166,8 +167,15 @@ export default function ComoUsar() {
   }
 
   return (
-    <section id="como-usar" ref={ref} className="como-usar" aria-labelledby="como-usar-titulo">
+    <section
+      id="como-usar"
+      ref={ref}
+      className="como-usar"
+      data-brilho="acento"
+      aria-labelledby="como-usar-titulo"
+    >
       <div className="como-usar__topo">
+        <Mascote humor="contente" acao="acenando" className="como-usar__mascote" />
         <div className="como-usar__resumo">
           <h2 id="como-usar-titulo" className="como-usar__titulo">
             {porNivel(TEXTOS.comoUsar.titulo, nivel)}

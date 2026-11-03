@@ -7,11 +7,12 @@ import { dataBR } from '../../lib/datas.js';
 import { EXPLICACOES } from '../../lib/explicacoes.js';
 import { montarIndicadoresFicha } from '../../lib/fichaIndicadores.js';
 import { proximoPagamento } from '../../lib/proventos.js';
+import { BRILHO_DA_PERGUNTA } from '../../lib/perguntasFicha.js';
 import { ROTULO_STATUS, TEXTOS } from '../../lib/textos.js';
 
 const F = TEXTOS.ficha.fundamentos;
 
-/** Indicadores de leitura rápida e a pergunta da ficha que cada um responde. */
+/** Indicadores de leitura rápida e a pergunta da ficha que cada um responde (a mancha vem dela). */
 const DESTAQUES = [
   { chave: 'pl', pergunta: 'cara' },
   { chave: 'pvp', pergunta: 'cara' },
@@ -67,7 +68,7 @@ export function Fundamentos({ ticker, resumo, carregando }) {
             const motivo = ausente ? indicador?.motivo || ROTULO_STATUS.indisponivel : '';
             const mediana = ausente ? null : medianaDoSetor(indicador);
             return (
-              <div className="ficha-fundamento" key={chave}>
+              <div className="ficha-fundamento" key={chave} data-brilho={BRILHO_DA_PERGUNTA[pergunta]}>
                 <dt>{rotulo}</dt>
                 <dd className="ficha-fundamento-valor">
                   <Link to={`?pergunta=${pergunta}`} replace aria-label={F.verPergunta(rotulo, ausente ? motivo : texto)}>

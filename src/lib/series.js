@@ -80,3 +80,46 @@ export function acumuladoAlinhado(serieBase, outra, n) {
   if (!valores) return null;
   return acumuladoDesdeInicio(alinharPorData(datas, outra.datas, valores));
 }
+
+/** "2026-09" -> "2026-10" (mês seguinte); formato inválido -> null. */
+export function mesSeguinte(mes) {
+  const m = /^(\d{4})-(\d{2})$/.exec(typeof mes === 'string' ? mes : '');
+  if (!m) return null;
+  const ano = Number(m[1]);
+  const n = Number(m[2]);
+  return n === 12 ? `${ano + 1}-01` : `${m[1]}-${String(n + 1).padStart(2, '0')}`;
+}
+
+/** "2026-01" -> "2025-12". */
+function mesAnterior(mes) {
+  const [ano, n] = mes.split('-').map(Number);
+  return n === 1 ? `${ano - 1}-12` : `${ano}-${String(n - 1).padStart(2, '0')}`;
+}
+
+/**
+ * Variação de cada mês de uma série diária: último valor do mês / último valor do mês anterior − 1.
+ * O primeiro mês só serve de base. `semUltimoMes` tira o mês da última data (pode estar em andamento);
+ * `ateMes` ('AAAA-MM') tira os meses depois dele. Mês anterior ausente: null, nunca 0.
+ * Devolve os `meses` mais recentes: {meses: ['AAAA-MM'], valores: [fração | null]}.
+ */
+export function variacoesMensais(serie, campo, { meses = 12, semUltimoMes = false, ateMes = null } = {}) {
+  const datas = serie?.datas ?? [];
+  const arr = serie?.valores?.[campo] ?? [];
+  const ultimoDoMes = new Map();
+  datas.forEach((d, i) => {
+    const v = arr[i];
+    if (typeof d === 'string' && typeof v === 'number' && Number.isFinite(v) && v !== 0) ultimoDoMes.set(d.slice(0, 7), v);
+  });
+  let chaves = [...ultimoDoMes.keys()].sort();
+  if (semUltimoMes) chaves = chaves.slice(0, -1);
+  if (ateMes) chaves = chaves.filter((c) => c <= ateMes);
+  const saidaMeses = [];
+  const valores = [];
+  for (let i = 1; i < chaves.length; i += 1) {
+    const atual = chaves[i];
+    const antes = chaves[i - 1];
+    saidaMeses.push(atual);
+    valores.push(antes === mesAnterior(atual) ? ultimoDoMes.get(atual) / ultimoDoMes.get(antes) - 1 : null);
+  }
+  return { meses: saidaMeses.slice(-meses), valores: valores.slice(-meses) };
+}

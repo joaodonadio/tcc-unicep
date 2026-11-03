@@ -32,18 +32,20 @@ Fica sempre no topo da página:
 A página inicial (`/`). Mostra o essencial do pregão. Cada bloco tem um link para a página completa.
 
 - **Como usar:** explica os blocos da página. Use o X para fechar; ele não volta enquanto você não reabrir pelo botão Como usar do cabeçalho.
-- **Top 5 para estudar hoje:** cinco ações que as regras destacaram no pregão, para estudar com calma. Toque numa delas para ver o porquê.
-  - Quando o modelo de previsão ainda está em avaliação, a lista segue as regras, nesta ordem: mais pontos a favor, depois menos pontos de atenção e, no empate, mais negociação que o normal. Se ainda empatar, vale a ordem alfabética do código.
+- **Top 5 para estudar hoje:** cinco ações que as regras destacaram no pregão. Cada cartão traz o principal motivo; toque numa ação para ver o resto. No celular, as cinco ficam numa faixa que rola para o lado.
+  - O botão Como escolhemos explica como a lista é feita: o site olha as mesmas checagens em cada ação e ordena por mais pontos a favor, depois menos pontos de atenção e, no empate, mais negociação que o normal. Se ainda empatar, vale a ordem alfabética do código.
+  - Junto da ação escolhida aparece o preço dos últimos 6 meses.
+  - Em Por que está aqui, uma frase resume os pontos, e cada um aparece numa linha marcada como A favor, Atenção ou Para saber. Toque na linha para ler a explicação completa.
   - O bloco Entenda com um objeto mostra um objeto 3D que ilustra o ponto escolhido.
 - **Resumo do dia:** um texto curto sobre o pregão. "Ouvir o resumo" faz o navegador ler o texto em voz alta. O botão só aparece se o navegador tiver essa função.
-- **Números do dia:** Ibovespa, dólar, Selic, CDI, IPCA e a amplitude do pregão. Logo abaixo, uma linha diz de onde vem cada dado, por exemplo: "Ibovespa, CDI, IPCA e altas e quedas: pacotes do pregão de 22/10/2026. Selic: Banco Central, valor em vigor."
+- **Números do dia:** Ibovespa, dólar, CDI, IPCA e a amplitude do pregão. Logo abaixo, uma linha diz de onde vem cada dado, por exemplo: "Ibovespa, dólar, CDI, IPCA e altas e quedas: pacotes do pregão de 22/10/2026."
 - **Gráfico do Ibovespa:** a variação do índice nos últimos 6 meses.
 - **Destaques do dia:** quem mais subiu, quem mais caiu e as ações com volume fora do comum.
 - **Proventos, notícias e Minha lista:** um resumo de cada um, com link para a página completa.
 
 ## Mercado
 
-Quatro abas: Índices, Juros e dólar, Setores e Destaques. A página também mostra o mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação.
+Duas abas: Índices e Destaques. A página também mostra o mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação.
 
 ## Setores
 
@@ -68,7 +70,7 @@ Agenda de pagamentos de dividendos e JCP, com gráfico por mês e um ranking de 
 
 ## Notícias
 
-O tom das manchetes do último pregão, com as empresas mais citadas. As manchetes em outra língua aparecem em português quando a tradução está disponível.
+O tom das manchetes do último pregão, com as empresas mais citadas. As manchetes aparecem no idioma original.
 
 ## O modelo
 

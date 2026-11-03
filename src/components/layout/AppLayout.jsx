@@ -5,6 +5,7 @@ import { ListaProvider } from '../../context/ListaProvider.jsx';
 import Cabecalho from './Cabecalho.jsx';
 import AvisoMovimento from './AvisoMovimento.jsx';
 import { Rodape } from './Rodape.jsx';
+import { FundoPontos } from './FundoPontos.jsx';
 import { TEXTOS } from '../../lib/textos.js';
 
 /**
@@ -30,6 +31,7 @@ export function AppLayout() {
         {/* trocar de tela leva ao topo da nova tela, em vez de manter a
             rolagem da anterior (o Data Router não faz isso sozinho) */}
         <ScrollRestoration />
+        <FundoPontos />
         <a className="pular-conteudo" href="#conteudo">
           {TEXTOS.cabecalho.pularConteudo}
         </a>

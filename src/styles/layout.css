@@ -12,17 +12,17 @@
   }
 }
 
-/* Cabeçalho: barra translúcida fixa, em uma linha só no computador.
-   Esquerda: marca. Centro: as páginas. Direita: Minha lista e Leitura (painel suspenso). */
+/* Cabeçalho: uma barra de vidro escuro de ponta a ponta, fixa no alto, com um fio embaixo.
+   Em uma linha só no computador. Esquerda: marca. Centro: as páginas. Direita: Minha lista e Leitura. */
 .cabecalho {
   position: sticky;
   top: 0;
   z-index: var(--z-cabecalho);
-  background: var(--cor-placa);
-  border-bottom: 1px solid var(--cor-fio);
   color: var(--cor-placa-texto);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  backdrop-filter: blur(16px) saturate(1.2);
+  background: var(--flutuante-fundo);
+  -webkit-backdrop-filter: var(--flutuante-desfoque);
+  backdrop-filter: var(--flutuante-desfoque);
+  border-bottom: 1px solid var(--cor-fio);
 }
 
 .cabecalho__linha {
@@ -30,17 +30,21 @@
   flex-wrap: nowrap;
   align-items: center;
   column-gap: var(--espaco-5);
-  min-height: 4rem;
+  min-height: 4.25rem;
   padding-block: var(--espaco-3);
 }
 
-/* Marca: um ponto âmbar antes do nome */
-.cabecalho__marca::before {
-  content: '';
-  width: 0.6em;
-  height: 0.6em;
-  border-radius: 50%;
-  background: var(--cor-acento);
+/* Marca: o Pavio antes do nome. Tamanho em em, para acompanhar a fonte; a margem negativa não aumenta a altura */
+.cabecalho__mascote {
+  inline-size: 2em;
+  block-size: 2em;
+  margin-block: -0.35em;
+  flex: none;
+}
+
+/* Passar o mouse na marca faz o Pavio pular (só sem movimento reduzido) */
+:root:not([data-movimento='reduzido']) .cabecalho__marca:hover .mascote-corpo {
+  animation: pulo 560ms var(--curva);
 }
 
 .cabecalho__marca {
@@ -48,6 +52,7 @@
   flex: none;
   align-items: center;
   gap: var(--espaco-2);
+  font-family: var(--fonte-titulo);
   font-size: var(--texto-lg);
   font-weight: var(--peso-forte);
   letter-spacing: -0.02em;
@@ -117,11 +122,13 @@
   text-decoration: none;
 }
 
+/* página atual: texto branco sobre uma pílula discreta de vidro, sem cor de destaque */
 .cabecalho__ancora[aria-current='true'],
 .cabecalho__ancora[aria-current='page'],
 .cabecalho__ancora[aria-current='location'] {
-  background: var(--cor-acento);
-  color: var(--cor-acento-texto);
+  background: rgb(255 255 255 / 0.09);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  color: var(--cor-placa-texto);
 }
 
 /* Ícones só aparecem na barra inferior do celular. O menu Mais existe só abaixo de 1280px. */
@@ -131,7 +138,7 @@
   display: none;
 }
 
-/* Minha lista: ícone em botão redondo, com o número num selinho âmbar */
+/* Minha lista: ícone em botão redondo, com o número num selinho claro */
 .cabecalho__lista {
   position: relative;
   display: inline-flex;
@@ -140,16 +147,18 @@
   flex: none;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto);
   text-decoration: none;
-  transition: background-color var(--duracao) var(--curva);
+  transition: background-color var(--duracao) var(--curva), border-color var(--duracao) var(--curva);
 }
 
 .cabecalho__lista:hover {
-  background: var(--cor-superficie);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
   color: var(--cor-texto);
   text-decoration: none;
 }
@@ -183,9 +192,10 @@
   gap: var(--espaco-2);
   min-height: 2.75rem;
   padding: 0 var(--espaco-4);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto);
   font: inherit;
   font-size: var(--texto-sm);
@@ -199,11 +209,13 @@
 }
 
 .leitura__gatilho:hover {
-  background: var(--cor-superficie);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .leitura__gatilho[aria-expanded='true'] {
   border-color: var(--cor-acento);
+  background: var(--cor-acento-suave);
   color: var(--cor-acento);
 }
 
@@ -225,12 +237,14 @@
   display: grid;
   gap: var(--espaco-5);
   box-sizing: border-box;
-  width: min(22rem, calc(100vw - 2rem));
+  width: min(24rem, calc(100vw - 2rem));
   padding: var(--espaco-5);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--flutuante-borda);
   border-radius: var(--raio-cartao);
-  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
-  box-shadow: var(--sombra-cartao);
+  background: var(--flutuante-fundo);
+  -webkit-backdrop-filter: var(--flutuante-desfoque);
+  backdrop-filter: var(--flutuante-desfoque);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.7);
   color: var(--cor-texto);
 }
 
@@ -241,6 +255,21 @@
 .leitura__bloco {
   display: grid;
   gap: var(--espaco-2);
+  min-width: 0;
+}
+
+/* Modo e Animações ocupam a largura do painel em colunas iguais; o rótulo quebra em vez de vazar */
+.leitura__bloco > .segmentado {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+
+.leitura__bloco > .segmentado .botao {
+  min-width: 0;
+  padding-inline: var(--espaco-2);
+  white-space: normal;
+  text-align: center;
 }
 
 .leitura__frase {
@@ -272,11 +301,15 @@
   gap: var(--espaco-3);
 }
 
+/* Percentual é número de dado: Atkinson Hyperlegible Mono, um pouco menor que o texto ao lado */
 .leitura__percentual {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--cor-texto-suave);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .leitura__ajuda {
@@ -303,13 +336,20 @@ main:focus {
   box-shadow: none;
 }
 
-/* Faixa "Para quem é e como usar", logo abaixo do cabeçalho */
+/* Cartão "Para quem é e como usar", logo abaixo do cabeçalho. Vidro com uma mancha de
+   acento suave (data-brilho="acento" no JSX, com a força reduzida aqui). */
 .como-usar {
   margin-top: var(--espaco-5);
   padding: var(--espaco-5) var(--espaco-6);
-  background: var(--cor-faixa);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
-  border: 1px solid var(--cor-borda);
+  box-shadow: var(--vidro-sombra);
+}
+
+/* faixa larga de boas-vindas: mancha mais contida que a dos cartões de dado */
+.como-usar[data-brilho='acento'] {
+  --brilho-forca: 34%;
 }
 
 .como-usar__topo {
@@ -324,8 +364,21 @@ main:focus {
   min-width: 0;
 }
 
+/* Pavio ao lado do título, alinhado ao topo; no celular fica menor */
+.como-usar__mascote {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+}
+
+@media (max-width: 720px) {
+  .como-usar__mascote {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+  }
+}
+
 .como-usar__titulo {
-  font-size: var(--texto-lg);
+  font-size: var(--texto-xl);
   font-weight: var(--peso-titulo);
   line-height: 1.2;
   margin-bottom: var(--espaco-1);
@@ -333,6 +386,7 @@ main:focus {
 
 .como-usar__publico {
   font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
 }
 
 .como-usar__passos {
@@ -343,11 +397,9 @@ main:focus {
   list-style: none;
   margin: 0;
   padding: 0;
-  counter-reset: passo;
 }
 
 .como-usar__passos li {
-  counter-increment: passo;
   display: flex;
   flex: 1 1 0;
   align-items: flex-start;
@@ -357,19 +409,16 @@ main:focus {
   line-height: 1.4;
 }
 
-.como-usar__passos li::before {
-  content: counter(passo);
-  display: grid;
-  place-items: center;
-  flex: 0 0 1.4rem;
-  width: 1.4rem;
-  height: 1.4rem;
-  border-radius: 50%;
-  background: var(--cor-destaque);
-  color: var(--cor-destaque-texto);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  line-height: 1;
+/* Cada passo é uma sub-superfície limpa dentro do cartão (sem caixa pesada por cima) */
+.como-usar__passo {
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+}
+
+.como-usar__passo:hover {
+  background: var(--sub-fundo-hover);
 }
 
 .como-usar__fechar {
@@ -377,17 +426,19 @@ main:focus {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 0;
-  border-radius: var(--raio-2);
-  background: transparent;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto);
   cursor: pointer;
 }
 
 .como-usar__fechar:hover {
-  background: rgb(255 255 255 / 0.06);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .como-usar__notas {
@@ -429,15 +480,17 @@ main:focus {
 }
 
 .pagina-titulo {
+  font-family: var(--fonte-titulo);
   font-size: var(--texto-3xl);
   font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
-  line-height: 1.08;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
   margin-bottom: var(--espaco-3);
 }
 
 .pagina-intro {
   font-size: var(--texto-base);
+  line-height: 1.55;
   color: var(--cor-texto-suave);
 }
 
@@ -452,23 +505,26 @@ main:focus {
   border-top: 0;
 }
 
-/* Rodapé: vidro escuro com fio no topo, como o cabeçalho */
+/* Rodapé: só um fio no topo e texto suave, sem caixa (fica discreto no fim da página) */
 .rodape {
   margin-top: 0;
-  background: var(--cor-placa);
   border-top: 1px solid var(--cor-fio);
-  color: var(--cor-placa-suave);
-  padding: var(--espaco-7) 0;
+  color: var(--cor-texto-suave);
+  padding: var(--espaco-7) 0 var(--espaco-8);
   font-size: var(--texto-sm);
 }
 
 .rodape a {
-  color: var(--cor-placa-texto);
+  color: var(--cor-texto);
   text-decoration-color: var(--cor-acento);
 }
 
+/* O aviso legal é texto de destaque, sem o véu de alerta que .aviso ganha em outras telas */
 .rodape .aviso {
-  color: var(--cor-placa-texto);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-texto);
   font-weight: var(--peso-medio);
   margin-bottom: var(--espaco-3);
 }
@@ -522,10 +578,12 @@ main:focus {
     margin: 0;
     padding: 6px;
     list-style: none;
-    border: 1px solid var(--cor-borda);
+    border: 1px solid var(--flutuante-borda);
     border-radius: var(--raio-cartao);
-    background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
-    box-shadow: var(--sombra-cartao);
+    background: var(--flutuante-fundo);
+    -webkit-backdrop-filter: var(--flutuante-desfoque);
+    backdrop-filter: var(--flutuante-desfoque);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.7);
   }
 
   .cabecalho__menu-mais .cabecalho__ancora {
@@ -571,13 +629,24 @@ main:focus {
   /* No celular o topo rola com a página (marca e controles); a navegação vira a barra inferior. */
   .cabecalho {
     position: static;
+    padding-top: 0;
+    background: none;
+    border-bottom: 0;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
 
+  /* no celular a marca e os controles ficam soltos no topo, sem a pílula de vidro */
   .cabecalho__linha {
     flex-wrap: wrap;
     row-gap: var(--espaco-2);
+    padding: var(--espaco-3) var(--espaco-4);
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .cabecalho__alerta {
@@ -589,7 +658,7 @@ main:focus {
     margin-left: auto;
   }
 
-  /* Barra inferior fixa em pílula */
+  /* Barra inferior flutuante em pílula de vidro */
   .cabecalho__nav {
     position: fixed;
     left: 50%;
@@ -599,12 +668,12 @@ main:focus {
     width: min(calc(100% - 1.5rem), 28rem);
     transform: translateX(-50%);
     padding: 6px;
-    border: 1px solid var(--cor-borda);
+    border: 1px solid var(--flutuante-borda);
     border-radius: var(--raio-pilula);
-    background: var(--cor-barra);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    box-shadow: var(--sombra-cartao);
+    background: var(--flutuante-fundo);
+    -webkit-backdrop-filter: var(--flutuante-desfoque);
+    backdrop-filter: var(--flutuante-desfoque);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.7);
   }
 
   .cabecalho__nav > ul {
@@ -655,10 +724,12 @@ main:focus {
     height: 1.25rem;
   }
 
+  /* página atual e menu Mais aberto: a mesma pílula discreta do computador */
   .cabecalho__ancora[aria-current='page'],
   .cabecalho__mais[aria-expanded='true'] {
-    background: var(--cor-placa-texto);
-    color: var(--cor-acento-texto);
+    background: rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+    color: var(--cor-placa-texto);
   }
 
   .cabecalho__mais {
@@ -677,10 +748,12 @@ main:focus {
     margin: 0;
     padding: 6px;
     list-style: none;
-    border: 1px solid var(--cor-borda);
+    border: 1px solid var(--flutuante-borda);
     border-radius: var(--raio-cartao);
-    background: var(--cor-menu);
-    box-shadow: var(--sombra-cartao);
+    background: var(--flutuante-fundo);
+    -webkit-backdrop-filter: var(--flutuante-desfoque);
+    backdrop-filter: var(--flutuante-desfoque);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.7);
   }
 
   .cabecalho__menu-mais .cabecalho__ancora {
@@ -717,7 +790,7 @@ main:focus {
   }
 }
 
-/* Aviso de animações desligadas no sistema: discreto, fixo no canto inferior, sem entrada animada */
+/* Aviso de animações desligadas no sistema: discreto, flutuando no canto inferior, sem entrada animada */
 .aviso-movimento {
   position: fixed;
   right: var(--espaco-4);
@@ -725,10 +798,12 @@ main:focus {
   z-index: var(--z-painel);
   width: min(22rem, calc(100% - 2 * var(--espaco-4)));
   padding: var(--espaco-4);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-3);
-  background: linear-gradient(var(--cor-superficie-2), var(--cor-superficie-2)), var(--cor-fundo);
-  box-shadow: var(--sombra-cartao);
+  border: 1px solid var(--flutuante-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--flutuante-fundo);
+  -webkit-backdrop-filter: var(--flutuante-desfoque);
+  backdrop-filter: var(--flutuante-desfoque);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.7);
 }
 
 .aviso-movimento__titulo {
@@ -749,17 +824,6 @@ main:focus {
   flex-wrap: wrap;
   gap: var(--espaco-2);
   margin-top: var(--espaco-3);
-}
-
-.aviso-movimento .aviso-movimento__principal {
-  background: var(--cor-destaque);
-  border-color: var(--cor-destaque);
-  color: var(--cor-destaque-texto);
-}
-
-.aviso-movimento .aviso-movimento__principal:hover {
-  background: var(--cor-destaque-hover);
-  border-color: var(--cor-destaque-hover);
 }
 
 /* No celular o aviso fica acima da barra inferior fixa */

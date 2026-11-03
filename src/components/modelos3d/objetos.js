@@ -10,7 +10,6 @@ import {
   CylinderGeometry,
   Group,
   Mesh,
-  PlaneGeometry,
   SphereGeometry,
   TorusGeometry,
   Vector3,
@@ -34,8 +33,8 @@ const R = TEXTOS.modelos3d.rotulos;
 const METAL = ['--cor-texto-suave', '--cor-fundo', 0.7];
 const METAL_CLARO = ['--cor-texto-suave', '--cor-fundo', 0.42];
 const CHAO = ['--cor-texto-suave', '--cor-fundo', 0.86];
-// Âmbar mais profundo que o acento, com contorno escuro.
-const AMBAR = ['--cor-acento', '--cor-fundo', 0.25];
+// Acento (neutro) escurecido 25% sobre o fundo, com contorno escuro.
+const ACENTO_ESCURO = ['--cor-acento', '--cor-fundo', 0.25];
 const CONTORNO_ESCURO = { tracoTok: '--cor-fundo', tracoOp: 0.7 };
 const TRACO = '--cor-texto-suave';
 const finito = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -84,7 +83,6 @@ export function balanca(d, ticker, reduz) {
   let rE;
   let rD;
   let aura;
-  let reflexoPrato;
   let tAnt = null;
   return {
     altura: 9.5,
@@ -101,7 +99,7 @@ export function balanca(d, ticker, reduz) {
       viga.position.y = 5.4;
       viga.add(P.peca(new BoxGeometry(10, 0.3, 0.42), METAL, { solido: true }));
       viga.add(P.peca(new SphereGeometry(0.42, 20, 14), '--cor-acento', { solido: true, arestas: false }));
-      // Aura âmbar translúcida sobre a viga: pulsa devagar (sem movimento reduzido, fica apagada).
+      // Aura clara translúcida sobre a viga: pulsa devagar (sem movimento reduzido, fica apagada).
       aura = new Mesh(new BoxGeometry(10.14, 0.44, 0.56), P.M.veu('--cor-acento', 0));
       aura.visible = !reduz;
       viga.add(aura);
@@ -126,12 +124,6 @@ export function balanca(d, ticker, reduz) {
       };
       bloco(pE, caixa, '--cor-alta');
       bloco(pD, divida, '--cor-queda');
-      // Reflexo especular que passa pelo prato mais pesado (o mais baixo; em empate, o do caixa só se for maior).
-      if (!reduz) {
-        reflexoPrato = new Mesh(new PlaneGeometry(0.22, 1.5), P.M.veu('--cor-texto', 0));
-        reflexoPrato.position.set(0, -1.6, 0.5);
-        (alvoAng < 0 || (alvoAng === 0 && caixa > divida) ? pE : pD).add(reflexoPrato);
-      }
       rE = P.rotulo(R.caixa, [0, 0, 0]);
       rD = P.rotulo(R.divida, [0, 0, 0]);
     },
@@ -155,16 +147,6 @@ export function balanca(d, ticker, reduz) {
       if (reduz) return false;
       // Pulso da aura (translúcida, então o pulso é de opacidade): de 0 a 0,35 e de volta a 0 em 3 s.
       aura.material.opacity = 0.35 * (0.5 - 0.5 * Math.cos((2 * Math.PI * t) / 3));
-      // Reflexo que atravessa o prato mais pesado em 1,2 s a cada 5 s.
-      if (reflexoPrato) {
-        const f = t % 5;
-        reflexoPrato.visible = f < 1.2;
-        if (f < 1.2) {
-          const u = f / 1.2;
-          reflexoPrato.position.x = -1.2 + 2.4 * u;
-          reflexoPrato.material.opacity = 0.55 * Math.sin(Math.PI * u);
-        }
-      }
       return true;
     },
   };
@@ -176,7 +158,7 @@ export function moedas(d, ticker, reduz) {
   const H = 0.2;
   const topo = Math.max(7, Math.max(nA, nS) * H + 3.6);
   const cair = [];
-  // Reflexo âmbar que sobe por cada pilha em loop de 4 s, depois que as moedas assentam.
+  // Reflexo claro que sobe por cada pilha em loop de 4 s, depois que as moedas assentam.
   const reflexos = [];
   const caiPilha = animaQueda(cair, reduz);
   let t0 = null;
@@ -196,7 +178,7 @@ export function moedas(d, ticker, reduz) {
         [2.1, nS, true],
       ].forEach(([x, n, setor], j) => {
         for (let i = 0; i < n; i++) {
-          const m = P.peca(geo, setor ? METAL_CLARO : AMBAR, { ang: 40, solido: setor, ...CONTORNO_ESCURO });
+          const m = P.peca(geo, setor ? METAL_CLARO : ACENTO_ESCURO, { ang: 40, solido: setor, ...CONTORNO_ESCURO });
           const y = H / 2 + i * H;
           m.position.set(x, reduz ? y : y + 6 + i * 0.02, 0);
           P.cena.add(m);
@@ -286,8 +268,6 @@ const TILINTA_MOEDA = 0.12;
 const ESCALA_TILINTA = 1.06;
 /** A frente do .glb é +z: esta rotação põe o focinho na mesma direção que o procedural (+x). */
 const ROTACAO_GLB = ROTACAO_PORQUINHO + Math.PI / 2;
-/** Brilho na fenda: aparece por 200 ms quando a moeda entra. */
-const JANELA_FENDA = 0.2;
 /** Orelhas: balanço de ±0,08 rad num ciclo de 4 s e abano de ±0,04 no início de cada ciclo (somados, ±0,12). */
 const PERIODO_ORELHA = 4;
 const BALANCO_ORELHA = 0.08;
@@ -386,7 +366,6 @@ export function cofrinho(d, ticker, reduz) {
   let glbGrupo = null;
   let glbRaiz = null;
   let partes = null;
-  let brilhoFenda = null;
   let esperaGlb = null;
   let entradaT0 = null;
 
@@ -544,7 +523,7 @@ export function cofrinho(d, ticker, reduz) {
 
       // Moeda no grupo da prateleira (não no porco): cai até a fenda, no topo do corpo.
       if (temProvento) {
-        moeda = malha(new CylinderGeometry(0.38, 0.38, ESP_MOEDA, 28), P.M.solido(AMBAR));
+        moeda = malha(new CylinderGeometry(0.38, 0.38, ESP_MOEDA, 28), P.M.solido(ACENTO_ESCURO));
         moeda.position.set(0, fendaY + ESP_MOEDA / 2, 0);
         // Giro em y depois da inclinação em x: a moeda gira em torno do eixo vertical do mundo enquanto cai.
         moeda.rotation.order = 'YXZ';
@@ -553,19 +532,13 @@ export function cofrinho(d, ticker, reduz) {
         g.add(moeda);
       }
 
-      // Porco .glb: o grupo fica invisível até o arquivo chegar. Brilho da fenda: só com proventos e sem reduzir movimento.
+      // Porco .glb: o grupo fica invisível até o arquivo chegar.
       palco = P;
       glbGrupo = new Group();
       glbGrupo.position.y = PRAT_TOPO;
       glbGrupo.rotation.y = ROTACAO_GLB;
       glbGrupo.visible = false;
       g.add(glbGrupo);
-      if (temProvento && !reduz) {
-        brilhoFenda = malha(new BoxGeometry(0.5, 0.04, 1), P.M.veu('--cor-texto', 0));
-        brilhoFenda.position.set(0, fendaY + 0.03, 0);
-        brilhoFenda.visible = false;
-        g.add(brilhoFenda);
-      }
       carregaGlb();
 
       const geo = new CylinderGeometry(0.75, 0.75, H * 0.9, 36);
@@ -574,7 +547,7 @@ export function cofrinho(d, ticker, reduz) {
         [-2.0, nS, true],
       ].forEach(([x, n, setor], j) => {
         for (let i = 0; i < n; i++) {
-          const m = P.peca(geo, setor ? METAL_CLARO : AMBAR, { ang: 40, solido: setor, ...CONTORNO_ESCURO });
+          const m = P.peca(geo, setor ? METAL_CLARO : ACENTO_ESCURO, { ang: 40, solido: setor, ...CONTORNO_ESCURO });
           const y = PRAT_TOPO + H / 2 + i * H;
           m.position.set(x, reduz ? y : y + 6, 0.4);
           P.cena.add(m);
@@ -643,11 +616,6 @@ export function cofrinho(d, ticker, reduz) {
         if (orelhaD) orelhaD.no.rotation.z = orelhaD.rot.z + anguloOrelha(s, Math.PI);
         if (rabo) rabo.no.rotation.y = rabo.rot.y + AMP_RABO * Math.sin((2 * Math.PI * s) / PERIODO_RABO);
       }
-      // Brilho curto na fenda, por 200 ms a partir da entrada da moeda.
-      if (brilhoFenda) {
-        brilhoFenda.visible = dt >= 0 && dt < JANELA_FENDA;
-        if (brilhoFenda.visible) brilhoFenda.material.opacity = 0.9 * Math.sin((Math.PI * dt) / JANELA_FENDA);
-      }
       if (moeda) {
         const p = (s % CICLO_MOEDA) / CICLO_MOEDA;
         if (p < FRACAO_QUEDA) {
@@ -672,16 +640,13 @@ export function cofrinho(d, ticker, reduz) {
     },
   };
 }
-/** Pêndulo: solta do repouso a 0,6 rad, assenta num movimento de período fixo e deixa um rastro com o peso. */
+/** Pêndulo: solta do repouso a 0,6 rad e assenta num movimento de período fixo. */
 const PERIODO_PENDULO = 2.2;
 const OMEGA_PENDULO = (2 * Math.PI) / PERIODO_PENDULO;
 /** Amortecimento (1/s): o transitório da soltura some em uns 4 s. */
 const GAMA_PENDULO = 0.9;
 const SOLTURA_PENDULO = 0.6;
 const COMPRIMENTO_HASTE = 5.2;
-/** Rastro: 5 cópias do peso, espaçadas de 0,09 s no passado. */
-const PASSO_RASTRO = 0.09;
-const N_RASTRO = 5;
 
 /**
  * Ângulo (rad) de um pêndulo amortecido de amplitude A, t segundos depois da soltura. Solto do repouso em
@@ -693,23 +658,9 @@ function oscila(A, t) {
   return A * Math.cos(fase) + (SOLTURA_PENDULO - A) * transitorio;
 }
 
-/** Move um pêndulo ao instante tt: haste, cópias do rastro e o brilho que corre no peso. */
+/** Move um pêndulo ao instante tt: haste e o brilho que corre no peso. */
 function moveP(p, tt) {
-  const ang = oscila(p.amp, tt);
-  p.g.rotation.z = ang;
-  // Velocidade pela diferença finita de PASSO_RASTRO; vmax é a do movimento estável (amplitude × ω).
-  const vmax = p.amp * OMEGA_PENDULO * PASSO_RASTRO;
-  for (const f of p.rastro) {
-    const ta = tt - f.k * PASSO_RASTRO;
-    f.g.visible = ta >= 0;
-    if (ta >= 0) {
-      const a = oscila(p.amp, ta);
-      f.g.rotation.z = a - ang;
-      // Cada cópia do rastro perde força conforme o peso desacelera: some no ponto de inversão.
-      const v = vmax > 0 ? Math.min(1, Math.abs(a - oscila(p.amp, ta - PASSO_RASTRO)) / vmax) : 0;
-      f.m.material.opacity = f.op * v;
-    }
-  }
+  p.g.rotation.z = oscila(p.amp, tt);
   // O brilho varre a face iluminada (lado +x e +z) de um lado ao outro em cada período.
   const th = Math.sin((2 * Math.PI * tt) / PERIODO_PENDULO);
   const raio = 0.635;
@@ -756,20 +707,9 @@ export function pendulo(d, ticker, reduz) {
         }
         P.cena.add(P.linha(arco, TRACO, 0.5));
         P.rotulo(nome, [x, -0.5, 1.2]);
-        const p = { g, amp, rastro: [], brilho: null };
-        // Movimento reduzido: sem rastro nem brilho, só a pose final.
+        const p = { g, amp, brilho: null };
+        // Movimento reduzido: sem brilho, só a pose final.
         if (!reduz) {
-          const esfera = new SphereGeometry(0.62, 24, 16);
-          for (let k = 1; k <= N_RASTRO; k++) {
-            const fantasma = new Group();
-            fantasma.visible = false;
-            const op = 0.26 * (1 - k / (N_RASTRO + 1));
-            const m = new Mesh(esfera, P.M.veu(tok, op));
-            m.position.y = -L;
-            fantasma.add(m);
-            g.add(fantasma);
-            p.rastro.push({ g: fantasma, k, m, op });
-          }
           p.brilho = new Mesh(new SphereGeometry(0.1, 12, 8), P.M.veu('--cor-texto', 0.9));
           p.brilho.position.y = -L;
           g.add(p.brilho);

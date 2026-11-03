@@ -1,5 +1,4 @@
 import { Suspense, lazy, useCallback, useEffect, useId, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { pct } from '../../lib/formato.js';
 import { proximoIndice } from '../../lib/setores3d.js';
 import { TEXTOS } from '../../lib/textos.js';
@@ -13,7 +12,7 @@ const PalcoSetores = lazy(() => import('./PalcoSetores.jsx'));
 const valorDe = (media) => (media == null ? TEXTOS.setores.semDado : pct(media));
 
 /**
- * Vitrine giratória dos setores acima da lista. Legenda, setas e teclas existem mesmo enquanto o palco
+ * Vitrine dos setores acima da lista, um objeto por vez. Legenda e teclas existem mesmo enquanto o palco
  * carrega, e leem o mesmo índice da frente. O canvas é aria-hidden; a legenda é a leitura.
  * Sem WebGL, sem setores ou com erro no palco: não renderiza nada.
  */
@@ -90,22 +89,6 @@ export function Setores3D({ colunas, destaque, aoEscolher }) {
             </Suspense>
           </LimiteErro>
         )}
-        <button
-          type="button"
-          className="botao setores3d-seta"
-          aria-label={TEXTOS.setores.cena3d.anterior}
-          onClick={() => passa(-1)}
-        >
-          <ChevronLeft size={20} strokeWidth={2} />
-        </button>
-        <button
-          type="button"
-          className="botao setores3d-seta"
-          aria-label={TEXTOS.setores.cena3d.proximo}
-          onClick={() => passa(1)}
-        >
-          <ChevronRight size={20} strokeWidth={2} />
-        </button>
       </div>
 
       <div className="setores3d-legenda" aria-live="polite">

@@ -22,14 +22,16 @@
   gap: var(--espaco-3);
 }
 
+/* Exemplo: cartão de vidro neutro (sem mancha, porque é só identificação) */
 .setores-exemplo {
   display: flex;
   align-items: center;
   gap: var(--espaco-3);
-  padding: var(--espaco-3);
-  border: 1px solid var(--cor-borda);
+  padding: var(--espaco-4);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
-  background: var(--cor-superficie);
+  box-shadow: var(--vidro-sombra);
   animation: setor-entra 0.35s var(--curva) both;
   animation-delay: calc(var(--i, 0) * 50ms);
 }
@@ -74,14 +76,16 @@
   color: var(--cor-texto-suave);
 }
 
+/* Trilho em pílula com sub-superfície; a opção ativa é branca sólida */
 .setores-abas {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espaco-1);
   padding: var(--espaco-1);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
 }
 
 .setores-aba {
@@ -102,7 +106,7 @@
 }
 
 .setores-aba:hover {
-  background: rgb(255 255 255 / 0.08);
+  background: var(--sub-fundo-hover);
 }
 
 .setores-aba[aria-selected='true'] {
@@ -124,7 +128,8 @@
 .setores-titulo {
   margin: 0 0 var(--espaco-2);
   font-size: var(--texto-2xl);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
@@ -164,7 +169,7 @@
 
 /* Uma linha por setor, separadas por filete fino */
 .setores-lista > li + li {
-  border-top: 1px solid var(--cor-borda);
+  border-top: 1px solid var(--cor-fio);
 }
 
 .setor-linha {
@@ -182,7 +187,7 @@
 }
 
 .setor-linha:hover {
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
 }
 
 .setor-linha-cabeca {
@@ -212,16 +217,21 @@
 
 .setor-linha-barra {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 4.5rem;
+  grid-template-columns: minmax(0, 1fr) 5.25rem;
   align-items: center;
   gap: var(--espaco-3);
   min-width: 0;
 }
 
+/* Variação em Atkinson Hyperlegible Mono, à direita: o sinal (+/−) já vem no texto */
 .setor-linha-valor {
   text-align: right;
-  font-weight: var(--peso-forte);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-base) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   color: var(--cor-texto-suave);
 }
 
@@ -297,6 +307,7 @@
   min-width: 0;
 }
 
+/* Cartão de setor: vidro neutro (.cartao), sem mancha de cor */
 .setor-cartao {
   display: flex;
   flex: 1 1 auto;
@@ -328,10 +339,14 @@
   height: 3rem;
 }
 
+/* Título de cartão: Atkinson Hyperlegible Next 700, com a frase de apoio logo abaixo */
 .setor-nome {
   margin: 0;
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--cor-texto);
 }
 
@@ -347,10 +362,10 @@
   gap: var(--espaco-1);
 }
 
+/* Rótulo pequeno de seção: frase normal, peso 600, sem caixa alta */
 .setor-rotulo {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
 }
 
@@ -363,24 +378,32 @@
   gap: var(--espaco-2);
 }
 
+/* Código de ação em chip: Atkinson Hyperlegible Mono, véu de acento e alvo de toque de 44px */
 .setor-tickers a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0 var(--espaco-3);
   border-radius: var(--raio-pilula);
   background: var(--cor-acento-suave);
   color: var(--cor-acento);
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-titulo);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   text-decoration: none;
 }
 
+/* Número-destaque do cartão: Atkinson Hyperlegible Mono 500, entre 2rem e 2.75rem, linha 1 */
 .setor-valor {
-  font-size: var(--texto-2xl);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 2.25rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .setor-valor[data-sinal] {
@@ -442,6 +465,7 @@
   overflow-y: auto;
 }
 
+/* Véu de saída no fim da rolagem: funde com o vidro do cartão */
 .setor-acoes-caixa:not([hidden])::after {
   content: '';
   position: sticky;
@@ -449,7 +473,7 @@
   display: block;
   height: 2.5rem;
   margin-top: -2.5rem;
-  background: linear-gradient(to bottom, transparent, var(--cor-superficie));
+  background: linear-gradient(to bottom, transparent, var(--vidro-base));
   pointer-events: none;
 }
 
@@ -466,17 +490,34 @@
   display: none;
 }
 
+/* Ticker com alvo de toque de 44px; coluna de número larga o bastante para Atkinson Hyperlegible Mono */
 .setor-acao-linha {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
+  grid-template-columns: 5rem minmax(0, 1fr) 5rem;
   align-items: center;
   gap: var(--espaco-3);
   font-size: var(--texto-sm);
 }
 
+.setor-acao-linha > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
 .setor-acao-linha .setor-numero {
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .setor-numero[data-sinal] {
@@ -495,6 +536,14 @@
   color: var(--cor-texto-suave);
   text-align: left;
   padding-bottom: var(--espaco-1);
+}
+
+.setor-periodos td {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .setor-periodos td[data-sinal] {
@@ -574,12 +623,14 @@
 
 /* ---------- Dispersão da variação por setor (modo técnico) ---------- */
 
+/* Cartão de vidro com mancha de dado técnico (data-brilho="dado" no JSX) */
 .setores-dispersao {
   margin-bottom: var(--espaco-6);
-  padding: var(--espaco-5);
-  border: 1px solid var(--cor-borda);
+  padding: var(--espaco-6);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
-  background: var(--cor-superficie);
+  box-shadow: var(--vidro-sombra);
 }
 
 .setores-dispersao-legenda {
@@ -633,8 +684,21 @@
 
 /* Linha em destaque (hover ou foco na lista, ou o ponteiro sobre a coluna 3D) */
 .setor-linha[data-destaque='true'] {
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
   box-shadow: inset 0 0 0 1px var(--cor-acento-borda);
+}
+
+/* Celular: cartões de setor e o ranking com respiro menor, em coluna única */
+@media (max-width: 720px) {
+  .setor-cartao,
+  .setores-ranking.cartao,
+  .setores-dispersao {
+    padding: var(--espaco-5) var(--espaco-4);
+  }
+
+  .setores-dispersao {
+    padding: var(--espaco-5) var(--espaco-4);
+  }
 }
 
 /* Nomes longos quebram e a barra encolhe; a linha nunca passa da largura do cartão */
@@ -644,7 +708,11 @@
   }
 
   .setor-linha-barra {
-    grid-template-columns: minmax(0, 1fr) 3.75rem;
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
     gap: var(--espaco-2);
+  }
+
+  .setor-acao-linha {
+    grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
   }
 }

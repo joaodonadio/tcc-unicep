@@ -6,7 +6,7 @@ import { pct } from '../../lib/formato.js';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { TEXTOS } from '../../lib/textos.js';
 
-// jsdom não tem WebGL: o palco vira um stub e a legenda, as setas e as teclas são testadas sozinhas.
+// jsdom não tem WebGL: o palco vira um stub e a legenda e as teclas são testadas sozinhas.
 const webgl = vi.hoisted(() => ({ ok: true }));
 vi.mock('../../components/modelos3d/suporte.js', () => ({
   suportaWebGL: () => webgl.ok,
@@ -26,7 +26,7 @@ afterEach(() => {
   webgl.ok = true;
 });
 
-describe('Setores3D: legenda, setas e teclas (sem WebGL no jsdom)', () => {
+describe('Setores3D: legenda e teclas (sem WebGL no jsdom)', () => {
   it('a legenda mostra o setor da frente, a variação, a contagem e a dica, sem canvas', () => {
     const { container } = renderizar(<Setores3D colunas={colunas} destaque={null} aoEscolher={() => {}} />);
     expect(screen.getByText('Financeiro')).toBeInTheDocument();
@@ -37,16 +37,14 @@ describe('Setores3D: legenda, setas e teclas (sem WebGL no jsdom)', () => {
     expect(container.querySelector('[aria-live="polite"]')).not.toBeNull();
   });
 
-  it('o botão Próximo setor troca a legenda para o seguinte', () => {
+  it('sem setas na tela: o único botão é "Ver o setor"', () => {
     renderizar(<Setores3D colunas={colunas} destaque={null} aoEscolher={() => {}} />);
-    fireEvent.click(screen.getByRole('button', { name: TEXTOS.setores.cena3d.proximo }));
-    expect(screen.getByText('Saúde')).toBeInTheDocument();
-    expect(screen.getByText(pct(-0.01))).toBeInTheDocument();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
   });
 
-  it('Setor anterior dá a volta: do primeiro vai para o último', () => {
+  it('seta para a esquerda dá a volta: do primeiro vai para o último', () => {
     renderizar(<Setores3D colunas={colunas} destaque={null} aoEscolher={() => {}} />);
-    fireEvent.click(screen.getByRole('button', { name: TEXTOS.setores.cena3d.anterior }));
+    fireEvent.keyDown(regiao(), { key: 'ArrowLeft' });
     expect(screen.getByText('Tecnologia')).toBeInTheDocument();
     expect(screen.getByText(TEXTOS.setores.semDado)).toBeInTheDocument();
     expect(screen.queryByText(TEXTOS.setores.subiramDe(0, 0))).toBeNull();
@@ -59,6 +57,7 @@ describe('Setores3D: legenda, setas e teclas (sem WebGL no jsdom)', () => {
     expect(palco).toHaveFocus();
     fireEvent.keyDown(palco, { key: 'ArrowRight' });
     expect(screen.getByText('Saúde')).toBeInTheDocument();
+    expect(screen.getByText(pct(-0.01))).toBeInTheDocument();
     fireEvent.keyDown(palco, { key: 'ArrowLeft' });
     expect(screen.getByText('Financeiro')).toBeInTheDocument();
   });

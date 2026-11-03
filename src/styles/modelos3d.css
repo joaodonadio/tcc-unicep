@@ -1,20 +1,27 @@
-/* Modelos 3D (balança, moedas, cofrinho, pêndulo): palco, rótulos projetados e frase-resposta. */
+/* Modelos 3D (balança, moedas, cofrinho, pêndulo): palco em sub-superfície, explicação em texto ao lado, rótulos flutuantes e frase-resposta. */
 .modelo3d-bloco {
-  margin-bottom: var(--espaco-5);
+  margin-bottom: var(--espaco-6);
 }
 
 .modelo3d-titulo {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
   margin-bottom: var(--espaco-3);
 }
 
 details.modelo3d-bloco > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   cursor: pointer;
+  font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
-  margin-bottom: var(--espaco-3);
+  color: var(--cor-texto-suave);
+}
+
+details.modelo3d-bloco > summary:hover {
+  color: var(--cor-texto);
 }
 
 .modelo3d {
@@ -31,14 +38,40 @@ details.modelo3d-bloco > summary {
   color: var(--cor-texto);
 }
 
+/* Telas largas: a explicação fica ao lado do palco (frase em cima à esquerda, legenda embaixo) */
+@media (min-width: 48rem) {
+  .modelo3d:has(.modelo3d-quadro) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    column-gap: var(--espaco-6);
+    align-items: center;
+  }
+
+  .modelo3d:has(.modelo3d-quadro) .modelo3d-frase {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .modelo3d:has(.modelo3d-quadro) .modelo3d-quadro {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .modelo3d:has(.modelo3d-quadro) .modelo3d-rodape {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    text-align: left;
+  }
+}
+
+/* Palco: sub-superfície (sem mancha, sem sombra externa) */
 .modelo3d-palco {
   position: relative;
   height: 300px;
-  border-radius: var(--raio-cartao);
-  background:
-    radial-gradient(20rem circle at 50% 0%, rgb(232 184 74 / 0.08), transparent 70%),
-    var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  box-shadow: var(--sub-luz);
   overflow: hidden;
 }
 
@@ -61,46 +94,56 @@ details.modelo3d-bloco > summary {
   overflow: hidden;
 }
 
-/* A posição (transform) é calculada pelo palco.js a cada quadro. */
+/* A posição (transform) é calculada pelo palco.js a cada quadro. Rótulo = vidro flutuante. */
 .modelo3d-rot {
   position: absolute;
   left: 0;
   top: 0;
   padding: 3px 10px;
   border-radius: var(--raio-pilula, 999px);
-  background: var(--cor-fundo);
-  border: 1px solid var(--cor-borda);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.45);
+  background: var(--flutuante-fundo);
+  -webkit-backdrop-filter: var(--flutuante-desfoque);
+  backdrop-filter: var(--flutuante-desfoque);
+  border: 1px solid var(--flutuante-borda);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 10px 24px -12px rgb(0 0 0 / 0.7);
   color: var(--cor-texto);
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .modelo3d-legenda {
   margin: 0;
-  text-align: center;
   font-size: var(--texto-sm);
   color: var(--cor-texto-suave);
 }
 
-/* Quadro do objeto: a dica de arrastar fica sobre o canto de baixo, sem empurrar o layout */
+/* Rodapé do objeto: legenda à esquerda e dica de arrastar à direita, abaixo do quadro (não cobre os rótulos) */
+.modelo3d-rodape {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2) var(--espaco-3);
+}
+
 .modelo3d-quadro {
   position: relative;
   min-height: 0;
 }
 
 .modelo3d-dica {
-  position: absolute;
-  right: var(--espaco-3);
-  bottom: var(--espaco-3);
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.25rem 0.625rem;
-  border: 1px solid var(--cor-borda);
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--flutuante-borda);
   border-radius: var(--raio-pilula);
-  background: color-mix(in srgb, var(--cor-fundo) 72%, transparent);
+  background: var(--flutuante-fundo);
+  -webkit-backdrop-filter: var(--flutuante-desfoque);
+  backdrop-filter: var(--flutuante-desfoque);
   color: var(--cor-texto-suave);
   font-size: var(--texto-xs);
   pointer-events: none;

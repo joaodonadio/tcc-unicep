@@ -1,4 +1,4 @@
-/* Página inicial (tema âmbar): O dia, mapa do pregão, notícias e proventos em cartões translúcidos. */
+/* Página inicial: O dia, mapa do pregão, notícias e proventos em cartões translúcidos. */
 
 /* ---------- O dia: fatos do quadro ---------- */
 .dia-fatos {
@@ -485,13 +485,19 @@
   padding-top: var(--espaco-6);
 }
 
+/* Espera do modelo (SecaoAcerto): aviso amarelo de atenção, a mesma fórmula do aviso da casa.
+   Dois seletores de classe para vencer `.acerto .estado` de acoes.css, que zera a caixa. */
+.acerto .estado.estado--vazio {
+  padding: var(--espaco-5);
+  border: 1px solid color-mix(in srgb, var(--cor-atencao) 32%, transparent);
+  border-radius: var(--raio-3);
+  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
+  color: var(--cor-texto);
+}
+
 /* Primeira vez por aqui (ComoUsar): cartões dos passos, anel com o número e ilustração em loop.
    Os estados de entrada (data-visivel) só valem com movimento permitido; com reduced motion,
    tudo fica no quadro final e legível. Só transform e opacity animam. */
-.como-usar .como-usar__passos li::before {
-  content: none;
-}
-
 /* Caminho: os cinco passos em uma linha só a partir de 1440px (ao lado da introdução);
    abaixo disso, grade de cartões que cabe na largura */
 .como-usar .como-usar__passos {
@@ -506,20 +512,21 @@
   }
 }
 
+/* Passo: sub-superfície dentro do cartão de introdução (sem borda colorida no hover) */
 .como-usar .como-usar__passo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--espaco-3);
   padding: var(--espaco-4);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-3);
-  background: var(--cor-superficie);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
 }
 
 .como-usar .como-usar__passo:hover {
-  border-color: var(--cor-acento);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
 }
 
 /* O cartão inteiro é o link: ocupa a largura e a altura do passo */
@@ -795,7 +802,7 @@
   }
 
   .como-usar__ilustra--linha polyline {
-    animation: desenha-linha 5s ease-in-out infinite;
+    animation: refaz-linha 5s ease-in-out infinite;
   }
 
   .como-usar__bloco {
@@ -890,6 +897,22 @@
   }
 }
 
+/* Miniatura Mercado: começa e termina desenhada (0%/100% com offset 0), apaga no meio e redesenha */
+@keyframes refaz-linha {
+  0%,
+  30% {
+    stroke-dashoffset: 0;
+  }
+  46%,
+  58% {
+    stroke-dashoffset: 1;
+  }
+  76%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Abaixo de 1440px a introdução vai para cima, em largura toda, e os passos descem para a grade.
    O X fica no canto, como no celular, para não ocupar uma linha da introdução. */
 @media (max-width: 1439px) {
@@ -899,12 +922,24 @@
 
   .como-usar__topo {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     gap: var(--espaco-4);
   }
 
+  /* o Pavio fica na linha do título; os passos descem para a largura toda */
+  .como-usar__mascote {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
   .como-usar__resumo {
+    grid-column: 2;
+    grid-row: 1;
     padding-right: var(--espaco-7);
+  }
+
+  .como-usar__passos {
+    grid-column: 1 / -1;
   }
 
   .como-usar__fechar {

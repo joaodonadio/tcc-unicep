@@ -58,6 +58,7 @@ export default function FluxoDados() {
   return (
     <section
       className="secao modelo-fluxo"
+      data-brilho="dado"
       aria-labelledby="modelo-fluxo-titulo"
       data-anima={animar}
       style={{ '--intervalo': `${INTERVALO_DESTAQUE_MS}ms` }}

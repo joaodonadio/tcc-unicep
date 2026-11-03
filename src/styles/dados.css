@@ -1,5 +1,5 @@
-/* De onde vêm os números?: resumo do topo, cartões de fontes e pacotes, avisos da coleta.
-   Cartões com a mesma borda e o mesmo raio; grades que quebram sozinhas, sem rolagem horizontal. */
+/* De onde vêm os números?: resumo do topo em cartão de vidro (cor aço), origens e pacotes em linhas
+   separadas por fio, avisos da coleta na fórmula de atenção. Números, horários e datas em Atkinson Hyperlegible Mono. */
 
 .dados__titulo {
   font-size: var(--texto-3xl);
@@ -30,10 +30,11 @@
 .dados__resumo {
   display: grid;
   gap: var(--espaco-5);
-  padding: var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-3);
+  padding: var(--espaco-6);
+  background: var(--vidro);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
 .dados__resumo .pilula {
@@ -56,17 +57,18 @@
 
 .dados__fato dd {
   margin: var(--espaco-1) 0 0;
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-lg) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   overflow-wrap: anywhere;
 }
 
-/* Grade de cartões (fontes e pacotes) */
+/* Origens e pacotes: linhas separadas por fio, sem caixinhas */
 .dados__grade {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: var(--espaco-4);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -74,18 +76,17 @@
 
 .dados__cartao {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--espaco-2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-1) var(--espaco-4);
   min-width: 0;
-  padding: var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-3);
+  padding: var(--espaco-4) 0;
+  border-top: 1px solid var(--cor-fio);
 }
 
 .dados__cartao p {
   margin: 0;
+  flex: 1 1 100%;
   color: var(--cor-texto-suave);
 }
 
@@ -103,10 +104,19 @@
 }
 
 .dados__quantidade {
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-lg) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--cor-texto);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* Quantidade alinhada à direita, na mesma linha do nome */
+.dados__cartao .dados__quantidade {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 
 .dados__arquivo,
@@ -117,12 +127,20 @@
   overflow-wrap: anywhere;
 }
 
-/* Selos no pé do cartão: alinham entre cartões com e sem a linha de quantidade */
+.dados__cru {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* Selos no pé da linha: ocupam a largura que sobra */
 .dados__selos {
   display: flex;
+  flex: 1 1 100%;
   flex-wrap: wrap;
   gap: var(--espaco-2);
-  margin-top: auto;
 }
 
 .dados__selos:empty {
@@ -140,14 +158,16 @@
   gap: var(--espaco-3);
 }
 
+/* Aviso de coleta: fórmula de aviso (amarelo de atenção translúcido) */
 .dados__avisos li {
   display: flex;
   align-items: flex-start;
   gap: var(--espaco-3);
   padding: var(--espaco-4) var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cor-atencao) 32%, transparent);
   border-radius: var(--raio-3);
+  color: var(--cor-texto);
 }
 
 .dados__avisos li > span {
@@ -169,10 +189,11 @@
   flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--espaco-2) var(--espaco-3);
-  padding: var(--espaco-3) var(--espaco-4);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-2);
+  padding: var(--espaco-3) 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--cor-fio);
+  border-radius: 0;
   font-size: var(--texto-sm);
   line-height: 1.55;
   color: var(--cor-texto);
@@ -196,8 +217,10 @@
 }
 
 .dados__aviso-texto code {
-  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: 0.9em;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.85em;
+  letter-spacing: -0.02em;
   padding: 0.05em 0.35em;
   border-radius: var(--raio-1);
   background: color-mix(in srgb, var(--cor-texto) 8%, transparent);
@@ -205,10 +228,14 @@
 }
 
 .dados__aviso-texto time {
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* Selo da coleta: ícone verde quando consultada, âmbar quando não */
+/* Selo da coleta: ícone verde quando consultada, amarelo de atenção quando não */
 .dados__selo-coleta {
   display: flex;
   align-items: center;
@@ -226,7 +253,7 @@
 }
 
 .dados__selo-coleta[data-tom='acento'] svg {
-  color: var(--cor-acento);
+  color: var(--cor-atencao);
 }
 
 .dados__detalhes {
@@ -296,10 +323,10 @@
   }
 
   .dados__resumo {
-    padding: var(--espaco-4);
+    padding: var(--espaco-5);
   }
 
   .dados__cartao {
-    padding: var(--espaco-4);
+    padding: var(--espaco-3) 0;
   }
 }

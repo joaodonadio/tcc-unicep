@@ -36,8 +36,8 @@
 
 .chart-legenda i {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin-right: 8px;
   border-radius: 50%;
   background: var(--cor);
@@ -55,14 +55,19 @@
   color: var(--cor-texto-suave);
 }
 
+/* Datas nas pontas do gráfico: números de dado, em Atkinson Hyperlegible Mono */
 .chart-foot {
   display: flex;
   justify-content: space-between;
   gap: var(--espaco-3);
   margin-top: var(--espaco-2);
-  font-size: var(--texto-xs);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-xs) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--cor-texto-suave);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 :root[data-movimento='reduzido'] {

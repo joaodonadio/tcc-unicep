@@ -41,9 +41,9 @@ Cada número traz a origem, a comparação com o setor e uma explicação em doi
 
 ## Brand Commitments
 
-- O produto não tem marca comercial. O cabeçalho só identifica o conteúdo ("Ações da B3"), sem logotipo nem slogan.
+- O produto não tem marca comercial. O cabeçalho identifica o conteúdo ("Ações da B3") e tem o Pavio, um candle com olhos, como símbolo; sem logotipo nem slogan.
 - Voz: português simples, frases curtas, sem caixa alta, sem jargão sem explicação.
-- Nada com cara de interface gerada por IA: sem fundo escuro com brilho neon, sem rótulos em caixa alta espaçada, sem texto de efeito nem símbolos decorativos (decisão do usuário em 28/10/2026).
+- Nada com cara de interface gerada por IA: sem fundo escuro com brilho neon, sem rótulos em caixa alta espaçada, sem texto de efeito nem símbolos decorativos (decisão do usuário em 28/10/2026). A única exceção é o mascote Pavio, e só aparece ao lado de uma frase.
 
 ## Evidence on Hand
 

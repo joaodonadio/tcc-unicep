@@ -4,21 +4,24 @@
  */
 
 const RESERVA = {
-  '--cor-texto': '#f3eee6',
-  '--cor-texto-suave': '#a39d92',
-  '--cor-fio': '#46484d',
-  '--cor-borda': '#4a4c51',
-  '--cor-superficie': '#34363a',
+  '--cor-texto': '#f4f4f5',
+  '--cor-texto-suave': '#b4b4bb',
+  '--cor-fio': 'rgb(255 255 255 / 0.07)',
+  '--cor-borda': 'rgb(255 255 255 / 0.09)',
+  '--cor-superficie': 'rgb(255 255 255 / 0.04)',
   '--cor-superficie-2': 'rgb(255 255 255 / 0.08)',
-  '--cor-fundo': '#1a1815',
-  '--cor-alta': '#7cc39a',
-  '--cor-queda': '#ea8f86',
-  '--cor-dado-1': '#e8a54b',
-  '--cor-dado-2': '#8fbf9f',
-  '--cor-dado-3': '#a99bd6',
-  '--cor-dado-4': '#7fa3c0',
-  '--cor-dado-5': '#a8a39a',
-  '--fonte-texto': 'system-ui, sans-serif',
+  '--cor-fundo': '#0b0b0c',
+  '--cor-alta': '#7fd19a',
+  '--cor-queda': '#f08a8a',
+  '--cor-estavel': '#b4b4bb',
+  '--cor-dado-1': '#ececef',
+  '--cor-dado-2': '#7fd19a',
+  '--cor-dado-3': '#b3a2f0',
+  '--cor-dado-4': '#7d9be0',
+  '--cor-dado-5': '#8a8a93',
+  '--cor-dado-6': '#5fc9c0',
+  '--fonte-texto': "'Atkinson Hyperlegible Next Variable', system-ui, sans-serif",
+  '--fonte-numeros': "'Atkinson Hyperlegible Mono Variable', ui-monospace, monospace",
 };
 
 /** Valor de um token CSS na raiz, ou a reserva quando ausente (jsdom, SSR). */
@@ -78,15 +81,19 @@ export function temaGraficos() {
   return {
     texto: lerToken('--cor-texto'),
     suave: lerToken('--cor-texto-suave'),
-    fio: lerToken('--cor-fio'),
-    borda: lerToken('--cor-borda'),
+    // Grade e borda translúcidas viram rgb() sólido: o ECharts não lê a sintaxe com espaço e barra.
+    fio: opacaSobre(lerToken('--cor-fio'), fundo),
+    borda: opacaSobre(lerToken('--cor-borda'), fundo),
     fundo,
     /** Cartão do tooltip: superfície elevada opaca (o gráfico não aparece através dele). */
     superficie: opacaSobre(lerToken('--cor-superficie-2'), fundo),
     alta: lerToken('--cor-alta'),
     queda: lerToken('--cor-queda'),
     dados: [1, 2, 3, 4, 5].map((i) => lerToken(`--cor-dado-${i}`)),
-    fonte: lerToken('--fonte-texto'),
+    /** Eixos e rótulos numéricos: Atkinson Hyperlegible Mono. */
+    fonte: lerToken('--fonte-numeros'),
+    /** Textos corridos (tooltip, nomes de setor e de índice): Atkinson Hyperlegible Next. */
+    fonteTexto: lerToken('--fonte-texto'),
   };
 }
 

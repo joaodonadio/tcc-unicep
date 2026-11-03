@@ -1,10 +1,15 @@
-/* Movimento do site, num lugar só. Regras: só transform e opacity (no hover, também translate,
-   border-color e background-color). Nada de quique, elástico, rotação ou confete. Com
-   movimento reduzido (data-movimento=reduzido), tudo fica parado e legível. Importado por último em index.css. */
+/* Movimento do site, num lugar só. Só transform, scale e opacity (no hover, também translate, cor, fundo e
+   aresta; nas aberturas, grid-template-rows em componentes.css). Nada de quique ou elástico; a seta dos
+   detalhes gira meia volta. Tempos: 100ms no toque, até 300ms na troca de estado e no deslize, 320ms nas
+   aberturas; a saída é mais curta que a entrada. As entradas usam fill-mode backwards, para não prender o
+   transform depois que terminam. Com movimento reduzido (data-movimento=reduzido), nada se desloca: só
+   esmaecimentos curtos de opacidade e cor (base.css também zera as animações). Importado por último em index.css. */
 
 :root {
+  --mov-toque: 100ms;
   --mov-curta: var(--duracao);
   --mov-media: 320ms;
+  --mov-palco: 280ms;
   --mov-curva: var(--curva);
 }
 
@@ -33,7 +38,7 @@
   }
 }
 
-/* ---------- 3. Entrada da página ao trocar de rota ---------- */
+/* ---------- 2. Entrada da página ao trocar de rota ---------- */
 @keyframes rota-entra {
   from {
     opacity: 0;
@@ -51,20 +56,57 @@
   }
 }
 
-/* ---------- 4 e 5. Hover e foco: cartões clicáveis, abas e ícones de "Ver a ficha" ---------- */
-.top5-item,
-.destaque {
+/* ---------- 3. Hover, foco e toque: cartões, abas, motivos, links e ícones de "Ver a ficha" ---------- */
+.top5-item {
   transition:
     translate var(--mov-curta) var(--mov-curva),
     border-color var(--mov-curta) var(--mov-curva),
-    background-color var(--mov-curta) var(--mov-curva);
+    background-color var(--mov-curta) var(--mov-curva),
+    scale var(--mov-toque) var(--mov-curva);
+}
+
+/* cartão (.destaque é um .cartao de vidro): a aresta e a sombra acendem, sem borda cheia por cima */
+.destaque {
+  transition:
+    translate var(--mov-curta) var(--mov-curva),
+    box-shadow var(--mov-curta) var(--mov-curva);
+}
+
+/* círculo da posição: fica branco no escolhido, com a cor do número trocando junto */
+.top5-pos {
+  transition:
+    background-color var(--mov-curta) var(--mov-curva),
+    color var(--mov-curta) var(--mov-curva);
+}
+
+.top5-motivo-botao {
+  transition:
+    background-color var(--mov-curta) var(--mov-curva),
+    scale var(--mov-toque) var(--mov-curva);
+}
+
+/* seta do motivo: gira meia volta; abre em 320ms e volta em 200ms, como o painel de detalhes */
+.top5-motivo-seta {
+  transition: transform 200ms var(--mov-curva);
+}
+
+.top5-motivo-botao[aria-expanded='true'] .top5-motivo-seta {
+  transition-duration: var(--mov-media);
 }
 
 .top5-aba {
   transition:
     background-color var(--mov-curta) var(--mov-curva),
     color var(--mov-curta) var(--mov-curva),
-    border-color var(--mov-curta) var(--mov-curva);
+    border-color var(--mov-curta) var(--mov-curva),
+    scale var(--mov-toque) var(--mov-curva);
+}
+
+.hoje-link,
+.hoje-ver {
+  transition:
+    color var(--mov-curta) var(--mov-curva),
+    text-decoration-color var(--mov-curta) var(--mov-curva);
 }
 
 .top5-ficha svg,
@@ -72,9 +114,14 @@
   transition: translate var(--mov-curta) var(--mov-curva);
 }
 
-.top5-item:not([aria-pressed='true']):hover,
+.top5-item:not([aria-pressed='true']):hover {
+  border-color: var(--cor-borda-hover);
+}
+
 .destaque:hover {
-  border-color: color-mix(in srgb, var(--cor-acento) 40%, transparent);
+  --vidro-base: var(--vidro-base-hover);
+  --aresta-topo: 0.32;
+  box-shadow: var(--vidro-sombra-hover);
 }
 
 :root:not([data-movimento='reduzido']) {
@@ -85,9 +132,130 @@
   .destaque:focus-within .destaque__ficha svg {
     translate: 3px 0;
   }
+
+  /* retorno ao toque: o controle encolhe 2% por 100ms (soma com o translateY de 1px do .botao) */
+  .botao:active,
+  .top5-item:active,
+  .top5-aba:active,
+  .top5-motivo-botao:active,
+  .detalhes-botao:active {
+    scale: 0.98;
+  }
 }
 
-/* ---------- 7. Esqueleto com brilho que desliza (substitui o pulso) ---------- */
+/* ---------- 4. Indicador de seleção compartilhado (hooks/useIndicador.js) ----------
+   Só o transform desliza; o tamanho é aplicado direto. Interrompido, a transição segue do ponto atual. */
+.top5-indicador,
+.top5-aba-indicador {
+  transition: transform 300ms var(--mov-curva);
+}
+
+/* ---------- 5. Troca de ação no Top 5: o palco novo entra em escada curta ----------
+   data-entrada='acao' (Top5Destaque.jsx): cabeçalho 0ms, gráfico 60ms, abas 120ms, conteúdo 140ms,
+   motivos de 180ms a 300ms, botão da ficha 200ms. data-entrada='aba': só o conteúdo da aba esmaece. */
+@keyframes top5-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes top5-aba-entra {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] > *,
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] .top5-motivo {
+  animation: top5-entra var(--mov-palco) var(--mov-curva) backwards;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] > .top5-seis {
+  animation-delay: 60ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] > .top5-abas-painel {
+  animation-delay: 120ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] > .top5-painel-corpo {
+  animation-delay: 140ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] > .top5-ficha {
+  animation-delay: 200ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] .top5-motivo:nth-child(1) {
+  animation-delay: 180ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] .top5-motivo:nth-child(2) {
+  animation-delay: 220ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] .top5-motivo:nth-child(3) {
+  animation-delay: 260ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='acao'] .top5-motivo:nth-child(4) {
+  animation-delay: 300ms;
+}
+
+:root:not([data-movimento='reduzido']) .top5-painel[data-entrada='aba'] .top5-aba-corpo {
+  animation: top5-aba-entra 180ms var(--mov-curva) backwards;
+}
+
+/* ---------- 6. Chegada dos dados: o que substitui o esqueleto esmaece em 220ms ----------
+   Vale no primeiro desenho de cada bloco da Hoje (os esqueletos têm aria-hidden e ficam de fora). */
+@keyframes chegar {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root:not([data-movimento='reduzido'])
+  :is(
+    .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
+    .hoje-numeros > :not([aria-hidden='true']),
+    .hoje-topo > :is(.hoje-resumo, .hoje-ouvir),
+    .top5 > :is(.top5-grade, .top5-vazio)
+  ) {
+  animation: chegar 220ms var(--mov-curva) backwards;
+}
+
+/* ---------- 7. Objeto 3D: o desenho entra quando carrega (e a cada objeto novo) ---------- */
+@keyframes palco3d-entra {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .modelo3d-palco canvas {
+  animation: palco3d-entra var(--mov-media) var(--mov-curva) backwards;
+}
+
+/* ---------- 8. Esqueleto com brilho que desliza (substitui o pulso) ---------- */
 .esqueleto {
   position: relative;
   overflow: hidden;
@@ -110,7 +278,7 @@
   }
 }
 
-/* ---------- 8. Pedido de pouco movimento: fica parado ---------- */
+/* ---------- 9. Pedido de pouco movimento: nada se desloca ---------- */
 :root[data-movimento='reduzido'] {
   .esqueleto::after {
     display: none;
@@ -121,11 +289,47 @@
     animation: none;
   }
 
+  /* o indicador pula direto para o lugar; cartões, abas e setas mudam sem transição de forma */
   .top5-item,
+  .top5-pos,
+  .top5-motivo-botao,
+  .top5-motivo-seta,
+  .top5-indicador,
+  .top5-aba-indicador,
   .destaque,
   .top5-aba,
   .top5-ficha svg,
   .destaque__ficha svg {
     transition: none;
+  }
+}
+
+/* Alternativa intencional com pouco movimento: o palco novo, a aba nova, os dados que chegam e o 3D
+   só esmaecem (150ms). Navegador sem @starting-style mostra direto. */
+:root[data-movimento='reduzido']
+  :is(
+    .top5-painel > :not(.top5-ficha),
+    .top5-aba-corpo,
+    .modelo3d-palco canvas,
+    .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
+    .hoje-numeros > :not([aria-hidden='true']),
+    .hoje-topo > .hoje-resumo,
+    .top5 > :is(.top5-grade, .top5-vazio)
+  ) {
+  transition: opacity 150ms linear;
+}
+
+@starting-style {
+  :root[data-movimento='reduzido']
+    :is(
+      .top5-painel > :not(.top5-ficha),
+      .top5-aba-corpo,
+      .modelo3d-palco canvas,
+      .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
+      .hoje-numeros > :not([aria-hidden='true']),
+      .hoje-topo > .hoje-resumo,
+      .top5 > :is(.top5-grade, .top5-vazio)
+    ) {
+    opacity: 0;
   }
 }

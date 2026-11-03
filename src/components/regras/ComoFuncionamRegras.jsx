@@ -44,7 +44,7 @@ export default function ComoFuncionamRegras({ ticker = null }) {
         );
         return (
           <section key={tipo} className="regras-grupo" data-tipo={tipo}>
-            <h4 className="regras-grupo__titulo">{T.tipos[tipo].nome}</h4>
+            <h4 className={`regras-grupo__titulo chip chip--${tipo}`}>{T.tipos[tipo].nome}</h4>
             <p className="regras-grupo__texto">{T.tipos[tipo].texto}</p>
             <ul className="regras-grade">
               {regrasDoTipo.map((regra) => {

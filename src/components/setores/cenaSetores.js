@@ -1,18 +1,20 @@
-import { CircleGeometry, CylinderGeometry, Group, Mesh, Raycaster, TorusGeometry, Vector2 } from 'three';
+import { CylinderGeometry, Group, Mesh, Raycaster, Vector2 } from 'three';
 import {
-  ALTURA_QUADRO, GLB_DISPONIVEIS, LARGURA_QUADRO, LIMITE_TRIANGULOS, RAIO_ANEL, RAIO_DISCO, TAMANHO_OBJETO, TAU,
-  alvoDoGiro, anguloDaFrente, encaixe, indiceDaFrente, posicaoDoPedestal, urlDoGlb,
+  ALTURA_QUADRO, GLB_DISPONIVEIS, LARGURA_QUADRO, LIMITE_TRIANGULOS, TAMANHO_OBJETO, TAU,
+  alvoDoGiro, anguloDaFrente, encaixe, indiceDaFrente, urlDoGlb,
 } from '../../lib/setores3d.js';
 import { suaviza } from '../modelos3d/palco.js';
 import { carregarObjetoGlb, descartarGeometrias, descartarMateriais } from './glbSetor.js';
 import { objetoProcedural } from './objetosSetor.js';
 
-// Mesmos tons de modelos3d/objetos.js: âmbar profundo e grafite.
-const AMBAR = ['--cor-acento', '--cor-fundo', 0.25];
+// Mesmos tons de modelos3d/objetos.js: acento escurecido sobre o fundo e grafite.
+const ACENTO_ESCURO = ['--cor-acento', '--cor-fundo', 0.25];
 const METAL = ['--cor-texto-suave', '--cor-fundo', 0.7];
-const ALVO_Y = 0.5; // centro vertical do conteúdo (disco, pedestais e objetos)
-const ELEV = 0.35; // rad: de frente, um pouco acima
-const ALTURA_PEDESTAL = 0.5;
+// Faixa de tons do .glb: as cores do arquivo viram cinzas entre estes dois, pela luminância.
+const TOM_CLARO = ACENTO_ESCURO;
+const TOM_ESCURO = ['--cor-texto-suave', '--cor-fundo', 0.55];
+const ALVO_Y = 1.5; // centro vertical do objeto em destaque (a base fica em y = 0)
+const ELEV = 0.2; // rad: de frente, um pouco acima
 const ENTRADA_ATRASO = 0.05; // s entre um objeto e o seguinte, em sequência pelo anel
 const ENTRADA_QUEDA = 0.4; // un: altura de onde o objeto desce
 const ENTRADA_DURACAO = 0.45; // s, ease-out exponencial
@@ -20,6 +22,8 @@ const ENTRADA_GIRO = 0.9; // s: giro de chegada do disco
 const ENTRADA_ARCO = Math.PI / 2; // 90 graus até o primeiro setor
 const MOLA = 0.12; // s, constante de tempo do encaixe (~400 ms até assentar)
 const ESCALA_DESTAQUE = 1.35;
+const ESCALA_VITRINE = 2.2; // um setor por vez, sozinho no centro: objeto grande
+const SAIDA_VIS = 0.15; // fração da escala abaixo da qual o setor que sai libera a entrada do próximo
 const GIRO = 0.35; // rad/s do objeto em destaque
 const OCIOSO_ESPERA = 6; // s sem interação até começar o giro ocioso
 const OCIOSO_PASSO = 5; // s entre um setor e o seguinte no giro ocioso
@@ -28,7 +32,7 @@ const MOVIMENTO_CLIQUE = 5; // px: menos que isso é clique
 const FORCA_DESTAQUE = 2.2;
 const FORCA_REPOUSO = 0.4;
 const DEFASE = 0.9; // s: fase da assinatura de um setor para o seguinte
-const AMBAR_EMISSIVO = 0xe8b84a;
+const LUZ_EMISSIVA = 0x5fc9c0; // teal das manchas: destaque do setor sem cor de ação
 
 /** Parte fracionária (de 0 a 1), também para tempo negativo. */
 const fracao = (x) => x - Math.floor(x);
@@ -150,10 +154,10 @@ function respira(modelo, sy0, t, f) {
 }
 
 /**
- * Vitrine giratória dos setores: um disco escuro com um pedestal por setor, em anel, e o objeto em cima.
- * A faixa do topo de cada pedestal é a única marca de dado (verde subiu, vermelho caiu, neutra sem sinal).
+ * Vitrine dos setores: só o objeto do setor da frente, sem moldura, disco nem pedestal, nos tons da paleta.
+ * Ao trocar de setor, o que sai encolhe e o que entra cresce, girando. A variação fica na legenda e na lista.
  * Devolve as opções do criarPalco + `controle` ({ atualiza(lista), vaiPara(indice), sobre(bool) }).
- * A frente é o pedestal de índice `frente`; quando a vitrine muda de frente sozinha (giro ocioso,
+ * A frente é o setor de índice `frente`; quando a vitrine muda de frente sozinha (giro ocioso,
  * arrasto, clique), chama aoFrente(indice). Clique num objeto gira até ele.
  */
 export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente }) {
@@ -208,7 +212,7 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
         const c = m.clone();
         if (TRANSLUCIDAS.has(nome)) c.transparent = true;
         if (EMISSIVAS.has(nome) && c.emissive) {
-          c.emissive.setHex(AMBAR_EMISSIVO);
+          c.emissive.setHex(LUZ_EMISSIVA);
           c.emissiveIntensity = 0;
         }
         descartaveis.push(c, ...origem);
@@ -237,12 +241,41 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
     return mapa;
   }
 
+  /**
+   * Troca cada material do .glb por uma cópia em cinza da paleta: a luminância da cor original escolhe o tom
+   * entre TOM_ESCURO e TOM_CLARO, então as partes seguem distintas entre si. Sem textura nem brilho próprio.
+   */
+  function tonsDaPaleta(obj) {
+    const copias = new Map();
+    obj.traverse((no) => {
+      if (!no.isMesh || !no.material) return;
+      const troca = (m) => {
+        if (!copias.has(m)) {
+          const c = m.clone();
+          if (c.color) {
+            const l = 0.2126 * c.color.r + 0.7152 * c.color.g + 0.0722 * c.color.b; // linear
+            c.color.copy(mats.tomEscuro.color).lerp(mats.tomClaro.color, Math.min(1, Math.sqrt(l)));
+          }
+          c.map = null;
+          c.vertexColors = false;
+          c.emissive?.setHex(0x000000);
+          c.emissiveMap = null;
+          descartaveis.push(m);
+          copias.set(m, c);
+        }
+        return copias.get(m);
+      };
+      no.material = Array.isArray(no.material) ? no.material.map(troca) : troca(no.material);
+    });
+  }
+
   function trocaPorGlb(col, chave) {
     carregarObjetoGlb(urlDoGlb(chave), mats.corpo, {
       tamanho: TAMANHO_OBJETO, limite: LIMITE_TRIANGULOS, manterMateriais: true,
     }).then((obj) => {
       if (!obj) return;
       if (!ativo) { descartarGeometrias(obj); descartarMateriais(obj); return; }
+      tonsDaPaleta(obj);
       col.giro.remove(col.modelo);
       descartarGeometrias(col.modelo);
       col.modelo = obj;
@@ -254,23 +287,22 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
     });
   }
 
-  /** Um pedestal por setor, com o objeto (procedural ou .glb), a faixa do sinal e o foco. Criado uma vez; depois muda de lugar e de cor. */
+  /** Um objeto por setor (procedural ou .glb), no centro. Criado uma vez. */
   function criaCelula(c, i) {
-    const cel = new Group();
-    const pedestal = new Mesh(geo.pedestal, mats.pedestal);
-    const aro = new Mesh(geo.anelTopo, mats.sinal[c.sinal]);
-    const foco = new Mesh(geo.foco, mats.foco);
-    foco.visible = false;
+    const cel = new Group(); // visível = setor na lista
+    const vitrine = new Group(); // visível e em escala cheia só no setor da frente
+    vitrine.visible = false;
+    vitrine.scale.setScalar(0);
     const giro = new Group();
-    giro.position.y = ALTURA_PEDESTAL;
     const modelo = objetoProcedural(c.chave, mats, TAMANHO_OBJETO);
     giro.add(modelo);
     const pick = new Mesh(geo.pick, mats.hit);
-    cel.add(pedestal, aro, foco, giro, pick);
+    vitrine.add(giro, pick);
+    cel.add(vitrine);
     anel.add(cel);
     const col = {
-      setor: c.setor, chave: c.chave, ordem: i, cel, aro, foco, giro, modelo, pick,
-      glb: null, pecas: null, sy0: modelo.scale.y, escala: 1, forca: FORCA_REPOUSO, destacado: false, queda: 0,
+      setor: c.setor, chave: c.chave, ordem: i, cel, vitrine, giro, modelo, pick,
+      glb: null, pecas: null, sy0: modelo.scale.y, escala: 1, forca: FORCA_REPOUSO, destacado: false, queda: 0, vis: 0,
     };
     pick.userData.col = col;
     picks.push(pick);
@@ -279,18 +311,18 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
     return col;
   }
 
-  /** Índice do pedestal sob o ponteiro (só os visíveis), ou null. */
+  /** Índice do objeto sob o ponteiro (só os visíveis), ou null. */
   function indiceNoPonteiro(e) {
     const r = P.canvas.getBoundingClientRect();
     if (!r.width || !r.height) return null;
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, P.cam);
-    const alvos = picks.filter((m) => m.userData.col.cel.visible);
+    const alvos = picks.filter((m) => m.userData.col.cel.visible && m.userData.col.vitrine.visible);
     const hit = ray.intersectObjects(alvos, false)[0];
     return hit ? hit.object.userData.col.ordem : null;
   }
 
-  /** Encaixa no pedestal mais próximo da frente, pelo menor caminho. */
+  /** Encaixa no setor mais próximo da frente, pelo menor caminho. */
   function encaixar() {
     const k = indiceDaFrente(psi, n);
     if (k !== alvoIdx) {
@@ -356,9 +388,6 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
         if (!col) col = criaCelula(c, i);
         col.ordem = i;
         col.cel.visible = true;
-        col.aro.material = mats.sinal[c.sinal];
-        const pos = posicaoDoPedestal(i, n, RAIO_ANEL);
-        col.cel.position.set(pos.x, 0, pos.z);
       });
       porSetor.forEach((col, setor) => {
         if (!vistos.has(setor)) col.cel.visible = false;
@@ -388,37 +417,20 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
     monta(api) {
       P = api;
       mats = {
-        corpo: P.M.solido(AMBAR),
+        corpo: P.M.solido(ACENTO_ESCURO),
         detalhe: P.M.solido(METAL),
         traco: P.M.traco('--cor-fundo', 0.45),
         hit: P.M.veu('--cor-fundo', 0),
-        // Disco escuro: o token de superfície tem alfa e lê como branco, então mistura-se com o fundo.
-        disco: P.M.solido(['--cor-fundo', '--cor-texto-suave', 0.12]),
-        // Pedestal grafite: --cor-superficie-2 tem alfa (lido como branco), então usa-se o texto suave misturado ao fundo.
-        pedestal: P.M.solido(['--cor-texto-suave', '--cor-fundo', 0.55]),
-        aro: P.M.veu('--cor-acento', 0.5),
-        brilho: P.M.veu('--cor-acento', 0.06),
-        foco: P.M.veu('--cor-acento', 0.18),
-        sinal: {
-          alta: P.M.solido('--cor-alta'),
-          queda: P.M.solido('--cor-queda'),
-          estavel: P.M.solido('--cor-estavel'),
-        },
+        tomClaro: P.M.solido(TOM_CLARO),
+        tomEscuro: P.M.solido(TOM_ESCURO),
       };
       mats.hit.visible = false; // invisível, mas o raycast acerta
       geo = {
-        disco: new CylinderGeometry(RAIO_DISCO, RAIO_DISCO, 0.25, 64).translate(0, -0.125, 0),
-        aro: new TorusGeometry(RAIO_DISCO, 0.025, 8, 160).rotateX(Math.PI / 2).translate(0, 0.005, 0),
-        brilho: new CircleGeometry(RAIO_DISCO + 1.8, 72).rotateX(-Math.PI / 2).translate(0, -0.27, 0),
-        pedestal: new CylinderGeometry(0.55, 0.55, ALTURA_PEDESTAL, 40).translate(0, ALTURA_PEDESTAL / 2, 0),
-        anelTopo: new TorusGeometry(0.55, 0.035, 8, 48).rotateX(Math.PI / 2).translate(0, ALTURA_PEDESTAL + 0.01, 0),
-        foco: new CylinderGeometry(0.5, 0.5, 0.01, 40).translate(0, ALTURA_PEDESTAL + 0.005, 0),
         pick: new CylinderGeometry(0.62, 0.62, 2, 16).translate(0, 1, 0),
       };
-      // O disco gira com o anel; o brilho do chão fica parado.
+      // Só o grupo que gira: os objetos ficam sozinhos na cena, sem chão.
       anel = new Group();
-      anel.add(new Mesh(geo.disco, mats.disco), new Mesh(geo.aro, mats.aro));
-      P.cena.add(anel, new Mesh(geo.brilho, mats.brilho));
+      P.cena.add(anel);
       P.canvas.addEventListener('pointerdown', aoBaixar);
       P.canvas.addEventListener('pointermove', aoMover);
       P.canvas.addEventListener('pointerup', aoSoltar);
@@ -461,22 +473,30 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
       }
       anel.rotation.y = -psi;
 
+      // o setor que entra espera o anterior quase sumir, para os dois não se cruzarem no centro
+      let saindo = false;
+      if (!reduz) porSetor.forEach((col) => {
+        if (col.cel.visible && col.ordem !== alvoIdx && col.vis > SAIDA_VIS) saindo = true;
+      });
+
       porSetor.forEach((col) => {
         if (!col.cel.visible) return;
         const destacado = col.ordem === alvoIdx;
-        if (destacado !== col.destacado) {
-          col.destacado = destacado;
-          col.foco.visible = destacado;
-        }
+        col.destacado = destacado;
         // destaque: o objeto cresce e a assinatura ganha força; os demais ficam em escala 1
         const metaEsc = destacado ? ESCALA_DESTAQUE : 1;
         col.escala = reduz || Math.abs(metaEsc - col.escala) < 0.002
           ? metaEsc : col.escala + (metaEsc - col.escala) * fMola;
         col.giro.scale.setScalar(col.escala);
+        // só o setor da frente fica à vista: o que sai encolhe até sumir e o que entra cresce
+        const metaVis = destacado && !saindo ? 1 : 0;
+        col.vis = reduz || Math.abs(metaVis - col.vis) < 0.002 ? metaVis : col.vis + (metaVis - col.vis) * fMola;
+        col.vitrine.visible = col.vis > 0;
+        col.vitrine.scale.setScalar(ESCALA_VITRINE * col.vis);
         const metaForca = destacado ? FORCA_DESTAQUE : FORCA_REPOUSO;
         col.forca = reduz || Math.abs(metaForca - col.forca) < 0.002
           ? metaForca : col.forca + (metaForca - col.forca) * fMola;
-        // entrada: o objeto desce ENTRADA_QUEDA e assenta no pedestal, em sequência pelo anel
+        // entrada: o objeto desce ENTRADA_QUEDA e assenta no lugar, em sequência pela lista
         const p = (tE - col.ordem * ENTRADA_ATRASO) / ENTRADA_DURACAO;
         if (p <= 0) {
           col.giro.visible = false;
@@ -484,7 +504,7 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
           col.giro.visible = true;
           col.queda = p >= 1 ? 0 : ENTRADA_QUEDA * Math.pow(2, -10 * p);
         }
-        col.giro.position.y = ALTURA_PEDESTAL + col.queda;
+        col.giro.position.y = col.queda;
         // rotação própria: só o destaque gira devagar; os demais voltam à frente
         if (reduz) {
           col.giro.rotation.y = 0;

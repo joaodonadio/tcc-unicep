@@ -5,8 +5,6 @@ import { TEXTOS } from '../../lib/textos.js';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
-
 // Top 5 e histórico do modelo chegam por react-query; aqui o hook devolve o valor do teste
 const dados = vi.hoisted(() => ({ top: undefined, historico: undefined }));
 vi.mock('../../hooks/useDados.js', async (importOriginal) => {

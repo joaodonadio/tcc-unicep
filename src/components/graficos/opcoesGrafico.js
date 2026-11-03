@@ -30,7 +30,7 @@ function tooltipBase(tema, formatter) {
     borderWidth: 1,
     borderRadius: 12,
     padding: [10, 12],
-    textStyle: { color: tema.texto, fontFamily: tema.fonte, fontSize: 13 },
+    textStyle: { color: tema.texto, fontFamily: tema.fonteTexto, fontSize: 13 },
     extraCssText: 'z-index:1000;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.55);',
     position: posicaoTooltip,
     formatter,
@@ -42,7 +42,7 @@ function linhaTooltip(tema, cor, rotulo, valor, mostrarRotulo) {
   const nome = mostrarRotulo
     ? `<span style="color:${escapar(tema.suave)};margin-right:12px">${escapar(TEXTOS.grafico.tipRotulo(rotulo))}</span>`
     : '';
-  const numero = `<strong style="margin-left:auto;font-size:15px;font-weight:700;color:${escapar(tema.texto)};font-variant-numeric:tabular-nums">${escapar(valor)}</strong>`;
+  const numero = `<strong style="margin-left:auto;font-family:${escapar(tema.fonte)};font-size:14px;font-weight:500;letter-spacing:-0.02em;color:${escapar(tema.texto)};font-variant-numeric:tabular-nums slashed-zero">${escapar(valor)}</strong>`;
   return `<div style="display:flex;align-items:center;white-space:nowrap;margin-top:4px">${bolinha}${nome}${numero}</div>`;
 }
 
@@ -89,7 +89,14 @@ export function montarOpcao({
     axisLine: { show: false },
     axisTick: { show: false },
     splitLine: { show: false },
-    axisLabel: { ...textoEixo, show: horizontal ? true : rotulosX, hideOverlap: true, interval: horizontal ? 0 : 'auto' },
+    // Na horizontal o eixo traz nomes (setores, índices): texto corrido. Na vertical, datas: números.
+    axisLabel: {
+      ...textoEixo,
+      fontFamily: horizontal ? tema.fonteTexto : tema.fonte,
+      show: horizontal ? true : rotulosX,
+      hideOverlap: true,
+      interval: horizontal ? 0 : 'auto',
+    },
   };
 
   const corDoSinal = (v) => (v < 0 ? tema.queda : tema.alta);
@@ -200,7 +207,7 @@ export function montarOpcao({
   return {
     animation: animar,
     animationDuration: 500,
-    textStyle: { fontFamily: tema.fonte },
+    textStyle: { fontFamily: tema.fonteTexto },
     grid: horizontal
       ? { left: 8, right: 56, top: 8, bottom: 8, containLabel: true }
       : { left: 8, right: 12, top: 12, bottom: rotulosX ? 8 : 6, containLabel: true },

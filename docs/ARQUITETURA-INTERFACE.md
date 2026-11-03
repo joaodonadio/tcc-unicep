@@ -61,7 +61,7 @@ Decisões de alto nível (detalhadas nas seções seguintes):
 | Análise do dia | Montada no front a partir de seis pacotes; não há endpoint de agregado | Os números e os status vêm do processamento; a montagem é uma função pura e testável |
 | Regras de sinal | Avaliadas no front, como tabela declarativa (`lib/sugestoes.js`), sobre os valores dos pacotes | O processamento fornece números e status; cada regra tem condição escrita, limite e teste (seção 4) |
 | Textos | Todo texto da interface fica em `lib/textos.js` (objeto `TEXTOS`) | A linguagem tem um único lugar para revisão |
-| Visual | Tema escuro cinza-quente, com destaque âmbar; cores e tipografia em `styles/tokens.css`; fonte Manrope | Contraste alto para leitura de números; fonte legível em tamanhos variados |
+| Visual | Tema escuro cinza-quente, com destaque âmbar; cores e tipografia em `styles/tokens.css`; fonte Atkinson Hyperlegible Next | Contraste alto para leitura de números; fonte legível em tamanhos variados |
 | Gráficos | SVG nos gráficos próprios; ECharts em alguns gráficos; Three.js só para os objetos 3D, carregado sob demanda | SVG é declarativo e tem alternativa textual (seção 7.5) |
 
 ---
@@ -91,14 +91,14 @@ A página Hoje é o painel inicial. Começa com o bloco Como usar e segue com o 
 | RF-1.2 | Top 5 para estudar hoje, no topo do painel: cinco ações, com o motivo de cada uma | H1, H2 |
 | RF-1.3 | Título com a data do pregão e resumo em frases curtas, gerado a partir dos números do pregão | H2 |
 | RF-1.4 | Botão "Ouvir o resumo" pela Web Speech API (`SpeechSynthesis`, pt-BR). O botão alterna para parar a leitura. Não aparece se o navegador não tiver a API | H7 |
-| RF-1.5 | Números do dia: Ibovespa, dólar (Banco Central com retorno ao pacote de mercado), Selic, CDI, IPCA e amplitude do pregão. Linha de fonte abaixo da grade, com a data do pacote e a origem da Selic (ex.: "Selic: Banco Central, valor em vigor.") | H1, H2 |
+| RF-1.5 | Números do dia: Ibovespa, dólar (fechamento do pregão, sem histórico), CDI, IPCA e amplitude do pregão (matriz de pontos). Linha de fonte abaixo da grade, com a data do pacote | H1, H2 |
 | RF-1.6 | Gráfico do Ibovespa nos últimos 6 meses, com link para a página Mercado | H1 |
 | RF-1.7 | Destaques do dia: maior alta, maior queda e volume fora do comum | H1, H2 |
 | RF-1.8 | Resumos de proventos, de notícias e da Minha lista, com link para a página completa | H6 |
 
 ### 2.3 Mercado (RF-2.x, rota `/mercado`)
 
-Quatro abas: Índices, Juros e dólar, Setores e Destaques (`aria-selected`). O mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação, aparece nas abas de setor.
+Duas abas: Índices e Destaques (os setores têm página própria) (`aria-selected`). O mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação, aparece nas abas de setor.
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
@@ -355,7 +355,7 @@ A linguagem da interface segue uma regra de contenção. Ela descreve o que os d
 | Roteamento | React Router 7, com `createBrowserRouter` |
 | Dados do servidor | TanStack Query 5 |
 | Estilo | CSS próprio, em `src/styles/`: tokens de cor e tipografia em `tokens.css`, e um arquivo por tela e por componente |
-| Tipografia | Manrope Variable, por `@fontsource-variable/manrope`, hospedada com o próprio site |
+| Tipografia | Atkinson Hyperlegible Next Variable (títulos e texto) e Atkinson Hyperlegible Mono Variable (números), por `@fontsource-variable/atkinson-hyperlegible-next` e `@fontsource-variable/atkinson-hyperlegible-mono`, hospedadas com o próprio site |
 | Ícones | lucide-react |
 | Gráficos | SVG próprio; ECharts em alguns gráficos; Three.js (0.187) nos objetos 3D, sob demanda |
 | Testes | Vitest 2, jsdom e Testing Library |
@@ -374,11 +374,9 @@ A camada de dados usa `fetch` nativo.
 | `services/erros.js` | Mensagens de erro em português. Traduz 401, 422 e 503 e as falhas de rede. Repete no máximo duas vezes as falhas transitórias (503 ou sem resposta) |
 | `services/experimento.js` | Normaliza o Top 5 e o histórico de acertos do experimento |
 | `services/proventosTodos.js` | Monta a agenda de proventos pela rota local `/proventos-todos` ou, se ela falhar, por ação |
-| `services/traducao.js` | Traduz as manchetes para português pelo proxy `/traduzir`, com cache no navegador. Qualquer falha devolve o original |
 | `hooks/useDados.js` | Um hook por rota, com `queryKey` em `['dados', caminho, parâmetros]` |
 | `hooks/useAnalise.js` | Combina os pacotes da análise do dia |
-| `hooks/useBancoCentral.js` | Selic e dólar PTAX do Banco Central, pelo proxy `/bcb` |
-| `hooks/useAgenda.js`, `useTraducao.js`, `useLeituraEmVoz.js`, `useReducedMotion.js`, `useRolarParaAncora.js`, `useMetaPublicacao.js` | Apoio: agenda de proventos, tradução, leitura em voz, preferência de movimento reduzido, rolagem para âncoras e metadados da publicação |
+| `hooks/useAgenda.js`, `useLeituraEmVoz.js`, `useReducedMotion.js`, `useRolarParaAncora.js`, `useMetaPublicacao.js` | Apoio: agenda de proventos, leitura em voz, preferência de movimento reduzido, rolagem para âncoras e metadados da publicação |
 | `lib/*.js` | Funções puras de montagem, formatação, datas, séries, perguntas da ficha, lista de ações, setores e textos. Não fazem chamadas de rede, salvo as que são feitas por hooks |
 | `lib/textos.js` | Objeto `TEXTOS`, com todo texto da interface |
 
@@ -393,13 +391,11 @@ Na fonte de arquivos, o parâmetro `data` é ignorado: a emulação sempre serve
 
 O `vite.config.js` cria os seguintes proxies:
 
-- `/api` para `API_BASE_URL`, acrescentando o cabeçalho `X-API-Key` com o valor de `API_KEY`. Só existe quando `API_BASE_URL` está preenchida;
-- `/traduzir` para o serviço de tradução automática, sem chave. Sem ele, as manchetes ficam no original;
-- `/bcb` para a API do Banco Central, sem chave. Sem ele, o bloco de dólar e Selic usa o pacote de mercado.
+- `/api` para `API_BASE_URL`, acrescentando o cabeçalho `X-API-Key` com o valor de `API_KEY`. Só existe quando `API_BASE_URL` está preenchida.
 
 Os proxies valem para o servidor de desenvolvimento (porta 5173) e para o `vite preview`. As variáveis `API_BASE_URL` e `API_KEY` não têm prefixo `VITE_`, porque o Vite só expõe ao navegador as variáveis com esse prefixo. Por isso a chave não entra no pacote publicado.
 
-Em produção, o build é estático e os proxies do Vite não existem. É preciso um proxy próprio que faça o mesmo papel: receba `/api`, acrescente `X-API-Key` no servidor e encaminhe à API, e receba `/traduzir` e `/bcb`, se essas funções forem desejadas. Se a interface chamar a API diretamente, o domínio de origem precisa ser informado à equipe da API para liberação de CORS. Com o proxy, o navegador fala somente com a própria origem e CORS não se aplica.
+Em produção, o build é estático e os proxies do Vite não existem. É preciso um proxy próprio que faça o mesmo papel: receba `/api`, acrescente `X-API-Key` no servidor e encaminhe à API. Se a interface chamar a API diretamente, o domínio de origem precisa ser informado à equipe da API para liberação de CORS. Com o proxy, o navegador fala somente com a própria origem e CORS não se aplica.
 
 ### 7.5 Renderização gráfica
 
@@ -429,7 +425,7 @@ O tema é escuro, cinza-quente, com destaque âmbar. As cores e a tipografia fic
 
 Dados e gráficos usam `--cor-dado-1` a `--cor-dado-7`. As cores de cada setor do mapa do pregão ficam nos tokens `--linha-*` (por exemplo, `--linha-financeiro` e `--linha-saude`).
 
-A tipografia usa Manrope Variable. A escala tem sete degraus, de `--texto-xs` (0,8125rem) a `--texto-3xl` (2,75rem; 2,125rem em telas de até 720 px). Os pesos são 400 (corpo), 600 (destaque), 700 (títulos) e 800 (títulos de página).
+A tipografia usa Atkinson Hyperlegible Next Variable (títulos e texto) e Atkinson Hyperlegible Mono Variable (números de dado e códigos). A escala tem sete degraus, de `--texto-xs` (0,8125rem) a `--texto-3xl` (2,75rem; 2,125rem em telas de até 720 px). Os pesos são 400 (corpo), 600 (destaque), 700 (títulos) e 800 (títulos de página).
 
 ---
 
@@ -506,7 +502,7 @@ A suíte roda com `npm test` (Vitest, em modo único) e tem mais de 1.000 testes
 | Área | Pasta | O que verifica |
 |---|---|---|
 | Funções puras | `src/test/lib/` | Análise do dia; regras de sinal e seus limites; séries; formatação, valores e datas; perguntas da ficha; lista de ações; mapa do pregão; experimento; linguagem |
-| Camada de dados | `src/test/services/`, `src/test/dados/` | Emulação das rotas da API, 404 como `null`, normalização do Top 5, agenda de proventos e tradução das manchetes |
+| Camada de dados | `src/test/services/`, `src/test/dados/` | Emulação das rotas da API, 404 como `null`, normalização do Top 5, e agenda de proventos |
 | Páginas e rotas | `src/test/paginas/`, `src/test/rotas.test.jsx` | Páginas, redirecionamentos e rotas |
 | Hoje, Mercado, Setores, Proventos e Notícias | `src/test/hoje/`, `src/test/inicio/`, `src/test/mercado/`, `src/test/setores/`, `src/test/proventos/`, `src/test/noticias/` | Blocos de cada página |
 | O modelo | `src/test/modelo/` | Página O modelo |
@@ -528,7 +524,7 @@ Também são usados `npm run lint` (ESLint) e `npm run build` (build de produç�
 - MDN. *Web Speech API (SpeechSynthesis)*. <https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis>
 - Chen, T.; Guestrin, C. (2016). *XGBoost: A Scalable Tree Boosting System*. In: KDD '16. ACM. DOI 10.1145/2939672.2939785.
 - Lucas Leme. *FinBERT-PT-BR*. <https://github.com/lucas-leme/FinBERT-PT-BR>
-- Documentação oficial: React <https://react.dev/>; Vite <https://vite.dev/>; TanStack Query <https://tanstack.com/query/latest>; React Router <https://reactrouter.com/>; Manrope <https://www.manrope.com/>.
+- Documentação oficial: React <https://react.dev/>; Vite <https://vite.dev/>; TanStack Query <https://tanstack.com/query/latest>; React Router <https://reactrouter.com/>; Atkinson Hyperlegible Next <https://www.brailleinstitute.org/freefont>.
 - Documentos do módulo de processamento (outubro de 2026): *Guia da API para a interface*; *Guia dos pacotes para a interface*; *Especificação do Módulo de Processamento*; planilha *Dados que precisam ser mandados para a interface*.
 
 ---

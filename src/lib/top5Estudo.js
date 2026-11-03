@@ -4,6 +4,8 @@
  * Ausência nunca vira 0: campo sem valor fica null. Não é indicação de compra.
  */
 
+import { cortarJanela, JANELAS } from './series.js';
+import { TEXTOS, porNivel } from './textos.js';
 import { valorOuNulo } from './valor.js';
 
 export const TAMANHO_TOP = 5;
@@ -45,10 +47,10 @@ function montarItem(posicao, ticker, cartao, chance = null) {
     setor: cartao?.setor_nome ?? cartao?.setor ?? null,
     preco: valorOuNulo(R?.cotacao?.fechamento),
     variacao: cartao?.variacao_dia ?? valorOuNulo(R?.cotacao?.variacao_dia),
-    motivoCurto: favor[0]?.titulo ?? cartao?.titulo ?? null,
     chance,
     favor,
     atencao: sinaisDe(cartao, 'atencao'),
+    contexto: sinaisDe(cartao, 'contexto'),
     contagem: cartao?.contagem ?? null,
     resumo: R,
   };
@@ -100,4 +102,54 @@ export function dadosDosModelos(resumo) {
     },
     pendulo: { beta: valorOuNulo(resumo?.beta) },
   };
+}
+
+const contagemValida = (v) => (Number.isInteger(v) && v >= 0 ? v : null);
+
+/** Fechamento dos últimos 6 meses (127 pregões) e as pontas com valor; com menos de 2 valores, null. */
+export function fechamentoSeisMeses(serie) {
+  if (!serie) return null;
+  const valores = cortarJanela(serie, JANELAS['6m']).valores.fechamento ?? [];
+  const finitos = valores.filter((v) => typeof v === 'number' && Number.isFinite(v));
+  if (finitos.length < 2) return null;
+  return { valores, primeiro: finitos[0], ultimo: finitos[finitos.length - 1] };
+}
+
+const ORDEM_DOS_TONS = ['forte', 'atencao', 'contexto'];
+const CAMPO_DO_TOM = { forte: 'favor', atencao: 'atencao', contexto: 'contexto' };
+
+/** Sinais do item na ordem de leitura (a favor, atenção, contexto), cada um com o `tom`. */
+export function motivosDoItem(item) {
+  return ORDEM_DOS_TONS.flatMap((tom) => (item?.[CAMPO_DO_TOM[tom]] ?? []).map((s) => ({ ...s, tom })));
+}
+
+/** Motivo do cartão da lista: o 1º a favor; sem nenhum, o 1º de atenção; senão null. */
+export function motivoPrincipal(item) {
+  if (item?.favor?.length) return { ...item.favor[0], tom: 'forte' };
+  if (item?.atencao?.length) return { ...item.atencao[0], tom: 'atencao' };
+  return null;
+}
+
+/** Título do sinal no nível de leitura; regra sem título próprio no mapa usa o do sinal. */
+export function tituloDoSinal(sinal, nivel) {
+  const titulo = TEXTOS.top5Hoje.tituloSinal[sinal?.id];
+  if (titulo) return porNivel(titulo, nivel);
+  return sinal?.titulo ?? sinal?.simples ?? null;
+}
+
+/**
+ * Frase-resumo dos pontos: "2 pontos a favor e nenhum ponto de atenção." O contexto entra só se houver.
+ * Sem os números de favor e de atenção, null: ausência não vira zero.
+ */
+export function resumoDosMotivos(contagem) {
+  const forte = contagemValida(contagem?.forte);
+  const atencao = contagemValida(contagem?.atencao);
+  if (forte == null || atencao == null) return null;
+  const R = TEXTOS.top5Hoje.resumoMotivos;
+  const partes = [R.forte(forte), R.atencao(atencao)];
+  const contexto = contagemValida(contagem?.contexto);
+  if (contexto) partes.push(R.contexto(contexto));
+  const ultima = partes.pop();
+  const frase = `${partes.join(', ')} e ${ultima}.`;
+  return frase.charAt(0).toUpperCase() + frase.slice(1);
 }

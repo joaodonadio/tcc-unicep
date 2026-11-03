@@ -9,7 +9,7 @@ vi.mock('../../components/modelos3d/Modelo3D.jsx', () => ({ default: () => null 
 
 describe('PainelHoje', () => {
   beforeEach(() => {
-    // o stub responde 503 para /bcb: o dólar cai para o valor do pacote
+    // fetch de teste: só os pacotes de public/dados (a API privada)
     instalarFetchDados();
   });
 
@@ -20,14 +20,13 @@ describe('PainelHoje', () => {
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 
-  it('mostra os seis números do dia com rótulo e valor', async () => {
+  it('mostra os cinco números do dia com rótulo e valor', async () => {
     renderizar(<PainelHoje />);
 
     const faixa = await screen.findByRole('region', { name: porNivel(TEXTOS.hoje.numeros, 'simples') });
     for (const rotulo of [
       porNivel(TEXTOS.hoje.ibovespa, 'simples'),
       porNivel(TEXTOS.hoje.dolar, 'simples'),
-      porNivel(TEXTOS.hoje.selic, 'simples'),
       porNivel(TEXTOS.hoje.cdi, 'simples'),
       porNivel(TEXTOS.hoje.ipca, 'simples'),
       porNivel(TEXTOS.hoje.amplitude, 'simples'),
@@ -35,10 +34,10 @@ describe('PainelHoje', () => {
       expect(await within(faixa).findByText(rotulo)).toBeInTheDocument();
     }
 
-    // o dólar vem do pacote do pregão (a PTAX só cobre a falta dele): valor em reais, nunca zero
+    // o dólar vem só do pacote do pregão: valor em reais, nunca zero
     const dolar = (await within(faixa).findByText(porNivel(TEXTOS.hoje.dolar, 'simples'))).closest('.hoje-numero');
     await vi.waitFor(() => expect(dolar.textContent).toMatch(/R\$ \d/));
-    // seis buscas encadeadas: sob a suíte inteira passa dos 5 s padrão
+    // cinco buscas encadeadas: sob a suíte inteira passa dos 5 s padrão
   }, 15000);
 
   it('mostra os títulos dos blocos', async () => {

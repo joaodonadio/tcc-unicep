@@ -1,6 +1,149 @@
-/* Notícias: a tabela de empresas por tom cabe na largura do celular sem rolar a página.
-   O restante do bloco de notícias (cores, cabeçalho) continua em inicio.css. */
+/* Notícias: o tom do pregão num cartão lavanda. Manchetes em Atkinson Hyperlegible Next, com um chip de tom que traz a palavra;
+   contagens e códigos em Atkinson Hyperlegible Mono. A tabela de empresas cabe na largura do celular sem rolar a página.
+   O bloco nasce em inicio.css (carregado antes); aqui fica só o que muda na página Notícias. */
 
+/* Cartão de vidro com mancha lavanda (notícias, tom) */
+.dia-bloco.dia-noticias {
+  --brilho: var(--poca-magenta);
+  --brilho-2: var(--poca-violeta);
+  --brilho-forca: 50%;
+  --cor-texto-suave: #dedee3;
+  background: var(--vidro);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
+}
+
+.dia-noticias .dia-bloco-titulo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
+}
+
+/* Aviso de poucas manchetes: fórmula de aviso amarela (atenção) */
+.dia-noticias .dia-nota[data-aviso='poucas-manchetes'] {
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid color-mix(in srgb, var(--cor-atencao) 30%, transparent);
+  border-radius: var(--raio-3);
+  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
+  color: var(--cor-texto);
+}
+
+/* Contagens: sub-superfícies, número grande em Atkinson Hyperlegible Mono */
+.dia-noticias .dia-contagem {
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  box-shadow: var(--sub-luz);
+}
+
+.dia-noticias .dia-contagem dt {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0;
+}
+
+.dia-noticias .dia-contagem dd {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 2.5rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+@media (max-width: 760px) {
+  .dia-noticias .dia-contagem dd {
+    font-size: 2rem;
+  }
+}
+
+/* Manchetes: uma coluna no celular; uma coluna por tom a partir de 900px */
+.dia-noticias .dia-manchetes {
+  gap: var(--espaco-5);
+}
+
+@media (min-width: 900px) {
+  .dia-noticias .dia-manchetes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--espaco-6);
+  }
+}
+
+.dia-noticias .dia-manchetes-titulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0;
+}
+
+/* Manchete: linha com fio fino, sem caixa; o chip de tom diz a palavra */
+.dia-noticias .dia-manchetes-lista {
+  gap: 0;
+}
+
+.dia-noticias .dia-manchetes-lista li {
+  padding: var(--espaco-3) 0;
+  border: 0;
+  border-top: 1px solid var(--cor-fio);
+  border-radius: 0;
+  background: none;
+}
+
+.dia-noticias .dia-manchetes-lista li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.dia-noticias .dia-manchetes-lista li > .pilula {
+  margin-bottom: var(--espaco-2);
+  font-size: var(--texto-sm);
+}
+
+.dia-noticias .pilula[data-tom='alta'] {
+  border-color: color-mix(in srgb, var(--cor-alta) 30%, transparent);
+}
+
+.dia-noticias .pilula[data-tom='queda'] {
+  border-color: color-mix(in srgb, var(--cor-queda) 30%, transparent);
+}
+
+.dia-noticias .dia-manchete {
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-base);
+  font-weight: var(--peso-medio);
+  line-height: 1.45;
+}
+
+.dia-noticias .dia-mais-manchetes {
+  min-height: 2.75rem;
+  border: 1px solid var(--sub-borda);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+}
+
+.dia-noticias .dia-mais-manchetes:hover {
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
+}
+
+/* Empresas com mais manchetes: tabela com ticker em Atkinson Hyperlegible Mono */
+.dia-noticias .dia-tabela-empresas thead th {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.dia-noticias .dia-tabela-empresas tbody th a {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.dia-noticias .dia-tabela-empresas tbody tr:hover {
+  background: var(--sub-fundo-hover);
+}
+
+/* Empresas: a tabela rola por dentro e a página não */
 .dia-empresas {
   min-width: 0;
   overflow-x: auto;

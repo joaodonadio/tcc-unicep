@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { dadosDosModelos, numerosChave, top5ParaEstudar } from '../../lib/top5Estudo.js';
+import {
+  dadosDosModelos,
+  fechamentoSeisMeses,
+  motivoPrincipal,
+  motivosDoItem,
+  numerosChave,
+  resumoDosMotivos,
+  tituloDoSinal,
+  top5ParaEstudar,
+} from '../../lib/top5Estudo.js';
+import { REGRAS } from '../../lib/sugestoes.js';
+import { TEXTOS } from '../../lib/textos.js';
 
 const cartao = (ticker, forte, atencao, volume = null, extra = {}) => ({
   ticker,
@@ -41,6 +52,17 @@ describe('top5ParaEstudar', () => {
     expect(itens[0].preco).toBeNull();
     expect(itens[0].variacao).toBeNull();
     expect(itens[0].chance).toBeNull();
+  });
+
+  it('separa os sinais de contexto', () => {
+    const c = cartao('A', 1, 0, null, {
+      sinais: [
+        { id: 'f0', tipo: 'forte', titulo: 'F', simples: 'f' },
+        { id: 'c0', tipo: 'contexto', titulo: 'C', simples: 'c' },
+      ],
+    });
+    const { itens } = top5ParaEstudar({ sugestoes: [c] });
+    expect(itens[0].contexto).toEqual([{ id: 'c0', titulo: 'C', simples: 'c', tecnico: null }]);
   });
 
   it('usa o modelo quando ele traz chance, com os dados das regras', () => {
@@ -91,5 +113,79 @@ describe('numerosChave e dadosDosModelos', () => {
   it('ausência vira null', () => {
     expect(numerosChave(null)).toEqual({ pl: null, dy: null, alta6m: null });
     expect(dadosDosModelos({ pl: { valor: null, status: 'indisponivel' } }).moedas).toEqual({ pl: null, plSetor: null });
+  });
+});
+
+describe('fechamentoSeisMeses', () => {
+  it('corta os últimos 127 pregões e devolve as pontas', () => {
+    const fechamento = Array.from({ length: 130 }, (_, i) => 100 + i);
+    const r = fechamentoSeisMeses({ datas: fechamento.map(String), valores: { fechamento } });
+    expect(r.valores).toHaveLength(127);
+    expect(r.primeiro).toBe(103);
+    expect(r.ultimo).toBe(229);
+  });
+
+  it('pula vazios nas pontas e pede ao menos 2 valores', () => {
+    expect(fechamentoSeisMeses({ datas: ['a', 'b', 'c'], valores: { fechamento: [null, 10, 12] } })).toEqual({
+      valores: [null, 10, 12],
+      primeiro: 10,
+      ultimo: 12,
+    });
+    expect(fechamentoSeisMeses({ datas: ['a', 'b'], valores: { fechamento: [null, 10] } })).toBeNull();
+    expect(fechamentoSeisMeses({ datas: [], valores: {} })).toBeNull();
+    expect(fechamentoSeisMeses(null)).toBeNull();
+  });
+});
+
+describe('motivos do item', () => {
+  const item = {
+    favor: [{ id: 'f0', titulo: 'F0', simples: 'f' }],
+    atencao: [{ id: 'a0', titulo: 'A0', simples: 'a' }],
+    contexto: [{ id: 'c0', titulo: 'C0', simples: 'c' }],
+  };
+
+  it('ordem a favor, atenção e contexto, cada um com o tom', () => {
+    expect(motivosDoItem(item).map((s) => `${s.tom}:${s.id}`)).toEqual(['forte:f0', 'atencao:a0', 'contexto:c0']);
+    expect(motivosDoItem({})).toEqual([]);
+  });
+
+  it('motivo principal: 1º a favor, senão 1º de atenção, senão null', () => {
+    expect(motivoPrincipal(item)).toMatchObject({ id: 'f0', tom: 'forte' });
+    expect(motivoPrincipal({ ...item, favor: [] })).toMatchObject({ id: 'a0', tom: 'atencao' });
+    expect(motivoPrincipal({ favor: [], atencao: [], contexto: item.contexto })).toBeNull();
+  });
+});
+
+describe('tituloDoSinal', () => {
+  it('simples do mapa, técnico no nível técnico e, sem mapa, o título do sinal', () => {
+    const s = { id: 'dy_alto', titulo: 'Dividend yield alto para o setor' };
+    expect(tituloDoSinal(s, 'simples')).toBe(TEXTOS.top5Hoje.tituloSinal.dy_alto.simples);
+    expect(tituloDoSinal(s, 'tecnico')).toBe('Dividend yield alto para o setor');
+    expect(tituloDoSinal({ id: 'regra_nova', titulo: 'Título do sinal' }, 'simples')).toBe('Título do sinal');
+  });
+
+  it('toda regra tem título simples, diferente do técnico', () => {
+    for (const regra of REGRAS) {
+      const t = TEXTOS.top5Hoje.tituloSinal[regra.id];
+      expect(t, regra.id).toBeDefined();
+      expect(t.simples, regra.id).not.toBe(t.tecnico);
+    }
+  });
+});
+
+describe('resumoDosMotivos', () => {
+  it('conta em palavras, com singular, plural e "nenhum"', () => {
+    expect(resumoDosMotivos({ forte: 2, atencao: 0, contexto: 0 })).toBe('2 pontos a favor e nenhum ponto de atenção.');
+    expect(resumoDosMotivos({ forte: 1, atencao: 1, contexto: 1 })).toBe(
+      '1 ponto a favor, 1 ponto de atenção e 1 informação para saber.',
+    );
+    expect(resumoDosMotivos({ forte: 0, atencao: 3, contexto: 2 })).toBe(
+      'Nenhum ponto a favor, 3 pontos de atenção e 2 informações para saber.',
+    );
+  });
+
+  it('sem contagem de favor e atenção, null', () => {
+    expect(resumoDosMotivos(null)).toBeNull();
+    expect(resumoDosMotivos({ forte: 1 })).toBeNull();
   });
 });

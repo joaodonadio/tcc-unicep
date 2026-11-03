@@ -1,4 +1,5 @@
 import { TEXTOS } from '../../lib/textos.js';
+import Mascote from './Mascote.jsx';
 
 /**
  * Os 4 estados de cada bloco: skeleton / dados / vazio / erro (§3).
@@ -24,10 +25,11 @@ export function CardSkeleton({ altura = '9rem', rotulo = TEXTOS.estados.carregan
   );
 }
 
-export function BlocoErro({ titulo = TEXTOS.estados.erroTitulo, mensagem, onTentarNovamente, nivel = 3 }) {
+export function BlocoErro({ titulo = TEXTOS.estados.erroTitulo, mensagem, onTentarNovamente, nivel = 3, mascote = false }) {
   const Titulo = `h${nivel}`;
   return (
     <div className="estado estado--erro" role="alert">
+      {mascote && <Mascote humor="atento" className="estado__mascote" />}
       <Titulo>{titulo}</Titulo>
       <p>{mensagem ?? TEXTOS.estados.erroTexto}</p>
       {onTentarNovamente && (

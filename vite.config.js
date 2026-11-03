@@ -9,22 +9,8 @@ export default defineConfig(({ mode }) => {
   // fica só no servidor de desenvolvimento/preview e nunca entra no pacote do
   // navegador. Em produção é preciso um proxy equivalente que injete X-API-Key.
   const env = loadEnv(mode, process.cwd(), '');
-  // /traduzir: tradução automática das manchetes (services/traducao.js). Não usa chave.
-  // Em produção é preciso um proxy equivalente; sem ele as manchetes ficam só no original.
-  const proxy = {
-    '/traduzir': {
-      target: 'https://translate.googleapis.com',
-      changeOrigin: true,
-      rewrite: (caminho) => caminho.replace(/^\/traduzir/, ''),
-    },
-    // /bcb: séries do Banco Central (lib/bancoCentral.js). Não usa chave.
-    // Em produção é preciso um proxy equivalente; sem ele o bloco usa o pacote de mercado.
-    '/bcb': {
-      target: 'https://api.bcb.gov.br',
-      changeOrigin: true,
-      rewrite: (caminho) => caminho.replace(/^\/bcb/, ''),
-    },
-  };
+  // Só a API privada: nenhum proxy para serviço público (regra em src/test/lib/apiPublica.test.js).
+  const proxy = {};
   if (env.API_BASE_URL) {
     proxy['/api'] = {
       target: env.API_BASE_URL,
@@ -64,6 +50,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.js'],
       globals: true,
+      // testes sempre nos pacotes de public/dados, qualquer que seja o .env local
+      env: { VITE_FONTE_DADOS: 'arquivos' },
     },
   };
 });

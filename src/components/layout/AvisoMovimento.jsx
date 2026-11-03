@@ -46,7 +46,7 @@ export default function AvisoMovimento() {
       <div className="aviso-movimento__acoes">
         <button
           type="button"
-          className="botao aviso-movimento__principal"
+          className="botao botao--principal"
           onClick={() => responder('ligadas')}
         >
           {TEXTOS.leitura.avisoLigar}

@@ -1,28 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { screen, within } from '@testing-library/react';
 import SecaoMercado from '../../components/mercado/SecaoMercado.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS } from '../../lib/textos.js';
 
-const TEMPO_ERRO = { timeout: 4000 };
-
-/** Série SGS de teste: a Selic de 12 meses atrás e a atual, ou o dólar nas mesmas datas. */
-const SERIES_BCB = {
-  432: [
-    { data: '27/10/2025', valor: '14.25' },
-    { data: '28/10/2025', valor: '14.50' },
-    { data: '27/10/2026', valor: '15.00' },
-  ],
-  1: [
-    { data: '27/10/2025', valor: '5.0000' },
-    { data: '27/10/2026', valor: '5.2500' },
-  ],
-};
-
-const aba = (chave) => screen.getByRole('tab', { name: TEXTOS.mercado.abas[chave] });
-
-describe('SecaoMercado: Ibovespa e juros', () => {
+describe('SecaoMercado: Ibovespa, dólar e Brent', () => {
   beforeEach(() => {
     instalarFetchDados();
   });
@@ -60,41 +43,8 @@ describe('SecaoMercado: Ibovespa e juros', () => {
     expect(await screen.findByText(/^\d+ ações? acompanhadas?\. Dia (volátil|estável)\.$/)).toBeInTheDocument();
   });
 
-  it('sem resposta do Banco Central, os dois blocos de juros mostram o erro e o resto da seção segue', async () => {
-    const { container } = renderizar(<SecaoMercado />);
-
-    fireEvent.click(aba('juros'));
-
-    expect(await screen.findByRole('heading', { level: 3, name: TEXTOS.mercado.jurosTitulo })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getAllByText(TEXTOS.mercado.bcbErro)).toHaveLength(2), TEMPO_ERRO);
-
-    fireEvent.click(aba('indices'));
-    expect(await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo })).toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/NaN|undefined/);
-  });
-
-  it('com a série do Banco Central, mostra a Selic e o dólar com a frase de resumo e a fonte', async () => {
-    const base = instalarFetchDados();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (entrada, opcoes) => {
-        const url = String(entrada?.url ?? entrada);
-        const casa = /bcdata\.sgs\.(\d+)\//.exec(url);
-        if (casa) return { ok: true, status: 200, json: async () => SERIES_BCB[casa[1]] };
-        return base(entrada, opcoes);
-      }),
-    );
-
+  it('dólar e Brent sem série: a nota explica os períodos sem número', async () => {
     renderizar(<SecaoMercado />);
-
-    fireEvent.click(aba('juros'));
-
-    expect(
-      await screen.findByText('Selic hoje: 15,00% ao ano. Há 12 meses: 14,25%.', {}, TEMPO_ERRO),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Dólar PTAX: R$ 5,25. Há 12 meses: R$ 5,00 (variação +5,0%).'),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText(TEXTOS.mercado.fonteBcb)).toHaveLength(2);
+    expect(await screen.findByText(TEXTOS.mercado.semHistoricoNota('dólar e Brent'))).toBeInTheDocument();
   });
 });

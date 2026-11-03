@@ -16,8 +16,9 @@ const PalcoThree = lazy(() => import('./PalcoThree.jsx'));
  * Objeto 3D que explica uma métrica a quem nunca investiu. Sempre mostra a frase-resposta;
  * o desenho é um complemento (sem número, sem WebGL ou com erro, só a frase aparece).
  * tipo: 'balanca' | 'moedas' | 'cofrinho' | 'pendulo'; dados: ver lib/modelos3d.js.
+ * proximidade: quanto o objeto aparece maior no quadro (padrão 1).
  */
-export default function Modelo3D({ tipo, dados, ticker }) {
+export default function Modelo3D({ tipo, dados, ticker, proximidade = 1 }) {
   const [falhou, setFalhou] = useState(false);
   const aoFalhar = useCallback(() => setFalhou(true), []);
   // o palco lê o movimento na montagem: ao mudar a preferência, ele remonta com o valor novo
@@ -52,15 +53,19 @@ export default function Modelo3D({ tipo, dados, ticker }) {
                   dados={dados}
                   ticker={ticker}
                   aoFalhar={aoFalhar}
+                  proximidade={proximidade}
                 />
               </Suspense>
             </LimiteErro>
-            <span className="modelo3d-dica">
-              <Rotate3d size={14} aria-hidden="true" />
+          </div>
+          {/* a dica fica num rodapé abaixo do quadro, para não cobrir os rótulos do objeto */}
+          <figcaption className="modelo3d-rodape">
+            <span className="modelo3d-legenda">{T.legenda[tipo]}</span>
+            <span className="modelo3d-dica" aria-hidden="true">
+              <Rotate3d size={14} />
               {T.arraste}
             </span>
-          </div>
-          <figcaption className="modelo3d-legenda">{T.legenda[tipo]}</figcaption>
+          </figcaption>
         </>
       )}
     </figure>

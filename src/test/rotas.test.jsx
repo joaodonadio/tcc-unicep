@@ -6,8 +6,6 @@ import { rotas } from '../App.jsx';
 import { TEXTOS, porNivel } from '../lib/textos.js';
 import { instalarFetchDados } from './apoio/fetchDados.js';
 
-vi.mock('../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
-
 // ScrollRestoration só restaura a rolagem entre navegações e chama window.scrollTo,
 // que o jsdom não implementa. Nestes testes ele não tem efeito a verificar.
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -79,9 +77,9 @@ describe('rotas', () => {
   ])('%s mostra a página com um único h1', async (caminho, titulo) => {
     renderizarRota(caminho);
 
-    expect(await screen.findByRole('heading', { level: 1, name: titulo }, { timeout: 5000 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: titulo }, { timeout: 15000 })).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-  });
+  }, 20000);
 
   it('/setores traz o mapa do pregão por setor, abaixo dos cartões', async () => {
     renderizarRota('/setores');

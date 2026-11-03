@@ -2,9 +2,9 @@ import { semAcento } from './listaAcoes.js';
 import { sinalDaVariacao } from './setores.js';
 
 /*
- * Vitrine giratória dos setores (cenaSetores.js): um pedestal por setor, em anel sobre um disco.
- * Ângulos em radianos. A ordem do anel é a da lista, em sentido horário visto de cima.
- * A rotação do disco (psi) põe na frente o pedestal de índice k quando psi = k · passo.
+ * Vitrine giratória dos setores (cenaSetores.js): um disco que mostra um setor por vez, no centro.
+ * Ângulos em radianos. Cada setor tem uma posição no giro, na ordem da lista, em sentido horário visto de cima.
+ * A rotação do disco (psi) põe na frente o setor de índice k quando psi = k · passo.
  * Sem números no desenho: a variação fica na legenda e na lista.
  */
 

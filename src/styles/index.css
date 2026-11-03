@@ -1,5 +1,6 @@
-/* Fonte self-hosted: Manrope, geométrica e calorosa, com algarismos tabulares. */
-@import '@fontsource-variable/manrope/wght.css';
+/* Fontes self-hosted: Atkinson Hyperlegible Next (títulos e texto), Atkinson Hyperlegible Mono (números de dado e códigos). */
+@import '@fontsource-variable/atkinson-hyperlegible-next/wght.css';
+@import '@fontsource-variable/atkinson-hyperlegible-mono/wght.css';
 
 @import './tokens.css';
 @import './base.css';
@@ -19,4 +20,5 @@
 @import './setores.css';
 @import './noticias.css';
 @import './setores3d.css';
+@import './mascote.css';
 @import './movimento.css';

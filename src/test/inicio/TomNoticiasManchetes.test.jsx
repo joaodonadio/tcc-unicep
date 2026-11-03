@@ -1,10 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { TomNoticias } from '../../components/inicio/TomNoticias.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { TEXTOS } from '../../lib/textos.js';
-
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
 
 const tom = { total: 2, positivas: 1, neutras: 0, negativas: 1 };
 const manchetes = {

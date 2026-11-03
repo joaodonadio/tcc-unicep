@@ -1,4 +1,4 @@
-/* Ficha da ação (tema âmbar): cartão-herói, cinco mini-cartões, abas em pílula e painel como cartão grande. */
+/* Ficha da ação: cabeçalho aberto (código grande), fundamentos em cartões de vidro, abas em pílula e cada painel como um cartão de vidro. Dentro do painel, blocos são sub-superfícies ou fios. */
 .ficha {
   padding-top: var(--espaco-5);
   padding-bottom: 0;
@@ -25,27 +25,28 @@ button.ficha-voltar {
   text-underline-offset: 0.2em;
 }
 
-/* Cabeçalho: cartão-herói com identidade à esquerda e cotação à direita (embaixo no celular). */
+/* Cabeçalho sem caixa: código, empresa e preço numa coluna, nessa ordem de leitura. */
 .ficha-topo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--espaco-5) var(--espaco-6);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'codigo'
+    'empresa'
+    'preco'
+    'meta';
+  justify-items: start;
+  gap: var(--espaco-2) 0;
   margin-bottom: var(--espaco-5);
-  padding: var(--espaco-7) var(--espaco-6);
-  background:
-    radial-gradient(28rem circle at 0% 0%, rgb(232 184 74 / 0.12), transparent 70%),
-    var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-cartao);
 }
 
+/* A identificação não tem caixa própria: as partes entram direto na grade do cabeçalho */
 .ficha-id {
-  min-width: 0;
+  display: contents;
 }
 
 .ficha-ticker {
+  grid-area: codigo;
+  font-family: var(--fonte-titulo);
   font-size: clamp(2.75rem, 9vw, 4.5rem);
   font-weight: var(--peso-forte);
   letter-spacing: -0.03em;
@@ -53,22 +54,26 @@ button.ficha-voltar {
 }
 
 .ficha-empresa {
-  margin-top: var(--espaco-2);
+  grid-area: empresa;
   font-size: var(--texto-lg);
   font-weight: var(--peso-medio);
+  line-height: 1.3;
 }
 
 .ficha-meta {
-  margin-top: var(--espaco-3);
+  grid-area: meta;
+  margin-top: var(--espaco-1);
   font-size: var(--texto-sm);
   color: var(--cor-texto-suave);
 }
 
 .ficha-cotacao {
+  grid-area: preco;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--espaco-3) var(--espaco-4);
+  margin-top: var(--espaco-3);
 }
 
 .ficha-preco {
@@ -78,21 +83,40 @@ button.ficha-voltar {
   gap: var(--espaco-2) var(--espaco-3);
 }
 
+/* Preço: número-destaque em Atkinson Hyperlegible Mono */
 .ficha-preco-valor {
-  font-size: var(--texto-3xl);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* Variação em pílula: a cor vem das classes valor--alta/queda/estavel */
+/* Variação em pílula (véu da cor a 13%): a cor vem das classes valor--alta/queda/estavel.
+   Palavras em Atkinson Hyperlegible Next; só o número (.ficha-variacao__numero) vai em Atkinson Hyperlegible Mono.
+   inline-block, não inline-flex: no flex o espaço antes de "no dia" seria descartado */
 .ficha-variacao {
-  padding: 4px 14px;
+  display: inline-block;
+  min-height: 1.75rem;
+  line-height: 1.25rem;
+  padding: 0.25rem 0.75rem;
   border-radius: var(--raio-pilula);
   background: var(--cor-superficie-2);
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-titulo);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-texto);
+  font-stretch: normal;
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: normal;
+  font-variant-numeric: normal;
+}
+
+.ficha-variacao__numero {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: -0.02em;
 }
 
 .ficha-variacao.valor--alta {
@@ -103,7 +127,7 @@ button.ficha-voltar {
   background: var(--cor-queda-suave);
 }
 
-/* Fundamentos: faixa em superfície com cinco números; cada número é um link que cobre a célula. */
+/* Fundamentos: uma fileira de cartões de vidro, cada um com um número grande em Atkinson Hyperlegible Mono. */
 .ficha-fundamentos-bloco {
   margin-bottom: var(--espaco-5);
 }
@@ -115,25 +139,29 @@ button.ficha-voltar {
   margin: 0;
 }
 
-/* Cada número é um mini-cartão */
 .ficha-fundamento {
   position: relative;
   min-width: 0;
-  padding: var(--espaco-5) var(--espaco-4);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  padding: var(--espaco-5);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
-  transition: background-color var(--duracao) var(--curva);
+  box-shadow: var(--vidro-sombra);
+  transition:
+    box-shadow var(--duracao) var(--curva),
+    transform var(--duracao) var(--curva);
 }
 
 .ficha-fundamento:hover {
-  background: var(--cor-superficie-2);
+  --vidro-base: var(--vidro-base-hover);
+  --aresta-topo: 0.32;
+  box-shadow: var(--vidro-sombra-hover);
+  transform: translateY(-1px);
 }
 
 .ficha-fundamento dt {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
 }
 
@@ -142,11 +170,14 @@ button.ficha-voltar {
 }
 
 .ficha-fundamento-valor {
-  margin-top: var(--espaco-2);
-  font-size: var(--texto-2xl);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
+  margin-top: var(--espaco-3);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: clamp(1.5rem, 4.4vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .ficha-fundamento-valor a {
@@ -171,7 +202,7 @@ button.ficha-voltar {
 }
 
 .ficha-fundamento-apoio {
-  margin-top: var(--espaco-1);
+  margin-top: var(--espaco-2);
   font-size: var(--texto-sm);
   color: var(--cor-texto-suave);
 }
@@ -198,12 +229,12 @@ button.ficha-voltar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ficha-topo {
-    padding: var(--espaco-6) var(--espaco-5);
+  .ficha-fundamento {
+    padding: var(--espaco-4);
   }
 }
 
-/* Abas em pílula, roláveis na horizontal; a barra fica fixa logo abaixo do cabeçalho do site. */
+/* Abas: seletor em pílula, rolável na horizontal, fixo logo abaixo do cabeçalho do site. Ativa: fundo claro, texto escuro. */
 .ficha-abas {
   position: sticky;
   top: var(--altura-cabecalho);
@@ -212,11 +243,10 @@ button.ficha-voltar {
   gap: var(--espaco-2);
   overflow-x: auto;
   scrollbar-width: none;
-  padding: var(--espaco-2) 0;
-  background: color-mix(in srgb, var(--cor-fundo) 97%, transparent);
+  padding: var(--espaco-3) 0;
+  background: color-mix(in srgb, var(--cor-fundo) 92%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--cor-borda);
 }
 
 .ficha-abas::-webkit-scrollbar {
@@ -225,10 +255,12 @@ button.ficha-voltar {
 
 .ficha-aba {
   flex: none;
+  min-height: 2.75rem;
   padding: var(--espaco-2) var(--espaco-4);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   font: inherit;
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
@@ -236,18 +268,20 @@ button.ficha-voltar {
   cursor: pointer;
   transition:
     background-color var(--duracao) var(--curva),
-    color var(--duracao) var(--curva);
+    color var(--duracao) var(--curva),
+    border-color var(--duracao) var(--curva);
 }
 
 .ficha-aba:hover {
   color: var(--cor-texto);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .ficha-aba[aria-selected='true'] {
   color: var(--cor-acento-texto);
-  background: var(--cor-acento);
-  border-color: var(--cor-acento);
+  background: color-mix(in srgb, var(--cor-texto) 92%, transparent);
+  border-color: transparent;
 }
 
 .ficha-aba:focus-visible {
@@ -255,44 +289,46 @@ button.ficha-voltar {
   outline-offset: 2px;
 }
 
-/* Painel da pergunta: um bloco só em superfície. */
+/* Painel da pergunta: um cartão de vidro. A mancha de cor vem de data-brilho (ver BRILHO_DA_PERGUNTA em lib/perguntasFicha.js). */
 .ficha-painel {
   margin-top: var(--espaco-3);
   padding: var(--espaco-6);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
-@media (max-width: 30rem) {
+@media (max-width: 45rem) {
   .ficha-painel {
-    padding: var(--espaco-5) var(--espaco-4);
+    padding: var(--espaco-5);
   }
 }
 
 .ficha-pergunta {
   font-size: var(--texto-xl);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.01em;
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
 .ficha-intro {
   max-width: 65ch;
-  margin-top: var(--espaco-3);
-  margin-bottom: var(--espaco-6);
+  margin-top: var(--espaco-1);
+  margin-bottom: var(--espaco-5);
+  font-size: var(--texto-sm);
   color: var(--cor-texto-suave);
 }
 
-/* Regras: três grupos, sinais separados por fio fino. */
+/* Regras: três grupos separados por respiro. Pontos fortes em alta, atenção em acento. */
 .ficha-grupo + .ficha-grupo {
   margin-top: var(--espaco-6);
 }
 
 .ficha-grupo-titulo {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
 }
 
 .ficha-grupo[data-tipo='forte'] > .ficha-grupo-titulo {
@@ -303,10 +339,9 @@ button.ficha-voltar {
   color: var(--cor-atencao);
 }
 
-/* Títulos dos grupos da aba de regras: texto legível e cor do tipo (a favor, atenção, contexto) */
 .ficha-regras .ficha-grupo-titulo {
   font-size: var(--texto-sm);
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .ficha-regras .ficha-grupo[data-tipo='forte'] > .ficha-grupo-titulo {
@@ -314,21 +349,22 @@ button.ficha-voltar {
 }
 
 .ficha-regras .ficha-grupo[data-tipo='atencao'] > .ficha-grupo-titulo {
-  color: var(--cor-queda);
+  color: var(--cor-acento);
 }
 
 .ficha-regras .ficha-grupo[data-tipo='contexto'] > .ficha-grupo-titulo {
   color: var(--cor-dado-3);
 }
 
-/* Cada regra é um cartão com contorno fino e um ponto no título, na cor do tipo */
+/* Cada regra é uma sub-superfície com contorno fino na cor do tipo (um ponto no título) */
 .ficha-regra {
   --tom: var(--cor-dado-3);
   min-width: 0;
   padding: var(--espaco-4) var(--espaco-5);
-  background: var(--cor-superficie);
-  border: 1px solid color-mix(in srgb, var(--tom) 40%, var(--cor-borda));
+  background: var(--sub-fundo);
+  border: 1px solid color-mix(in srgb, var(--tom) 34%, var(--sub-borda));
   border-radius: var(--raio-3);
+  box-shadow: var(--sub-luz);
 }
 
 .ficha-regra[data-tipo='forte'] {
@@ -336,7 +372,7 @@ button.ficha-voltar {
 }
 
 .ficha-regra[data-tipo='atencao'] {
-  --tom: var(--cor-queda);
+  --tom: var(--cor-acento);
 }
 
 .ficha-regra + .ficha-regra {
@@ -359,6 +395,7 @@ button.ficha-voltar {
 }
 
 .ficha-regra-titulo {
+  font-family: var(--fonte-titulo);
   font-size: var(--texto-base);
   font-weight: var(--peso-titulo);
   line-height: 1.3;
@@ -373,7 +410,7 @@ button.ficha-voltar {
   color: var(--cor-texto);
 }
 
-/* Comparação de números: indicadores sem referência em fileira de cartões; com referência, uma linha cada */
+/* Comparação de números: dentro da regra, colunas separadas por fio (sem caixas dentro da caixa) */
 .regra-comparacao {
   display: grid;
   gap: var(--espaco-3);
@@ -383,7 +420,7 @@ button.ficha-voltar {
 .regra-comparacao__cartoes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
-  gap: var(--espaco-2);
+  gap: var(--espaco-3);
   margin: 0;
 }
 
@@ -393,14 +430,12 @@ button.ficha-voltar {
   gap: 0.2rem;
   min-width: 0;
   margin: 0;
-  padding: var(--espaco-2) var(--espaco-3);
-  background: var(--cor-superficie-2);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-2);
+  padding-top: var(--espaco-2);
+  border-top: 1px solid var(--cor-fio);
 }
 
 .regra-comparacao__cartao--acao {
-  border-color: color-mix(in srgb, var(--cor-acento) 40%, transparent);
+  border-top-color: color-mix(in srgb, var(--cor-acento) 50%, transparent);
 }
 
 .regra-comparacao__legenda {
@@ -411,9 +446,11 @@ button.ficha-voltar {
 .regra-comparacao__numero {
   margin: 0;
   font-family: var(--fonte-numeros);
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
-  font-variant-numeric: tabular-nums;
+  font-stretch: var(--numeros-largura);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   line-height: 1.2;
   color: var(--cor-texto);
   overflow-wrap: anywhere;
@@ -429,7 +466,7 @@ button.ficha-voltar {
   display: grid;
   gap: var(--espaco-2);
   padding-top: var(--espaco-3);
-  border-top: 1px solid var(--cor-borda);
+  border-top: 1px solid var(--cor-fio);
 }
 
 .regra-comparacao__rotulo {
@@ -440,7 +477,7 @@ button.ficha-voltar {
 
 .regra-comparacao__valores {
   display: grid;
-  gap: var(--espaco-2);
+  gap: var(--espaco-3);
   max-width: 32rem;
   margin: 0;
 }
@@ -456,9 +493,8 @@ button.ficha-voltar {
   align-content: start;
   gap: 0.2rem;
   min-width: 0;
-  padding: var(--espaco-2) var(--espaco-3);
-  background: var(--cor-superficie-2);
-  border-radius: var(--raio-2);
+  padding-top: var(--espaco-2);
+  border-top: 1px solid var(--cor-fio);
 }
 
 .ficha-ficha__rotulo {
@@ -468,9 +504,11 @@ button.ficha-voltar {
 
 .ficha-ficha__valor {
   font-family: var(--fonte-numeros);
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
-  font-variant-numeric: tabular-nums;
+  font-stretch: var(--numeros-largura);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   line-height: 1.2;
   color: var(--cor-texto);
   overflow-wrap: anywhere;
@@ -482,7 +520,7 @@ button.ficha-voltar {
   height: 0.5rem;
   margin-top: 0.25rem;
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie);
+  background: var(--cor-superficie-2);
   overflow: hidden;
 }
 
@@ -528,19 +566,21 @@ button.ficha-voltar {
   margin-top: 0.2em;
 }
 
-/* Como foi a negociação (pergunta "Oscila muito?"): fios finos entre os blocos, sem caixa. */
+/* Como foi a negociação (pergunta "Oscila muito?"): duas sub-superfícies empilhadas. */
 .ficha-negociacao {
-  margin-top: var(--espaco-7);
-}
-
-.ficha-negociacao-bloco + .ficha-negociacao-bloco {
-  margin-top: var(--espaco-3);
+  margin-top: var(--espaco-6);
 }
 
 .ficha-negociacao-bloco {
   padding: var(--espaco-5);
   border-radius: var(--raio-3);
-  background: var(--cor-superficie);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  box-shadow: var(--sub-luz);
+}
+
+.ficha-negociacao-bloco + .ficha-negociacao-bloco {
+  margin-top: var(--espaco-3);
 }
 
 .ficha-negociacao-rotulo {
@@ -582,9 +622,13 @@ button.ficha-voltar {
 }
 
 .ficha-negociacao-numero {
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   text-align: right;
-  font-weight: var(--peso-medio);
 }
 
 .ficha-negociacao-frase {
@@ -620,6 +664,15 @@ button.ficha-voltar {
 
 /* ===== Painéis das perguntas: leitura por nível (Simples ensina, Técnica mostra tabela) ===== */
 
+/* Texto de apoio do painel: sem mono, sem caixa. Valor-motivo e motivo de tabela ficam em texto comum. */
+.ficha .valor-motivo,
+.ficha .ficha-tab-motivo {
+  font-family: var(--fonte-texto);
+  font-stretch: normal;
+  font-variant-numeric: normal;
+  letter-spacing: normal;
+}
+
 .ficha-nota {
   max-width: 65ch;
   margin-top: var(--espaco-3);
@@ -633,41 +686,46 @@ button.ficha-voltar {
   color: var(--cor-texto);
 }
 
-/* Simples: um bloco de leitura por indicador, separado por fio fino, sem caixa. */
+/* Simples: grade de células sub-superfície, uma por indicador; o número é o destaque. */
 .ficha-leituras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: var(--espaco-3);
   margin-top: var(--espaco-5);
 }
 
 .ficha-leitura {
-  padding: var(--espaco-6);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-cartao);
-  background: var(--cor-superficie);
-}
-
-.ficha-leitura + .ficha-leitura {
-  margin-top: var(--espaco-3);
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  padding: var(--espaco-5);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  box-shadow: var(--sub-luz);
 }
 
 .ficha-leitura-nome {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
 }
 
 .ficha-leitura-valor {
-  margin-top: var(--espaco-2);
-  font-size: var(--texto-3xl);
-  font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  margin-top: var(--espaco-3);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums slashed-zero;
+  overflow-wrap: anywhere;
 }
 
 .ficha-comparacao {
   display: grid;
-  grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(4.5rem, 6rem) minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--espaco-2);
   max-width: 30rem;
@@ -706,8 +764,12 @@ button.ficha-voltar {
 
 .ficha-barra-valor {
   text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--peso-medio);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .ficha-leitura-como {
@@ -737,7 +799,7 @@ button.ficha-voltar {
   gap: var(--espaco-1);
 }
 
-/* Técnica: tabelas densas, fio fino entre linhas, números tabulares à direita. */
+/* Técnica: tabelas densas, fio fino entre linhas, números em Atkinson Hyperlegible Mono à direita. */
 .ficha-rolagem {
   margin-top: var(--espaco-5);
   overflow-x: auto;
@@ -765,8 +827,7 @@ button.ficha-voltar {
 
 .ficha-tab thead th {
   font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
   white-space: nowrap;
 }
@@ -781,6 +842,15 @@ button.ficha-voltar {
   white-space: nowrap;
 }
 
+.ficha-tab td.ficha-tab-num {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
 .ficha-tab--noticias td:first-child {
   white-space: nowrap;
 }
@@ -791,7 +861,7 @@ button.ficha-voltar {
   color: var(--cor-texto-suave);
 }
 
-/* Gráficos dos painéis */
+/* Gráficos dos painéis: cada gráfico é um bloco separado por fio fino */
 .ficha-controles {
   display: flex;
   flex-wrap: wrap;
@@ -806,13 +876,19 @@ button.ficha-voltar {
 }
 
 .ficha-grafico,
-.ficha-volume {
+.ficha-volume,
+.ficha-hist-ano {
   margin-top: var(--espaco-6);
+  padding-top: var(--espaco-6);
+  border-top: 1px solid var(--cor-fio);
 }
 
 .ficha-grafico-titulo {
-  font-size: var(--texto-base);
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-lg);
   font-weight: var(--peso-titulo);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 
 .ficha-grafico-texto {
@@ -822,7 +898,7 @@ button.ficha-voltar {
   color: var(--cor-texto-suave);
 }
 
-/* Proventos */
+/* Proventos (mancha alta no painel): colunas empilhadas, a parte de cima com cantos arredondados */
 .ficha-proventos {
   margin-top: var(--espaco-5);
 }
@@ -840,17 +916,19 @@ button.ficha-voltar {
   border-bottom: 1px solid var(--cor-fio);
 }
 
-/* Histórico */
+/* Histórico: dois blocos de sub-superfície */
 .ficha-hist-blocos {
   display: grid;
-  gap: var(--espaco-6);
+  gap: var(--espaco-3);
   margin-top: var(--espaco-4);
 }
 
 .ficha-hist-bloco {
   padding: var(--espaco-5);
   border-radius: var(--raio-3);
-  background: var(--cor-superficie);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  box-shadow: var(--sub-luz);
 }
 
 .ficha-hist-lista {
@@ -865,11 +943,11 @@ button.ficha-voltar {
   display: flex;
   justify-content: space-between;
   gap: var(--espaco-3);
-  padding-block: var(--espaco-1);
+  padding-block: var(--espaco-2);
   border-bottom: 1px solid var(--cor-fio);
 }
 
-/* Notícias */
+/* Notícias (mancha lavanda): lista com fio fino, sem caixas */
 .ficha-noticias-lista {
   margin-top: var(--espaco-3);
   padding: 0;
@@ -879,6 +957,10 @@ button.ficha-voltar {
 .ficha-noticia {
   padding-block: var(--espaco-4);
   border-bottom: 1px solid var(--cor-fio);
+}
+
+.ficha-noticia:last-child {
+  border-bottom: 0;
 }
 
 .ficha-noticia-meta {
@@ -934,18 +1016,30 @@ button.ficha-voltar {
   min-height: 2px;
 }
 
+.ficha-prov-parte:last-child {
+  border-radius: 6px 6px 0 0;
+}
+
 .ficha-prov-parte--dividendo { background: var(--cor-dado-1, var(--cor-acento)); }
 .ficha-prov-parte--jcp { background: var(--cor-dado-2, var(--cor-alta)); }
 .ficha-prov-parte--outros { background: var(--cor-dado-3, var(--cor-estavel)); }
 
 .ficha-prov-rotulo {
-  font-size: var(--texto-xs);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--cor-texto-suave);
 }
 
 .ficha-prov-total {
-  font-weight: var(--peso-medio);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .ficha-prov-conferencia {
@@ -987,27 +1081,31 @@ button.ficha-voltar {
 .ficha-hist-aba {
   min-height: 2.75rem;
   padding: var(--espaco-2) var(--espaco-4);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: transparent;
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto-suave);
   font: inherit;
   font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   cursor: pointer;
   transition:
     background-color var(--duracao) var(--curva),
-    color var(--duracao) var(--curva);
+    color var(--duracao) var(--curva),
+    border-color var(--duracao) var(--curva);
 }
 
 .ficha-hist-aba:hover {
   color: var(--cor-texto);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .ficha-hist-aba[aria-selected='true'] {
   color: var(--cor-acento-texto);
-  background: var(--cor-acento);
-  border-color: var(--cor-acento);
+  background: color-mix(in srgb, var(--cor-texto) 92%, transparent);
+  border-color: transparent;
 }
 
 .ficha-hist-aba:focus-visible {
@@ -1034,7 +1132,12 @@ button.ficha-voltar {
 .ficha-hist-ano-resumo dd {
   margin: 0;
   color: var(--cor-texto);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   overflow-wrap: anywhere;
 }
 

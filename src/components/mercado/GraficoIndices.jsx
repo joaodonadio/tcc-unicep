@@ -164,7 +164,7 @@ export function GraficoIndices() {
   }
 
   return (
-    <div className="mercado-grafico">
+    <div className="mercado-grafico" data-brilho="dado">
       <div className="mercado-grafico__cabecalho">
         <div>
           <h3 className="mercado-bloco-titulo">{TEXTOS.mercado.graficoTitulo}</h3>

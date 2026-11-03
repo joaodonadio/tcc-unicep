@@ -7,7 +7,6 @@ import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
 vi.mock('../../components/modelos3d/Modelo3D.jsx', () => ({ default: () => null }));
 
 const CHAVE_PREFERENCIAS = 'painel-b3:preferencias';

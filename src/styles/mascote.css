@@ -1,0 +1,282 @@
+/*
+ * Mascote Pavio. Formas e origens do desenho, depois os humores (reação ao chegar, uma vez
+ * ou fixa) e as ações (loop). Cores pelos tokens --cor-mascote-*. Nenhuma animação depende de JS.
+ */
+
+/* Tamanho padrão sem especificidade: quem usa o mascote define o seu próprio tamanho. */
+:where(.mascote) {
+  display: block;
+  inline-size: 3rem;
+  block-size: 3rem;
+  flex: none;
+  overflow: visible;
+}
+
+.mascote * {
+  transform-box: fill-box;
+}
+
+.mascote .mascote-corpo {
+  transform-origin: 50% 100%;
+}
+
+.mascote .mascote-pavio {
+  transform-origin: 50% 100%;
+}
+
+.mascote .mascote-olhar {
+  transform-origin: center;
+}
+
+.mascote .mascote-olhos {
+  transform-origin: center;
+  animation: piscar 5.2s infinite;
+}
+
+.mascote .mascote-ideia circle {
+  opacity: 0;
+}
+
+.mascote .mascote-zz {
+  opacity: 0;
+}
+
+@keyframes piscar {
+  0%, 93%, 100% { scale: 1 1; }
+  95% { scale: 1 0.1; }
+}
+
+/* Ocioso: olha para a esquerda, para a direita e pensa, com pausas longas. O neutro do Top 5 usa o mesmo ciclo */
+.mascote--ocioso .mascote-olhar,
+.mascote--vivo.mascote--neutro .mascote-olhar {
+  animation: olhar 16s var(--curva) infinite;
+}
+
+.mascote--ocioso .mascote-corpo,
+.mascote--vivo.mascote--neutro .mascote-corpo {
+  animation: inclinar 16s var(--curva) infinite;
+}
+
+.mascote--ocioso .mascote-pavio,
+.mascote--vivo.mascote--neutro .mascote-pavio {
+  animation: pavio-ocioso 16s ease-in-out infinite;
+}
+
+.mascote--ocioso .mascote-ideia circle,
+.mascote--vivo.mascote--neutro .mascote-ideia circle {
+  animation: ideia-ociosa 16s ease-out infinite;
+}
+
+.mascote--ocioso .mascote-ideia circle:nth-child(2),
+.mascote--vivo.mascote--neutro .mascote-ideia circle:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.mascote--ocioso .mascote-ideia circle:nth-child(3),
+.mascote--vivo.mascote--neutro .mascote-ideia circle:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes olhar {
+  0%, 10% { translate: 0 0; }
+  13%, 22% { translate: -4px 0.5px; }
+  26%, 31% { translate: 0 0; }
+  34%, 43% { translate: 4px 0.5px; }
+  47%, 54% { translate: 0 0; }
+  58%, 74% { translate: -2.5px -4px; }
+  79%, 100% { translate: 0 0; }
+}
+
+@keyframes inclinar {
+  0%, 10% { rotate: 0deg; }
+  13%, 22% { rotate: -3deg; }
+  26%, 31% { rotate: 0deg; }
+  34%, 43% { rotate: 3deg; }
+  47%, 100% { rotate: 0deg; }
+}
+
+@keyframes pavio-ocioso {
+  0%, 57% { rotate: 0deg; }
+  60% { rotate: -9deg; }
+  63% { rotate: 7deg; }
+  66% { rotate: -5deg; }
+  69% { rotate: 3deg; }
+  72%, 100% { rotate: 0deg; }
+}
+
+@keyframes ideia-ociosa {
+  0%, 58% { opacity: 0; translate: 0 2px; }
+  61%, 72% { opacity: 1; translate: 0 0; }
+  76%, 100% { opacity: 0; translate: 0 -2px; }
+}
+
+/* Pensativo: olhar fixo para cima e pontinhos em ciclo */
+.mascote--pensativo .mascote-pavio {
+  animation: pavio-pensa 2.4s ease-in-out infinite;
+}
+
+.mascote--pensativo .mascote-ideia circle {
+  animation: ideia 1.5s ease-in-out infinite;
+}
+
+.mascote--pensativo .mascote-ideia circle:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.mascote--pensativo .mascote-ideia circle:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pavio-pensa {
+  0%, 100% { rotate: -6deg; }
+  50% { rotate: 6deg; }
+}
+
+@keyframes ideia {
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+/* Dormindo: respira devagar e solta um z */
+.mascote--dormindo .mascote-corpo {
+  animation: respirar 3.6s ease-in-out infinite;
+}
+
+.mascote--dormindo .mascote-zz {
+  animation: zz 3.6s ease-out infinite;
+}
+
+@keyframes respirar {
+  0%, 100% { scale: 1 1; }
+  50% { scale: 1.025 0.975; }
+}
+
+@keyframes zz {
+  0% { opacity: 0; translate: 0 3px; }
+  30%, 60% { opacity: 1; }
+  100% { opacity: 0; translate: 3px -6px; }
+}
+
+/* Reações de chegada: tocam uma vez ao montar */
+.mascote--contente .mascote-corpo {
+  animation: pulo 560ms var(--curva) both;
+}
+
+.mascote--atento .mascote-corpo {
+  animation: susto 420ms var(--curva) both;
+}
+
+.mascote--atento .mascote-pavio {
+  animation: pavio-alerta 420ms var(--curva) both;
+}
+
+@keyframes pulo {
+  0% { translate: 0 0; scale: 1 1; }
+  30% { translate: 0 -7px; scale: 0.95 1.06; }
+  62% { translate: 0 0; scale: 1.06 0.94; }
+  100% { translate: 0 0; scale: 1 1; }
+}
+
+@keyframes susto {
+  0% { scale: 1 1; }
+  35% { scale: 0.96 1.05; }
+  100% { scale: 1 1; }
+}
+
+@keyframes pavio-alerta {
+  0% { scale: 1 1; }
+  40% { scale: 1 1.25; }
+  100% { scale: 1 1; }
+}
+
+/* Acenando: balança de um lado para o outro (vem depois da reação, então vence no onboarding) */
+.mascote--acenando .mascote-corpo {
+  animation: aceno 1.8s ease-in-out infinite;
+}
+
+@keyframes aceno {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: -6deg; }
+  75% { rotate: 6deg; }
+}
+
+/* Vivo (Top 5): a reação se repete em ciclo, olhando para a frase ao lado */
+.mascote--vivo.mascote--contente .mascote-corpo {
+  animation: vivo-contente 6s var(--curva) infinite;
+}
+
+.mascote--vivo.mascote--contente .mascote-olhar {
+  animation: vivo-olhar 6s var(--curva) infinite;
+}
+
+.mascote--vivo.mascote--atento .mascote-corpo {
+  animation: vivo-atento 5s var(--curva) infinite;
+}
+
+.mascote--vivo.mascote--atento .mascote-olhar {
+  animation: vivo-olhar 5s var(--curva) infinite;
+}
+
+.mascote--vivo.mascote--atento .mascote-pavio {
+  animation: vivo-pavio 5s var(--curva) infinite;
+}
+
+@keyframes vivo-contente {
+  0% { translate: 0 0; scale: 1 1; rotate: 0deg; }
+  5% { translate: 0 -7px; scale: 0.95 1.06; }
+  10% { translate: 0 0; scale: 1.06 0.94; }
+  15%, 40% { translate: 0 0; scale: 1 1; rotate: 0deg; }
+  46% { rotate: -5deg; }
+  52% { rotate: 5deg; }
+  58% { rotate: -3deg; }
+  63% { rotate: 0deg; }
+  70% { translate: 0 -4px; scale: 0.97 1.03; }
+  75% { translate: 0 0; scale: 1.03 0.97; }
+  80%, 100% { translate: 0 0; scale: 1 1; rotate: 0deg; }
+}
+
+@keyframes vivo-olhar {
+  0%, 18% { translate: 0 0; }
+  24%, 40% { translate: 3.5px 0.5px; }
+  46%, 100% { translate: 0 0; }
+}
+
+@keyframes vivo-atento {
+  0% { scale: 1 1; rotate: 0deg; }
+  6% { scale: 0.96 1.05; }
+  12%, 22% { scale: 1 1; rotate: 0deg; }
+  28%, 42% { rotate: 4deg; }
+  50%, 100% { rotate: 0deg; }
+}
+
+@keyframes vivo-pavio {
+  0% { scale: 1 1; }
+  6% { scale: 1 1.25; }
+  12%, 58% { scale: 1 1; }
+  62% { scale: 1 1.2; }
+  66% { scale: 1 1; }
+  70% { scale: 1 1.2; }
+  74%, 100% { scale: 1 1; }
+}
+
+/* Movimento reduzido (preferência do site): nada se mexe; pontos do pensamento e o z ficam parados à mostra */
+:root[data-movimento='reduzido'] .mascote,
+:root[data-movimento='reduzido'] .mascote * {
+  animation: none !important;
+}
+
+:root[data-movimento='reduzido'] :is(.mascote--pensativo .mascote-ideia circle, .mascote--dormindo .mascote-zz) {
+  opacity: 1;
+}
+
+/* Sem preferência do site, vale a do sistema operacional */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-movimento='livre']) .mascote,
+  :root:not([data-movimento='livre']) .mascote * {
+    animation: none !important;
+  }
+
+  :root:not([data-movimento='livre']) :is(.mascote--pensativo .mascote-ideia circle, .mascote--dormindo .mascote-zz) {
+    opacity: 1;
+  }
+}

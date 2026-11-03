@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { DestaquesDoPregao } from './DestaquesDoPregao.jsx';
-import { JurosEDolar } from './JurosEDolar.jsx';
 import { PainelIndices } from './PainelIndices.jsx';
 import { useAnaliseDoDia, useRecarregarAnalise } from '../../hooks/useAnalise.js';
 import { useResumos } from '../../hooks/useDados.js';
@@ -9,14 +8,14 @@ import { comPeriodosIbovespa, frasesDoResumo, rentabilidadeIbovDos } from '../..
 import { TEXTOS } from '../../lib/textos.js';
 import { BlocoErro, Linhas } from '../ui/Estados.jsx';
 
-const ABAS = ['indices', 'juros', 'destaques'];
+const ABAS = ['indices', 'destaques'];
 const ABA_INICIAL = 'indices';
 const TECLAS_PROXIMA = ['ArrowRight'];
 const TECLAS_ANTERIOR = ['ArrowLeft'];
 
 /**
  * Seção "O mercado": uma frase com o pregão e, abaixo, uma barra de abas com uma
- * visão por vez (índices, juros e dólar, destaques; os setores têm página própria). A aba vai para a URL
+ * visão por vez (índices e destaques; os setores têm página própria). A aba vai para a URL
  * em ?aba=. Só o painel ativo é montado. Carregamento e erro ficam dentro dele.
  */
 export default function SecaoMercado({ nivelTitulo = 2 }) {
@@ -64,7 +63,6 @@ export default function SecaoMercado({ nivelTitulo = 2 }) {
     indices: (
       <PainelIndices indicadores={pronto ? indicadores : null} pendencia={pendencia} />
     ),
-    juros: <JurosEDolar />,
     destaques: (
       <>
         <p className="mercado-ver-setores">

@@ -6,7 +6,7 @@ import { criarPalco, reduzMovimento } from './palco.js';
  * Palco com Three.js. É este arquivo que Modelo3D carrega sob demanda (import dinâmico), então
  * o three fica num chunk à parte. Monta no efeito e limpa tudo ao sair.
  */
-export default function PalcoThree({ tipo, dados, ticker, aoFalhar }) {
+export default function PalcoThree({ tipo, dados, ticker, aoFalhar, proximidade }) {
   const palcoRef = useRef(null);
   const rotulosRef = useRef(null);
   const chave = JSON.stringify(dados ?? {});
@@ -24,6 +24,7 @@ export default function PalcoThree({ tipo, dados, ticker, aoFalhar }) {
         container: palcoRef.current,
         canvas,
         rotulos: rotulosRef.current,
+        proximidade,
       });
     } catch {
       aoFalhar?.();
@@ -32,7 +33,7 @@ export default function PalcoThree({ tipo, dados, ticker, aoFalhar }) {
       palco?.destruir();
       canvas.remove();
     };
-  }, [tipo, ticker, chave, aoFalhar]);
+  }, [tipo, ticker, chave, aoFalhar, proximidade]);
 
   return (
     <div className="modelo3d-palco" ref={palcoRef} aria-hidden="true" data-testid="modelo3d-palco">

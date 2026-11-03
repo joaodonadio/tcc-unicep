@@ -37,7 +37,7 @@ function Pilula({ variacao }) {
   );
 }
 
-/** Acima de 1,5 vez a mediana, o número das vezes ganha destaque em âmbar. */
+/** Acima de 1,5 vez a mediana, o número das vezes ganha destaque em branco (cor de acento, em negrito). */
 const LIMITE_FORTE = 1.5;
 
 /**
@@ -127,7 +127,7 @@ export function DestaquesDoPregao() {
 
   return (
     <>
-      <section className="mercado-destaque-setores" aria-labelledby="mercado-setores-destaque">
+      <section className="mercado-destaque-setores" data-brilho="acento" aria-labelledby="mercado-setores-destaque">
         <h3 id="mercado-setores-destaque" className="mercado-bloco-titulo">
           {TEXTOS.mercado.destaqueSetorTitulo}
         </h3>

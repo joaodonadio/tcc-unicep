@@ -1,11 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import Mercado from '../../pages/Mercado.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS } from '../../lib/textos.js';
-
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
 
 describe('Mercado', () => {
   beforeEach(() => {

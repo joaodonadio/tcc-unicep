@@ -32,7 +32,7 @@ function iconeDoSetor(setor) {
   return ICONES.find(([chave]) => nome.startsWith(chave))?.[1] ?? Building2;
 }
 
-/** Ícone decorativo do setor, num selo redondo âmbar (aria-hidden: o nome do setor vem ao lado). */
+/** Ícone decorativo do setor, num selo redondo de fundo claro (acento neutro; aria-hidden: o nome do setor vem ao lado). */
 export function IconeSetor({ setor, tamanho = 18 }) {
   const Icone = iconeDoSetor(setor);
   return (

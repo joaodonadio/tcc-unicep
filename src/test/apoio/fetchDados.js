@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 /**
  * Fetch de teste para o modo arquivos: serve os pacotes de public/dados/
  * como a fonte arquivos os pede (`${BASE_URL}dados/<pacote>.json`).
- * Qualquer outra URL (ex.: /traduzir) responde 503, como um proxy indisponível.
+ * Qualquer outra URL responde 503, como um proxy indisponível.
  */
 
 const PACOTE = /\/dados\/([\w-]+)\.json(?:[?#].*)?$/;

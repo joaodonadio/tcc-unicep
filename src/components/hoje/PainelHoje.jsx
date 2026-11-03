@@ -36,7 +36,7 @@ export default function PainelHoje() {
         <h2 className="hoje-titulo">{titulo}</h2>
 
         {isError ? (
-          <BlocoErro titulo={TEXTOS.hoje.erroTitulo} mensagem={TEXTOS.hoje.erro} onTentarNovamente={recarregar} />
+          <BlocoErro titulo={TEXTOS.hoje.erroTitulo} mensagem={TEXTOS.hoje.erro} onTentarNovamente={recarregar} mascote />
         ) : isPending ? (
           <Linhas quantidade={3} larguras={['100%', '94%', '72%']} />
         ) : (

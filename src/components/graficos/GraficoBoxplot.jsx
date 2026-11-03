@@ -51,7 +51,7 @@ function montarOpcao({ itens, formatar, tema, animar }) {
   const linha = (nome, valor, destaque = false) =>
     `<div style="display:flex;align-items:center;white-space:nowrap;margin-top:4px">`
     + `<span style="color:${escapar(tema.suave)};margin-right:12px">${escapar(nome)}</span>`
-    + `<strong style="margin-left:auto;font-size:${destaque ? 15 : 13}px;font-weight:700;color:${escapar(tema.texto)};font-variant-numeric:tabular-nums">${escapar(valor)}</strong>`
+    + `<strong style="margin-left:auto;font-family:${escapar(tema.fonte)};font-size:${destaque ? 15 : 14}px;font-weight:500;letter-spacing:-0.02em;color:${escapar(tema.texto)};font-variant-numeric:tabular-nums slashed-zero">${escapar(valor)}</strong>`
     + `</div>`;
 
   const formatter = (p) => {
@@ -73,7 +73,7 @@ function montarOpcao({ itens, formatar, tema, animar }) {
   return {
     animation: animar,
     animationDuration: 500,
-    textStyle: { fontFamily: tema.fonte },
+    textStyle: { fontFamily: tema.fonteTexto },
     grid: { left: 8, right: 16, top: 8, bottom: 8, containLabel: true },
     tooltip: {
       trigger: 'item',
@@ -83,7 +83,7 @@ function montarOpcao({ itens, formatar, tema, animar }) {
       borderWidth: 1,
       borderRadius: 12,
       padding: [10, 12],
-      textStyle: { color: tema.texto, fontFamily: tema.fonte, fontSize: 13 },
+      textStyle: { color: tema.texto, fontFamily: tema.fonteTexto, fontSize: 13 },
       extraCssText: 'z-index:1000;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.55);',
       position: posicaoTooltip,
       formatter,
@@ -103,7 +103,8 @@ function montarOpcao({ itens, formatar, tema, animar }) {
       axisLine: { show: false },
       axisTick: { show: false },
       splitLine: { show: false },
-      axisLabel: { ...textoEixo, interval: 0, width: 128, overflow: 'break' },
+      // Nomes de setor: texto corrido, não número.
+      axisLabel: { ...textoEixo, fontFamily: tema.fonteTexto, interval: 0, width: 128, overflow: 'break' },
     },
     series: [
       {

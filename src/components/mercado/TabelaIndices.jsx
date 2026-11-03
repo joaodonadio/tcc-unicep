@@ -1,5 +1,5 @@
 import { Termo } from './Termo.jsx';
-import { PERIODOS, celulaHoje, celulaPeriodo, temCalculado } from '../../lib/mercadoTela.js';
+import { PERIODOS, ROTULO_DOLAR, celulaHoje, celulaPeriodo, temCalculado } from '../../lib/mercadoTela.js';
 import { TEXTOS } from '../../lib/textos.js';
 
 /** Termo do glossário de cada linha, pelo rótulo que o pacote traz. */
@@ -15,6 +15,9 @@ const TERMO_DA_LINHA = {
   IVVB11: 'ivvb11',
 };
 const ROTULO_BRENT = 'Petróleo Brent (US$)';
+
+/** Linhas sem série histórica nos dados (períodos sem número) e o nome de cada uma na nota. */
+const SEM_HISTORICO = { [ROTULO_DOLAR]: 'dólar', [ROTULO_BRENT]: 'Brent' };
 
 /** "Ibovespa (pontos)" -> nome "Ibovespa" e unidade "pontos". Sem parênteses, a unidade fica nula. */
 function separarUnidade(rotulo) {
@@ -50,8 +53,12 @@ function Calculado({ ativo }) {
   );
 }
 
-/** Número em pílula tingida pelo sinal (alta, queda ou estável). */
+/** Traço que o pacote usa para "sem número": travessão, meia-risca ou hífen sozinhos. */
+const ehTraco = (texto) => ['—', '–', '-'].includes(String(texto ?? '').trim());
+
+/** Número em pílula tingida pelo sinal (alta, queda ou estável). Traço sozinho fica sem pílula. */
 function Pilula({ texto, sinal, calculado = false }) {
+  if (ehTraco(texto)) return <span className="mercado-traco">{texto}</span>;
   return (
     <span className="mercado-celula" data-sinal={sinal ?? 'flat'}>
       {texto}
@@ -99,9 +106,9 @@ function CelulaHoje({ indicador }) {
  * colunas Hoje, 1 mês, 6 meses e 1 ano. Em telas estreitas (CSS) vira uma lista de cartões.
  */
 export function TabelaIndices({ indicadores = [] }) {
-  const semBrent = indicadores.some(
-    (i) => i.label === ROTULO_BRENT && !i.periodos?.some((p) => /[0-9]/.test(p.valor_texto ?? '')),
-  );
+  const semHistorico = indicadores
+    .filter((i) => SEM_HISTORICO[i.label] && !i.periodos?.some((p) => /[0-9]/.test(p.valor_texto ?? '')))
+    .map((i) => SEM_HISTORICO[i.label]);
   return (
     <>
       <div className="mercado-rolagem" role="region" aria-label={TEXTOS.mercado.tabelaTitulo} tabIndex={0}>
@@ -164,7 +171,9 @@ export function TabelaIndices({ indicadores = [] }) {
           {TEXTOS.mercado.calculadoNota}
         </p>
       )}
-      {semBrent && <p className="mercado-nota mercado-nota--rodape">{TEXTOS.mercado.brentNota}</p>}
+      {semHistorico.length > 0 && (
+        <p className="mercado-nota mercado-nota--rodape">{TEXTOS.mercado.semHistoricoNota(semHistorico.join(' e '))}</p>
+      )}
     </>
   );
 }

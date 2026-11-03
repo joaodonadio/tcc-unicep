@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Info, Sparkles, ThumbsUp, TriangleAlert } from 'lucide-react';
+import { ChevronRight, Info, ThumbsUp, TriangleAlert } from 'lucide-react';
 import { BotaoGuardar } from '../ui/BotaoGuardar.jsx';
 import { IconeSetor } from '../ui/IconeSetor.jsx';
 import { brl, numero, pct } from '../../lib/formato.js';
@@ -17,6 +17,9 @@ const SINAIS = {
   atencao: { tom: 'queda', Icone: TriangleAlert },
   contexto: { tom: 'neutro', Icone: Info },
 };
+
+/** Mancha do cartão em destaque pela direção do dia (a mesma regra da Hoje); o sinal fica com os selos. */
+const BRILHO_DA_DIRECAO = { up: 'alta', down: 'queda' };
 
 /** Selo de um tipo de sinal: ícone e texto na cor do tipo. */
 export function SeloSinal({ tipo, children }) {
@@ -58,7 +61,7 @@ export function CartaoDestaque({ acao, nivel, nivelTitulo = 3 }) {
   const Sub = `h${nivelTitulo}`;
 
   return (
-    <li className="cartao destaque">
+    <li className="cartao destaque" data-brilho={BRILHO_DA_DIRECAO[direcao] ?? 'aco'}>
       <p className="destaque__setor">
         <IconeSetor setor={setor} />
         <span>{setor}</span>
@@ -85,7 +88,7 @@ export function CartaoDestaque({ acao, nivel, nivelTitulo = 3 }) {
       <p className="destaque__sinais">{selosDeSinais(acao.contagem)}</p>
       <div className="destaque__porque">
         <p className="destaque__porque-rotulo">
-          <Sparkles size={16} strokeWidth={2} aria-hidden="true" />
+          {motivo && <ThumbsUp size={16} strokeWidth={2} aria-hidden="true" />}
           {porNivel(TEXTOS.acoes.destaquePorque, nivel)}
         </p>
         <p className="destaque__porque-texto">{motivo ?? porNivel(TEXTOS.acoes.destaqueSemMotivo, nivel)}</p>

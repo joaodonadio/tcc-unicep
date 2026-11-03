@@ -25,6 +25,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
+import { alturaVisivel } from '../../lib/modelos3d.js';
 export { suportaWebGL, reduzMovimento } from './suporte.js';
 
 /** Cor de um token CSS (ex.: '--cor-acento') como THREE.Color; [tokA, tokB, t] mistura duas. */
@@ -46,7 +47,7 @@ function lerCor(ancora, token) {
 export const suaviza = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 
 /**
- * opcoes: { container, canvas, rotulos, altura, largura, alvo, az, elev, arrastar (padrão true), monta(P),
+ * opcoes: { container, canvas, rotulos, altura, largura, proximidade (padrão 1), alvo, az, elev, arrastar (padrão true), monta(P),
  * anima(segundos), aoDestruir() }.
  * anima devolve true enquanto ainda há movimento.
  * api: { cena, M, peca, linha, rotulo, cam, canvas, redesenha(), vista(az, elev), destruir() }.
@@ -174,7 +175,7 @@ export function criarPalco(opcoes) {
     if (!w || !h) return;
     r.setSize(w, h, false);
     const asp = w / h;
-    const H = Math.max(opcoes.altura, (opcoes.largura || 0) / asp);
+    const H = alturaVisivel(opcoes, asp);
     cam.left = (-H * asp) / 2;
     cam.right = (H * asp) / 2;
     cam.top = H / 2;

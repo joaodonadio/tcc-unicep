@@ -70,6 +70,8 @@ Pontos de atenção:
 - O proxy do servidor de desenvolvimento e do `npm run preview` acrescenta o cabeçalho `X-API-Key`. A chave não entra no build.
 - Em produção, o build é estático e o proxy do Vite não existe. É preciso um proxy próprio que receba as chamadas em `/api`, acrescente `X-API-Key` no servidor e encaminhe à API. A seção 7.4 do documento de arquitetura descreve o caso.
 
+Para trabalhar o design com o painel cheio, use `VITE_FONTE_DADOS=simulado`: os pacotes de `public/dados/` ganham valores simulados com semente fixa (série do dólar, ações estáveis, tom das notícias desigual e pagamentos nos próximos dias). `VITE_MOCK_LATENCY_MIN`, `VITE_MOCK_LATENCY_MAX` e `VITE_MOCK_ERROR_RATE` simulam atraso e falha. Esses números não são reais.
+
 ## Scripts
 
 | Comando | O que faz |
@@ -123,9 +125,9 @@ src/
     graficos/             gráficos em SVG e ECharts
     ui/                   estados de carregamento, erro e vazio, termos com balão e botões
   context/                preferências de leitura e Minha lista
-  hooks/                  consultas (TanStack Query), análise do dia, Banco Central e apoio (voz, rolagem, traduções)
+  hooks/                  consultas (TanStack Query), análise do dia e apoio (voz, rolagem)
   lib/                    regras de sinal (sugestoes.js), perguntas da ficha, lista de ações, setores, textos (TEXTOS) e funções puras
-  services/               fontes de dados (arquivos e API), contrato, erros, experimento e tradução
+  services/               fontes de dados (arquivos, API e simulada), contrato, erros e experimento
   styles/                 tokens de cor e tipografia (tokens.css), um arquivo por tela e por componente
   test/                   testes automatizados, em pastas por área
 public/dados/             pacotes JSON de exemplo
@@ -137,7 +139,7 @@ docs/                     documentação: arquitetura da interface e guia do usu
 
 ## Visual
 
-Tema escuro cinza-quente, com destaque âmbar. A fonte é a Manrope, instalada pelo próprio projeto. As cores e a tipografia ficam em `src/styles/tokens.css`. O projeto segue as preferências de movimento do sistema operacional: com movimento reduzido, as animações deixam de rodar.
+Tema escuro cinza-quente, com destaque âmbar. As fontes são a Atkinson Hyperlegible Next (títulos e texto) e a Atkinson Hyperlegible Mono (números), instaladas pelo próprio projeto. As cores e a tipografia ficam em `src/styles/tokens.css`. O projeto segue as preferências de movimento do sistema operacional: com movimento reduzido, as animações deixam de rodar.
 
 ## Documentação
 

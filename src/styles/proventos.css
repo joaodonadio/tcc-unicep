@@ -8,7 +8,7 @@
 .proventos-titulo {
   font-size: var(--texto-3xl);
   font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 1.08;
   margin-bottom: var(--espaco-3);
   text-wrap: balance;
@@ -53,20 +53,25 @@
   }
 }
 
-/* Bloco: cartão translúcido com título, uma frase de como ler e o conteúdo */
+/* Bloco: cartão de vidro com mancha sálvia (dinheiro entrando), título, uma frase de como ler e o conteúdo */
 .proventos-bloco {
   min-width: 0;
   padding: var(--espaco-6);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
+  background: var(--vidro);
+  border: 1px solid transparent;
   border-radius: var(--raio-cartao);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--vidro-sombra);
+  --brilho: var(--poca-verde);
+  --brilho-2: var(--poca-oliva);
+  --brilho-forca: 50%;
+  --poca-1-pos: 100% 0%;
+  --poca-2-pos: 0% 100%;
+  --cor-texto-suave: #dedee3;
 }
 
 .proventos-bloco-titulo {
   font-size: var(--texto-xl);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
   letter-spacing: -0.02em;
   line-height: 1.2;
   margin-bottom: var(--espaco-2);
@@ -141,9 +146,8 @@
 .proventos-tabela thead th {
   padding: 0 var(--espaco-2) var(--espaco-3) 0;
   color: var(--cor-texto-suave);
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
   text-align: left;
   white-space: nowrap;
 }
@@ -157,6 +161,16 @@
 .proventos-tabela .proventos-num {
   text-align: right;
   white-space: nowrap;
+}
+
+/* Posição do ranking é número de dado: Atkinson Hyperlegible Mono (o cabeçalho continua em texto) */
+.proventos-tabela tbody .proventos-num {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .proventos-tabela tbody td:first-child {
@@ -176,8 +190,13 @@
   }
 }
 
+/* Código da ação na tabela: Atkinson Hyperlegible Mono */
 .proventos-tabela a {
-  font-weight: var(--peso-medio);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--cor-texto);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
@@ -199,7 +218,12 @@
 
 .proventos-dy-valor {
   display: block;
-  font-weight: var(--peso-medio);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 /* Barra proporcional ao maior dividend yield: 10px, pílula, sem borda */
@@ -210,7 +234,7 @@
   height: 10px;
   margin: var(--espaco-2) 0 0 auto;
   border-radius: var(--raio-pilula);
-  background: var(--cor-fio);
+  background: var(--cor-superficie-2);
   overflow: hidden;
 }
 
@@ -218,7 +242,7 @@
   display: block;
   height: 100%;
   border-radius: var(--raio-pilula);
-  background: var(--cor-dado-1);
+  background: var(--cor-alta);
 }
 
 /* Como funciona: três passos, uma moedinha que percorre a trilha */
@@ -297,16 +321,17 @@
   width: 3.5rem;
   height: 3.5rem;
   margin-bottom: var(--espaco-3);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: 50%;
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-acento);
 }
 
 .proventos-passo-titulo {
   margin-bottom: var(--espaco-1);
   font-size: var(--texto-base);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
   line-height: 1.3;
 }
 
@@ -318,7 +343,7 @@
   line-height: 1.5;
 }
 
-/* Alertas: cartões com ícone, data em destaque e o prazo na pílula */
+/* Alertas: avisos com a fórmula de aviso amarela (atenção), data em destaque e o prazo na pílula */
 .proventos-alertas-grade {
   display: grid;
   gap: var(--espaco-4);
@@ -326,9 +351,9 @@
 
 .proventos-alerta {
   padding: var(--espaco-4);
-  background: var(--cor-superficie-2);
-  border: 1px solid var(--cor-borda);
-  border-radius: calc(var(--raio-cartao) - 6px);
+  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cor-atencao) 30%, transparent);
+  border-radius: var(--raio-3);
 }
 
 .proventos-alerta-titulo {
@@ -336,7 +361,7 @@
   align-items: center;
   gap: var(--espaco-2);
   font-size: var(--texto-base);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
   margin-bottom: var(--espaco-2);
 }
 
@@ -402,8 +427,12 @@
 }
 
 .proventos-data-dia {
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-lg) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .proventos-data-mes {
@@ -422,17 +451,17 @@
   text-align: center;
 }
 
-/* Prazo: pílula de texto âmbar sobre âmbar translúcido, com relógio */
+/* Prazo: pílula de texto amarelo de atenção sobre véu da mesma cor, com relógio */
 .proventos-prazo {
   flex: none;
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   padding: 0.3em 0.8em;
-  border: 1px solid var(--cor-acento);
+  border: 1px solid color-mix(in srgb, var(--cor-atencao) 30%, transparent);
   border-radius: var(--raio-pilula);
-  background: var(--cor-acento-suave);
-  color: var(--cor-acento);
+  background: var(--cor-atencao-fundo);
+  color: var(--cor-atencao);
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
   line-height: 1.2;
@@ -448,8 +477,10 @@
 }
 
 .proventos-cal-mes {
+  font-family: var(--fonte-titulo);
   font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
+  font-weight: var(--peso-titulo);
+  letter-spacing: -0.02em;
 }
 
 .proventos-cal-nav {
@@ -457,15 +488,17 @@
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: transparent;
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto);
   cursor: pointer;
 }
 
 .proventos-cal-nav:hover {
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .proventos-cal-nav:focus-visible,
@@ -479,8 +512,10 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
   padding: var(--espaco-2);
-  border-radius: calc(var(--raio-cartao) - 6px);
-  background: var(--cor-superficie-2);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
 }
 
 .proventos-cal-semana {
@@ -504,20 +539,24 @@
   background: transparent;
   color: var(--cor-texto);
   font: inherit;
-  font-size: var(--texto-sm);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-sm) * 0.92);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .proventos-cal-dia[data-hoje] {
   box-shadow: inset 0 0 0 1px var(--cor-texto-suave);
 }
 
-/* Dia com pagamento: célula âmbar suave, contorno âmbar e número em destaque */
+/* Dia com pagamento: célula clara suave, contorno claro a 30% e número em destaque */
 .proventos-cal-dia-pag {
-  border: 1px solid var(--cor-acento);
+  border: 1px solid color-mix(in srgb, var(--cor-acento) 30%, transparent);
   background: var(--cor-acento-suave);
   color: var(--cor-acento);
-  font-weight: var(--peso-titulo);
+  font-weight: var(--peso-medio);
   cursor: pointer;
 }
 
@@ -525,7 +564,7 @@
   border-color: var(--cor-acento-hover);
 }
 
-/* Dia selecionado: âmbar sólido com tinta escura */
+/* Dia selecionado: branco sólido com tinta escura */
 .proventos-cal-dia-pag[aria-pressed='true'] {
   background: var(--cor-acento);
   color: var(--cor-acento-texto);
@@ -594,7 +633,7 @@
   height: 3rem;
   pointer-events: none;
   opacity: 0;
-  background: linear-gradient(to bottom, transparent, var(--cor-superficie));
+  background: linear-gradient(to bottom, transparent, var(--vidro-base));
   transition: opacity 0.3s ease-out;
 }
 
@@ -672,8 +711,13 @@
   min-width: 0;
 }
 
+/* Código da ação na agenda: Atkinson Hyperlegible Mono */
 .proventos-ag-ticker {
-  font-weight: var(--peso-forte);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .proventos-ag-com {
@@ -686,9 +730,9 @@
 .proventos-ag-tipo {
   justify-self: start;
   padding: 0.2em 0.75em;
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo);
   color: var(--cor-texto);
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
@@ -704,8 +748,12 @@
 .proventos-ag-valor {
   display: block;
   text-align: right;
-  font-weight: var(--peso-medio);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
   white-space: nowrap;
 }
 
@@ -720,9 +768,10 @@
   margin-top: var(--espaco-4);
   min-height: 2.75rem;
   padding: 0 var(--espaco-5);
-  border: 1px solid var(--cor-borda);
+  border: 1px solid var(--sub-borda);
   border-radius: var(--raio-pilula);
-  background: transparent;
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
   color: var(--cor-texto);
   font: inherit;
   font-size: var(--texto-base);
@@ -731,7 +780,8 @@
 }
 
 .proventos-ag-mais:hover {
-  background: var(--cor-superficie-2);
+  background: var(--sub-fundo-hover);
+  border-color: var(--cor-borda-hover);
 }
 
 .proventos-ag-mais[aria-expanded='true'] {

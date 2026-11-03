@@ -46,7 +46,7 @@ export default function MaquinaModelo({ diagrama }) {
   const [entradas, modelo, chance, top5] = diagrama;
 
   return (
-    <div className="maq" ref={ref} aria-hidden="true" data-anima={animar}>
+    <div className="maq" ref={ref} aria-hidden="true" data-anima={animar} data-brilho="lavanda">
       <div className="maq__no maq__no--entradas">
         <span className="maq__nome">{entradas.nome}</span>
         <ul className="maq__chips">

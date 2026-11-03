@@ -21,7 +21,7 @@ export default function ResumoAtualizacao({ registro, dataReferencia }) {
   ].filter((fato) => fato.valor);
 
   return (
-    <div className="dados__resumo">
+    <div className="dados__resumo" data-brilho="aco">
       <span className="pilula" data-tom={situacao.tom}>
         <Icone aria-hidden="true" size={18} />
         {situacao.rotulo}

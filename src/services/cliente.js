@@ -1,7 +1,8 @@
 /**
  * Ponto único de leitura dos dados. Escolhe a fonte pelo ambiente:
- *   VITE_FONTE_DADOS=api      -> API de leitura via proxy (fonteApi.js)
- *   qualquer outro / ausente  -> arquivos de public/dados (fonteArquivos.js)
+ *   VITE_FONTE_DADOS=api       -> API de leitura via proxy (fonteApi.js)
+ *   VITE_FONTE_DADOS=simulado  -> pacotes de public/dados completados com valores simulados, só para design (fonteSimulada.js)
+ *   qualquer outro / ausente   -> arquivos de public/dados (fonteArquivos.js)
  *
  * Os hooks chamam só `obter`; nunca sabem qual fonte está ativa.
  */
@@ -10,6 +11,7 @@ import { verificarContrato } from './contrato.js';
 import { ErroDados, MENSAGEM_PADRAO } from './erros.js';
 import { pedirApi } from './fonteApi.js';
 import { pedirArquivos } from './fonteArquivos.js';
+import { pedirSimulado } from './fonteSimulada.js';
 import { corrigirNome } from '../lib/nomesEmpresas.js';
 
 /**
@@ -34,10 +36,11 @@ function corrigirNomes(resp) {
 }
 
 function lerFonte() {
-  return import.meta.env.VITE_FONTE_DADOS === 'api' ? 'api' : 'arquivos';
+  const valor = import.meta.env.VITE_FONTE_DADOS;
+  return valor === 'api' || valor === 'simulado' ? valor : 'arquivos';
 }
 
-/** Fonte ativa no momento do carregamento do módulo ('api' ou 'arquivos'). */
+/** Fonte ativa no momento do carregamento do módulo ('api', 'simulado' ou 'arquivos'). */
 export const FONTE = lerFonte();
 
 /**
@@ -46,9 +49,12 @@ export const FONTE = lerFonte();
  */
 export async function obter(caminho, { params, signal } = {}) {
   try {
-    const resp = lerFonte() === 'api'
+    const fonte = lerFonte();
+    const resp = fonte === 'api'
       ? await pedirApi(caminho, { params, signal })
-      : await pedirArquivos(caminho, { params });
+      : fonte === 'simulado'
+        ? await pedirSimulado(caminho, { params, signal })
+        : await pedirArquivos(caminho, { params });
 
     if (resp && typeof resp === 'object' && resp.versao_contrato !== undefined) {
       verificarContrato(resp);

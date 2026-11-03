@@ -1,11 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import Noticias from '../../pages/Noticias.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
-
-vi.mock('../../hooks/useTraducao.js', () => ({ useTraducao: () => ({ data: null }) }));
 
 describe('Noticias', () => {
   beforeEach(() => {

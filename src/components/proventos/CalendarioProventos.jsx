@@ -7,7 +7,7 @@ import { usePreferencias } from '../../context/contextos.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 
 /**
- * Calendário do mês (domingo a sábado). Dias com pagamento são botões âmbar com
+ * Calendário do mês (domingo a sábado). Dias com pagamento são botões de fundo claro com
  * uma bolinha por pagamento (até 3); tocar num dia lista os pagamentos dele.
  */
 

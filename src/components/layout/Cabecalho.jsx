@@ -6,6 +6,7 @@ import { useMinhaLista } from '../../context/contextos.js';
 import { dataBR } from '../../lib/datas.js';
 import { TEXTO_EXECUCAO, TEXTOS } from '../../lib/textos.js';
 import ControlesLeitura from './ControlesLeitura.jsx';
+import Mascote from '../ui/Mascote.jsx';
 
 /**
  * Páginas do menu, na ordem em que aparecem. Hoje é a rota "/", então usa end para não ficar ativa nas outras.
@@ -65,6 +66,7 @@ export default function Cabecalho() {
     <header className="cabecalho">
       <div className="cabecalho__linha pagina">
         <Link className="cabecalho__marca" to="/">
+          <Mascote humor="neutro" acao="ocioso" className="cabecalho__mascote" />
           {TEXTOS.cabecalho.identificacao}
         </Link>
 

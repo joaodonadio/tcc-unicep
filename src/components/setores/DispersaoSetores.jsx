@@ -19,7 +19,7 @@ export function DispersaoSetores({ setores, periodo }) {
   }, [setores]);
 
   return (
-    <section className="secao setores-dispersao" aria-labelledby="setores-dispersao-titulo">
+    <section className="secao setores-dispersao" data-brilho="dado" aria-labelledby="setores-dispersao-titulo">
       <h2 id="setores-dispersao-titulo" className="setores-titulo">
         {T.titulo}
       </h2>

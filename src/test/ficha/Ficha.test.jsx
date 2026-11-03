@@ -215,7 +215,8 @@ describe('ficha da ação por perguntas /acao/:ticker', () => {
   it('o cabeçalho mostra o preço e a variação do dia', () => {
     renderizarFicha('/acao/PETR4?pergunta=regras');
     expect(screen.getByText(/R\$\s53,88/)).toBeInTheDocument();
-    expect(screen.getByText(/8,2% no dia/)).toBeInTheDocument();
+    // o número fica num span próprio (fonte de números) e "no dia" no texto ao redor
+    expect(document.querySelector('.ficha-variacao')).toHaveTextContent(/8,2% no dia/);
   });
 
   it('nota de setor com poucas empresas aparece em dívida e preço, mas não quando a comparação vale', () => {

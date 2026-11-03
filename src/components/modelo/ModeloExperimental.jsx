@@ -49,7 +49,13 @@ export default function ModeloExperimental() {
 
       <div className="modelo-cartoes" ref={cartoes} data-visto={visto}>
         {t.cartoes.map((c, i) => (
-          <article key={c.chave} className="modelo-cartao" data-cartao={c.chave} style={{ '--i': i }}>
+          <article
+            key={c.chave}
+            className="modelo-cartao"
+            data-cartao={c.chave}
+            data-brilho={c.chave === 'naoE' ? 'acento' : 'lavanda'}
+            style={{ '--i': i }}
+          >
             <h3 className="modelo-cartao__titulo">{c.titulo}</h3>
             <p className="modelo-cartao__texto">
               <Partes partes={porNivel(c.texto, nivel)} />
