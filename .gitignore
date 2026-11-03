@@ -248,3 +248,6 @@ logs/
 .cursor/
 .gemini/
 .impeccable/
+
+# vínculo local com o projeto da Vercel
+.vercel
