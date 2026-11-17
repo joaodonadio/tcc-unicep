@@ -59,7 +59,7 @@ describe('montarSerieDolar', () => {
 });
 
 describe('montarHistoricoDolar', () => {
-  it('ignora os 404 (null), monta a série e nunca passa de 6 pedidos ao mesmo tempo', async () => {
+  it('ignora os 404 (null), monta a série e nunca passa de 20 pedidos ao mesmo tempo', async () => {
     let emVoo = 0;
     let maximo = 0;
     const pedirDia = async (data) => {
@@ -74,7 +74,7 @@ describe('montarHistoricoDolar', () => {
 
     const historico = await montarHistoricoDolar(pedirDia, HOJE);
 
-    expect(maximo).toBeLessThanOrEqual(6);
+    expect(maximo).toBeLessThanOrEqual(20);
     expect(historico.datas.length).toBeGreaterThan(0);
     expect(historico.datas.every((d) => Number(d.slice(8)) % 2 === 1)).toBe(true);
     expect(historico.datas).toEqual([...historico.datas].sort());

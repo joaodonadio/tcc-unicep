@@ -3,7 +3,8 @@
   "framework": "vite",
   "buildCommand": "vite build",
   "outputDirectory": "dist",
-  "functions": { "api/v1/*.js": { "maxDuration": 60 } },
+  "functions": { "api/v1/*.js": { "maxDuration": 60 }, "api/aquecer.js": { "maxDuration": 60 } },
+  "crons": [{ "path": "/api/aquecer", "schedule": "15 12 * * *" }],
   "rewrites": [
     { "source": "/api/v1/:caminho*", "destination": "/api/proxy?caminho=:caminho*" },
     {

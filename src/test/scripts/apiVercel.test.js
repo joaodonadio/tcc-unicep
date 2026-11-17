@@ -5,6 +5,8 @@ import { montarCorpoDolar } from '../../../scripts/dolarHistorico.mjs';
 import { montarSeriesSemana } from '../../../scripts/seriesSemana.mjs';
 import handler, { montarDestino, validarCaminho } from '../../../api/proxy.js';
 import handlerProventos from '../../../api/v1/proventos-todos.js';
+import handlerAquecer, { ROTAS_AQUECIDAS } from '../../../api/aquecer.js';
+import { tempoLimite } from '../../services/fonteApi.js';
 
 function respostaFalsa() {
   const res = { cabecalhos: {}, statusCode: 200, corpo: '' };
@@ -159,7 +161,7 @@ describe('rota montada (proventos-todos)', () => {
     const res = respostaFalsa();
     await handlerProventos({ method: 'GET' }, res);
     expect(res.statusCode).toBe(200);
-    expect(res.cabecalhos['cache-control']).toBe('s-maxage=21600, stale-while-revalidate=86400');
+    expect(res.cabecalhos['cache-control']).toBe('s-maxage=21600, stale-while-revalidate=604800');
     expect(JSON.parse(res.corpo).registros).toEqual([]);
   });
 
@@ -170,5 +172,40 @@ describe('rota montada (proventos-todos)', () => {
     await handlerProventos({ method: 'GET' }, res);
     expect(res.statusCode).toBe(502);
     expect(JSON.parse(res.corpo)).toEqual({ erro: 'proventos indisponíveis' });
+  });
+});
+
+describe('aquecimento diário das rotas montadas', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  });
+
+  it('pede as quatro rotas pelo domínio público e devolve o status de cada uma', async () => {
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = 'site.vercel.app';
+    const pedido = vi.fn(async () => new Response('{}', { status: 200 }));
+    vi.stubGlobal('fetch', pedido);
+    const res = respostaFalsa();
+    await handlerAquecer({ method: 'GET' }, res);
+    expect(pedido.mock.calls.map((c) => c[0])).toEqual(ROTAS_AQUECIDAS.map((r) => `https://site.vercel.app/api/v1/${r}`));
+    expect(JSON.parse(res.corpo).resultados.every((r) => r.status === 200)).toBe(true);
+  });
+
+  it('sem domínio de produção: 503, sem pedir nada', async () => {
+    const pedido = vi.fn();
+    vi.stubGlobal('fetch', pedido);
+    const res = respostaFalsa();
+    await handlerAquecer({ method: 'GET' }, res);
+    expect(res.statusCode).toBe(503);
+    expect(pedido).not.toHaveBeenCalled();
+  });
+});
+
+describe('tempo limite no navegador', () => {
+  it('rotas montadas esperam até 60 s; as outras, 12 s', () => {
+    expect(tempoLimite('proventos-todos')).toBe(60000);
+    expect(tempoLimite('velas-setores')).toBe(60000);
+    expect(tempoLimite('proventos/PETR4')).toBe(12000);
+    expect(tempoLimite('resumo_acao')).toBe(12000);
   });
 });

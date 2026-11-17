@@ -12,7 +12,7 @@
 import { criarPedirJson } from './pedirApi.mjs';
 
 const VALIDADE_MS = 6 * 60 * 60_000;
-const SIMULTANEOS = 6;
+const SIMULTANEOS = 20;
 const ROTA = '/api/v1/proventos-todos';
 
 /**

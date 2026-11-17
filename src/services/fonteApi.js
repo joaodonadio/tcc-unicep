@@ -10,9 +10,19 @@ import { erroDeRede, erroDeStatus } from './erros.js';
 
 const TEMPO_LIMITE_MS = 12000;
 
+/**
+ * Rotas montadas no servidor (juntam as 85 ações): com o cache da CDN frio levam ~10-20 s.
+ * Esperar por elas evita cair na busca ação por ação, que demoraria muito mais.
+ */
+const ROTAS_MONTADAS = new Set(['proventos-todos', 'velas-setores', 'series-semana', 'dolar-historico']);
+const TEMPO_LIMITE_MONTADA_MS = 60000;
+
+export const tempoLimite = (caminho) =>
+  ROTAS_MONTADAS.has(String(caminho).replace(/^\/+/, '').split(/[/?]/)[0]) ? TEMPO_LIMITE_MONTADA_MS : TEMPO_LIMITE_MS;
+
 /** Combina o sinal do chamador com o tempo limite. */
-function sinalCombinado(signal) {
-  const sinais = [AbortSignal.timeout(TEMPO_LIMITE_MS)];
+function sinalCombinado(signal, limiteMs = TEMPO_LIMITE_MS) {
+  const sinais = [AbortSignal.timeout(limiteMs)];
   if (signal) sinais.unshift(signal);
 
   if (typeof AbortSignal.any === 'function') return AbortSignal.any(sinais);
@@ -49,7 +59,7 @@ export async function pedirApi(caminho, { params, signal } = {}) {
   try {
     resp = await fetch(montarUrl(caminho, params), {
       headers: { Accept: 'application/json' },
-      signal: sinalCombinado(signal),
+      signal: sinalCombinado(signal, tempoLimite(caminho)),
     });
   } catch (erro) {
     // Cancelamento feito pelo chamador (ex.: React Query) não é erro de dados.

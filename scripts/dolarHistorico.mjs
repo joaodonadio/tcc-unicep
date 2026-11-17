@@ -13,7 +13,7 @@ import { criarPedirJson } from './pedirApi.mjs';
 
 export const DIAS_CORRIDOS = 120;
 const VALIDADE_MS = 6 * 60 * 60_000;
-const SIMULTANEOS = 6;
+const SIMULTANEOS = 20;
 const ROTA = '/api/v1/dolar-historico';
 
 const doisDigitos = (n) => String(n).padStart(2, '0');

@@ -1,7 +1,9 @@
 // Ajudantes das funções da Vercel (o prefixo _ impede que vire rota).
 // A chave só é lida de process.env no servidor e nunca entra em resposta nem em log.
 
-export const CACHE_CDN = 's-maxage=21600, stale-while-revalidate=86400';
+// 6 h fresca; depois, até 7 dias a CDN entrega a versão anterior na hora e remonta por trás
+// (ninguém espera as 85 consultas, salvo logo após um deploy, que zera o cache)
+export const CACHE_CDN = 's-maxage=21600, stale-while-revalidate=604800';
 
 /** Ambiente da API privada, no formato que scripts/pedirApi.mjs espera. */
 export const ambiente = () => ({
