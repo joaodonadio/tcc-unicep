@@ -3,11 +3,10 @@ import { useDetalhes } from '../../hooks/useDetalhes.js';
 import { numero, vezes } from '../../lib/formato.js';
 import { fracaoDe, tetoVezes } from '../../lib/hoje.js';
 import { usePreferencias } from '../../context/contextos.js';
-import { ROTULO_STATUS, TEXTOS, porNivel } from '../../lib/textos.js';
+import { TEXTOS, porNivel } from '../../lib/textos.js';
 import { BotaoTermo } from '../ui/BotaoTermo.jsx';
 import { BotaoDetalhes, PainelDetalhes } from '../ui/Detalhes.jsx';
 import { Linhas } from '../ui/Estados.jsx';
-import { Variacao } from './Variacao.jsx';
 
 const MAX_VOLUME = 3;
 
@@ -37,76 +36,20 @@ function Linha({ rotulo, ticker, barra, valor }) {
 }
 
 /**
- * Destaques do pregão: maior alta, maior queda (barras na mesma escala) e até 3 ações com volume
- * incomum ("2,3×", barra com a marca do normal). Explicações e nomes das empresas ficam no painel.
+ * Volume incomum do pregão: até 3 ações com volume acima do normal ("2,3×", barra com a marca do normal).
+ * Maior alta e maior queda ficam no Resumo do pregão. Sem volume incomum, o bloco não aparece.
  * `alertas` é data.painel_alertas.
  */
 export function DestaquesDoDia({ alertas, carregando = false }) {
   const { nivel } = usePreferencias();
   const detalhes = useDetalhes();
-  const alta = alertas?.alta ?? null;
-  const queda = alertas?.queda ?? null;
   const volume = (alertas?.volume?.itens ?? []).slice(0, MAX_VOLUME);
-  const algum = Boolean(alta || queda || volume.length);
   const titulo = porNivel(TEXTOS.hoje.destaquesTitulo, nivel);
+  if (!carregando && volume.length === 0) return null;
 
-  // escala comum de alta e queda: o maior módulo enche a barra
-  const modulos = [alta?.variacao, queda?.variacao].filter(Number.isFinite).map(Math.abs);
-  const tetoVariacao = modulos.length ? Math.max(...modulos) : null;
   const teto = tetoVezes(volume.map((i) => i.vezes));
-  const empresas = [...new Map([alta, queda, ...volume].filter((x) => x?.empresa).map((x) => [x.ticker, x])).values()];
-
-  let conteudo;
-  if (carregando) {
-    conteudo = <Linhas quantidade={3} />;
-  } else if (!alertas) {
-    conteudo = <p className="hoje-vazio">{ROTULO_STATUS.indisponivel}</p>;
-  } else if (!algum) {
-    conteudo = <p className="hoje-vazio">{porNivel(TEXTOS.hoje.semDestaques, nivel)}</p>;
-  } else {
-    conteudo = (
-      <ul className="hoje-lista">
-        {alta && (
-          <Linha
-            rotulo={porNivel(TEXTOS.hoje.maiorAlta, nivel)}
-            ticker={alta.ticker}
-            barra={<Barra fracao={fracaoDe(alta.variacao, tetoVariacao)} sinal="up" />}
-            valor={<Variacao valor={alta.variacao} />}
-          />
-        )}
-        {queda && (
-          <Linha
-            rotulo={porNivel(TEXTOS.hoje.maiorQueda, nivel)}
-            ticker={queda.ticker}
-            barra={<Barra fracao={fracaoDe(queda.variacao, tetoVariacao)} sinal="down" />}
-            valor={<Variacao valor={queda.variacao} />}
-          />
-        )}
-        {volume.length > 0 && (
-          <li className="hoje-subgrupo">
-            <BotaoTermo chave="volume">{porNivel(TEXTOS.hoje.volumeIncomum, nivel)}</BotaoTermo>
-          </li>
-        )}
-        {volume.map((item) => (
-          <Linha
-            key={item.ticker}
-            ticker={item.ticker}
-            barra={<Barra fracao={fracaoDe(item.vezes, teto)} sinal="volume" normal={fracaoDe(1, teto)} />}
-            valor={
-              <>
-                <span className="hoje-vezes" aria-hidden="true">
-                  {vezes(item.vezes)}
-                </span>
-                <span className="sr-only">{porNivel(TEXTOS.hoje.vezesMediana, nivel)(numero(item.vezes, { casas: 1 }))}</span>
-              </>
-            }
-          />
-        ))}
-      </ul>
-    );
-  }
-
-  const comPainel = !carregando && Boolean(alertas) && algum;
+  const empresas = [...new Map(volume.filter((x) => x.empresa).map((x) => [x.ticker, x])).values()];
+  const comPainel = !carregando;
 
   return (
     <section className="hoje-bloco" aria-labelledby="hoje-destaques-titulo">
@@ -116,11 +59,33 @@ export function DestaquesDoDia({ alertas, carregando = false }) {
         </h2>
         {comPainel && <BotaoDetalhes nome={titulo} aberto={detalhes.aberto} controla={detalhes.id} onClick={detalhes.alternar} />}
       </div>
-      {conteudo}
+      {carregando ? (
+        <Linhas quantidade={3} />
+      ) : (
+        <ul className="hoje-lista">
+          <li className="hoje-subgrupo">
+            <BotaoTermo chave="volume">{porNivel(TEXTOS.hoje.volumeIncomum, nivel)}</BotaoTermo>
+          </li>
+          {volume.map((item) => (
+            <Linha
+              key={item.ticker}
+              ticker={item.ticker}
+              barra={<Barra fracao={fracaoDe(item.vezes, teto)} sinal="volume" normal={fracaoDe(1, teto)} />}
+              valor={
+                <>
+                  <span className="hoje-vezes" aria-hidden="true">
+                    {vezes(item.vezes)}
+                  </span>
+                  <span className="sr-only">{porNivel(TEXTOS.hoje.vezesMediana, nivel)(numero(item.vezes, { casas: 1 }))}</span>
+                </>
+              }
+            />
+          ))}
+        </ul>
+      )}
       {comPainel && (
         <PainelDetalhes id={detalhes.id} aberto={detalhes.aberto}>
-          {(alta || queda) && <p>{porNivel(TEXTOS.hoje.destaquesNota, nivel)}</p>}
-          {volume.length > 0 && <p>{porNivel(TEXTOS.hoje.volumeNota, nivel)}</p>}
+          <p>{porNivel(TEXTOS.hoje.volumeNota, nivel)}</p>
           {empresas.map((e) => (
             <p key={e.ticker}>{TEXTOS.hoje.quemE(e.ticker, e.empresa)}</p>
           ))}

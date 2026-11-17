@@ -11,6 +11,7 @@ import { ok, valorOuNulo, textoStatus } from './valor.js';
 import { brl, brlCompacto, numero, pct, pp, quantidade, vezes } from './formato.js';
 import { dataBR } from './datas.js';
 import { AVISO_FIXO, NAO_PREVE } from './textos.js';
+import { variacaoDiaCrivel, variacaoDiaSuspeita, variacaoPeriodoSuspeita } from './crivel.js';
 
 const LIMITE_BASE = `${NAO_PREVE} ${AVISO_FIXO}`;
 
@@ -20,6 +21,13 @@ export const SEM_CONTRA = 'Nada nos dados de hoje pesa contra este ponto.';
 const cmp = (campo, condicao) => {
   const x = valorOuNulo(campo);
   return x != null && condicao(x);
+};
+
+/** Rentabilidade de período só se o dia e o próprio período forem críveis; senão null (salto de escala). */
+const periodoConfiavel = (R, campo) => {
+  const v = valorOuNulo(campo);
+  if (v == null || variacaoDiaSuspeita(valorOuNulo(R.cotacao?.variacao_dia)) || variacaoPeriodoSuspeita(v)) return null;
+  return v;
 };
 
 /** Formata o valor, ou devolve null se ele não existir. */
@@ -93,7 +101,7 @@ export const REGRAS = [
     tipo: 'atencao',
     pacotes: ['resumo_acao'],
     condicaoTexto: 'Variação do dia de −3% ou menos.',
-    aplica: (R) => cmp(R.cotacao?.variacao_dia, (x) => x <= -0.03),
+    aplica: (R) => cmp(R.cotacao?.variacao_dia, (x) => variacaoDiaCrivel(x) && x <= -0.03),
     montar: (R) => {
       const x = valorOuNulo(R.cotacao.variacao_dia);
       return {
@@ -123,7 +131,7 @@ export const REGRAS = [
     tipo: 'contexto',
     pacotes: ['resumo_acao'],
     condicaoTexto: 'Variação do dia de +3% ou mais.',
-    aplica: (R) => cmp(R.cotacao?.variacao_dia, (x) => x >= 0.03),
+    aplica: (R) => cmp(R.cotacao?.variacao_dia, (x) => variacaoDiaCrivel(x) && x >= 0.03),
     montar: (R) => {
       const x = valorOuNulo(R.cotacao.variacao_dia);
       return {
@@ -147,7 +155,7 @@ export const REGRAS = [
     condicaoTexto:
       'Rentabilidade de 6 meses superior à do Ibovespa e à média do setor em mais de 5 pontos percentuais.',
     aplica: (R) => {
-      const m6 = valorOuNulo(R.rentabilidade?.m6);
+      const m6 = periodoConfiavel(R, R.rentabilidade?.m6);
       const ibov = valorOuNulo(R.rentabilidade?.ibov?.m6);
       const setor = valorOuNulo(R.rentabilidade?.setor?.m6);
       return m6 != null && ibov != null && setor != null && m6 - ibov > 0.05 && m6 - setor > 0.05;
@@ -159,7 +167,7 @@ export const REGRAS = [
       return {
         titulo: 'Desempenho acima do Ibovespa e do setor em 6 meses',
         simples: `Em 6 meses, a ação rendeu ${pct(m6)}, contra ${pct(ibov)} do Ibovespa e ${pct(setor)} da média do setor.`,
-        tecnico: `Rentabilidade de 6 meses (127 pregões), com proventos reinvestidos. Diferença: ${pp(m6 - ibov)} do Ibovespa e ${pp(m6 - setor)} da média do setor, ambas acima de 5 p.p. A média do setor não inclui a própria ação.`,
+        tecnico: `Rentabilidade de 6 meses (126 pregões), com proventos reinvestidos. Diferença: ${pp(m6 - ibov)} do Ibovespa e ${pp(m6 - setor)} da média do setor, ambas acima de 5 p.p. A média do setor não inclui a própria ação.`,
         dados: [
           linha('Ação, 6 meses', pct(m6)),
           linha('Ibovespa, 6 meses', pct(ibov)),
@@ -312,14 +320,17 @@ export const REGRAS = [
     nome: 'Queda forte no mês',
     tipo: 'atencao',
     pacotes: ['resumo_acao'],
-    condicaoTexto: 'Rentabilidade de 1 mês (22 pregões) de −15% ou menos.',
-    aplica: (R) => cmp(R.rentabilidade?.m1, (x) => x <= -0.15),
+    condicaoTexto: 'Rentabilidade de 1 mês (21 pregões) de −15% ou menos.',
+    aplica: (R) => {
+      const m1 = periodoConfiavel(R, R.rentabilidade?.m1);
+      return m1 != null && m1 <= -0.15;
+    },
     montar: (R) => {
       const m1 = valorOuNulo(R.rentabilidade.m1);
       return {
         titulo: 'Queda forte no mês',
-        simples: `A ação caiu ${absPct(m1)} nos últimos 22 pregões, cerca de um mês.`,
-        tecnico: `Rentabilidade de 1 mês (22 pregões), com proventos reinvestidos: ${pct(m1)}. Limite de atenção: queda de 15% ou mais.`,
+        simples: `A ação caiu ${absPct(m1)} nos últimos 21 pregões, cerca de um mês.`,
+        tecnico: `Rentabilidade de 1 mês (21 pregões), com proventos reinvestidos: ${pct(m1)}. Limite de atenção: queda de 15% ou mais.`,
         dados: [
           linha('Ação, 1 mês', pct(m1)),
           linhaSe('Ibovespa, 1 mês', R.rentabilidade?.ibov?.m1, pct),

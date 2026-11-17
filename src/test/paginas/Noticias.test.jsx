@@ -10,28 +10,29 @@ describe('Noticias', () => {
     instalarFetchDados();
   });
 
-  it('mostra o título da página e lista até 8 empresas com mais manchetes, com contagem e link para as notícias da ficha', async () => {
+  it('mostra o título da página e os cartões de empresas com link para as notícias da ficha', async () => {
     const { container } = renderizar(<Noticias />);
 
     expect(screen.getByRole('heading', { level: 1, name: porNivel(TEXTOS.paginas.noticiasTitulo, 'simples') })).toBeInTheDocument();
 
-    const titulo = await screen.findByRole('heading', { level: 3, name: porNivel(TEXTOS.dia.empresasTitulo, 'simples') });
+    const titulo = await screen.findByRole('heading', { level: 2, name: porNivel(TEXTOS.dia.empresasTitulo, 'simples') });
     const bloco = titulo.parentElement;
 
-    const empresas = within(bloco).getAllByRole('link');
-    expect(empresas.length).toBeGreaterThan(0);
-    expect(empresas.length).toBeLessThanOrEqual(8);
-    for (const empresa of empresas) {
-      expect(empresa).toHaveAttribute('href', expect.stringMatching(/^\/acao\/[A-Z]{4}\d{1,2}\?pergunta=noticias$/));
+    const linhas = bloco.querySelectorAll('.noticias-barra-linha');
+    expect(linhas.length).toBeGreaterThan(0);
+    expect(linhas.length).toBeLessThanOrEqual(8);
+
+    const links = within(bloco).getAllByRole('link');
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link).toHaveAttribute('href', expect.stringMatching(/^\/acao\/[A-Z]{4}\d{1,2}\?pergunta=noticias$/));
     }
 
-    // Tabela: cada linha tem as três contagens. Número é número; ausência vira traço, nunca 0 por engano.
-    const celulas = empresas.map((link) =>
-      [...link.closest('tr').querySelectorAll('td')].map((celula) => celula.textContent.trim()),
-    );
-    expect(celulas.every((linha) => linha.length === 3)).toBe(true);
-    expect(celulas.flat().every((texto) => /^(\d+|—Indisponível)$/.test(texto))).toBe(true);
-    expect(celulas.flat().some((texto) => /^\d+$/.test(texto))).toBe(true);
+    // Cada linha tem o texto completo para leitor de tela: número ou palavra de indisponível, nunca 0 por engano.
+    for (const linha of linhas) {
+      const texto = linha.querySelector('.sr-only').textContent;
+      expect(texto).toMatch(/^[A-Z0-9 e,·]+: (\d[\d.]* manchetes?, \d[\d.]* positivas?, \d[\d.]* neutras?, \d[\d.]* negativas?|Indisponível)$/);
+    }
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 });

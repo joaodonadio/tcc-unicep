@@ -42,23 +42,9 @@ describe('análise do dia com dados reais', () => {
     expect(analise.indicadores.map((i) => i.label)).toContain('IFIX');
   });
 
-  it('monta 10 setores', () => {
-    expect(analise.setores).toHaveLength(10);
-  });
-
-  it('monta 3 leituras', () => {
-    expect(analise.leituras).toHaveLength(3);
-  });
-
   it('não contém termos proibidos, exceto dentro do aviso fixo', () => {
     const texto = JSON.stringify(analise).split(AVISO_FIXO).join('');
     expect(texto).not.toMatch(PROIBIDOS);
-  });
-
-  it('todo alerta com tipo tem frase e motivo', () => {
-    const comTipo = analise.alertas.filter((a) => a.tipo);
-    expect(comTipo.length).toBeGreaterThan(0);
-    expect(comTipo.every((a) => a.frase && a.motivo)).toBe(true);
   });
 
   it('toda sugestão traz setor_nome', () => {
@@ -95,10 +81,34 @@ describe('análise do dia com dados reais', () => {
       mercado,
       execucao,
     });
-    expect(analiseSintetica.noticias_destaque[0].fonte).toBe('O GLOBO · 22/10/2026, sem horário');
+    expect(analiseSintetica.manchetes_por_tom.positivo[0].fonte).toBe('O GLOBO · 22/10/2026, sem horário');
     // "1969" aparece dentro de decimais dos dados reais (ex.: 0,1969...), então busca só datas de época
     const dataEpoca = /31\/12\/1969|1969-12-/;
     expect(JSON.stringify(analiseSintetica)).not.toMatch(dataEpoca);
     expect(JSON.stringify(analise)).not.toMatch(dataEpoca);
+  });
+});
+
+describe('variação suspeita (grupamento não ajustado) fora dos destaques', () => {
+  // RAIZ4 com +8.933% no dia: a origem não ajustou o grupamento.
+  const suspeita = {
+    ...resumos[0],
+    ticker: 'RAIZ4',
+    cotacao: { ...resumos[0].cotacao, variacao_dia: { valor: 89.33, status: 'ok' } },
+  };
+  const comSuspeita = montarAnaliseDoDia({ acoes, resumos: [...resumos, suspeita], noticias, mercado, execucao });
+
+  it('não aponta a suspeita como maior alta', () => {
+    expect(comSuspeita.painel_alertas.alta?.ticker).not.toBe('RAIZ4');
+    expect(comSuspeita.painel_alertas.alta?.variacao ?? 0).toBeLessThan(1);
+  });
+
+  it('não aponta a suspeita como maior queda', () => {
+    expect(comSuspeita.painel_alertas.queda?.ticker).not.toBe('RAIZ4');
+  });
+
+  it('a análise sem a suspeita não muda os destaques', () => {
+    expect(comSuspeita.painel_alertas.alta?.ticker).toBe(analise.painel_alertas.alta?.ticker);
+    expect(comSuspeita.painel_alertas.queda?.ticker).toBe(analise.painel_alertas.queda?.ticker);
   });
 });

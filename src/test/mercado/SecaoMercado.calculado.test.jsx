@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import SecaoMercado from '../../components/mercado/SecaoMercado.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
-import { TEXTOS } from '../../lib/textos.js';
+import { porNivel, TEXTOS } from '../../lib/textos.js';
 
 // Arquivo próprio: o cache de pacotes da fonte vale por arquivo de teste.
 describe('SecaoMercado: índices completados pela série', () => {
@@ -26,8 +26,7 @@ describe('SecaoMercado: índices completados pela série', () => {
   it('marca com asterisco o que veio do cálculo e explica na nota', async () => {
     renderizar(<SecaoMercado />);
 
-    const tabela = await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo });
-    expect(await screen.findByText(new RegExp(TEXTOS.mercado.calculadoNota.slice(0, 30)), { selector: 'p' })).toBeInTheDocument();
-    expect(within(tabela).getAllByText(TEXTOS.mercado.calculadoSr).length).toBeGreaterThan(0);
+    expect(await screen.findByText(new RegExp(porNivel(TEXTOS.mercado.calculadoNota, 'simples').slice(0, 30)), { selector: 'p' })).toBeInTheDocument();
+    expect(screen.getAllByText(TEXTOS.mercado.calculadoSr).length).toBeGreaterThan(0);
   });
 });

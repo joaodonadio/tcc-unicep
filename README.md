@@ -25,9 +25,9 @@ Abra http://localhost:5173. Por padrão, a interface lê os pacotes de exemplo e
 | Endereço | Página |
 |---|---|
 | `/` | Hoje: resumo do pregão, Top 5 para estudar, números do dia e blocos de apoio |
-| `/mercado` | Mercado: índices, juros, dólar e destaques, em abas |
-| `/setores` | Setores: o que mudou em cada setor e o mapa do pregão |
-| `/acoes` | Ações: lista e tabela, com filtros, busca e Minha lista |
+| `/mercado` | Mercado: índices em grupos e gráficos do dólar e de juros, sem abas |
+| `/setores` | Setores: o que mudou em cada setor, por período |
+| `/acoes` | Ações: o mapa do pregão por setor |
 | `/proventos` | Proventos: agenda de pagamentos e ranking |
 | `/noticias` | Notícias: tom das manchetes do último pregão |
 | `/modelo` | O modelo: de onde vêm os dados e o modelo experimental |
@@ -111,21 +111,21 @@ src/
   pages/                  uma página por rota (Hoje, Mercado, Setores, Acoes, Proventos, Noticias, Modelo, Dados e Ficha)
   components/
     layout/               cabeçalho, controles de leitura, layout comum, rodapé e tela de erro de rota
-    hoje/                 blocos da página Hoje (Top 5, números do dia, gráfico do Ibovespa, resumos)
-    inicio/               Como usar, mapa do pregão e seções reaproveitadas em Hoje e Setores
+    hoje/                 blocos da página Hoje (Como usar, Top 5, números do dia, gráfico do Ibovespa, resumos)
+    acoes/                mapa do pregão da página Ações
     ficha/                perguntas, painéis e fundamentos da ficha da ação
     mercado/              componentes da página Mercado
-    setores/              cena 3D de colunas, grade e resumo dos setores
+    setores/              vitrine 3D, mosaico e resumo dos setores
     modelos3d/            objetos 3D da ficha e do Top 5 (carregados sob demanda)
-    proventos/            agenda e gráficos de proventos
+    proventos/            resumo, agenda, gráfico e ranking de proventos
     noticias/             manchetes e tom das notícias
-    modelo/               conteúdo da página O modelo
+    modelo/               conteúdo da página O modelo (inclui a régua de acerto)
     dados/                conteúdo da página Sobre os dados
     regras/               explicação das regras de sinal
     graficos/             gráficos em SVG e ECharts
     ui/                   estados de carregamento, erro e vazio, termos com balão e botões
-  context/                preferências de leitura e Minha lista
-  hooks/                  consultas (TanStack Query), análise do dia e apoio (voz, rolagem)
+  context/                preferências de leitura
+  hooks/                  consultas (TanStack Query), análise do dia e apoio (rolagem, movimento reduzido)
   lib/                    regras de sinal (sugestoes.js), perguntas da ficha, lista de ações, setores, textos (TEXTOS) e funções puras
   services/               fontes de dados (arquivos, API e simulada), contrato, erros e experimento
   styles/                 tokens de cor e tipografia (tokens.css), um arquivo por tela e por componente

@@ -228,6 +228,7 @@ logs/
 .env
 .env.*
 !.env.example
+!.env.production
 
 # editores
 .vscode/*
@@ -240,7 +241,7 @@ logs/
 *.sln
 *.sw?
 
-# ferramentas de IA (skills locais, não fazem parte do site)
+# ferramentas de IA (skills locais, nï¿½o fazem parte do site)
 .agent/
 .agents/
 .claude/
@@ -249,5 +250,9 @@ logs/
 .gemini/
 .impeccable/
 
+
 # vÃ­nculo local com o projeto da Vercel
 .vercel
+
+.vercel
+.env*

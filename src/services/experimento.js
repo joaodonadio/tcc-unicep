@@ -7,10 +7,10 @@
 
 const TITULO_PADRAO = 'Maior chance de superar o Ibovespa no próximo pregão (experimento)';
 import { AVISO_FIXO as AVISO_PADRAO } from '../lib/textos.js';
+import { valorOuNulo } from '../lib/valor.js';
 const SELO_PADRAO = 'em avaliação';
 const SELOS_EM_AVALIACAO = new Set(['em_avaliacao', 'em avaliação']);
 const EFEITOS = new Set(['ajudou', 'atrapalhou', 'neutro']);
-const REFERENCIA_PADRAO = 0.5;
 
 function normalizarSelo(selo) {
   if (selo == null) return SELO_PADRAO;
@@ -37,10 +37,10 @@ function normalizarMotivo(motivo) {
 
 function normalizarChance(chance) {
   if (chance?.exibir !== true || chance?.valor == null) return null;
-  return {
-    valor: chance.valor,
-    referencia: chance.media ?? chance.referencia_acaso ?? REFERENCIA_PADRAO,
-  };
+  // sem referência do acaso a chance não é mostrada
+  const referencia = chance.media ?? chance.referencia_acaso ?? null;
+  if (referencia == null) return null;
+  return { valor: chance.valor, referencia };
 }
 
 function normalizarItem(item) {
@@ -69,20 +69,35 @@ export function normalizarTop(resp) {
   };
 }
 
+/** Número puro, ou campo {valor, status} com status ok; o resto é null (ausência nunca vira 0). */
+function numeroOuNulo(v) {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (v && typeof v === 'object') return valorOuNulo(v);
+  return null;
+}
+
+/** Faixa do acaso: par de números, puro ou dentro de {valor, status}; senão null. */
+function faixaOuNula(v) {
+  const par = v && typeof v === 'object' && !Array.isArray(v) ? valorOuNulo(v) : v;
+  return Array.isArray(par) && par.length === 2 && par.every((n) => typeof n === 'number') ? par : null;
+}
+
 /** Normaliza o histórico de acertos do experimento. Devolve null quando não há pacote. */
 export function normalizarHistorico(resp) {
   const r = extrairRegistro(resp);
   if (!r) return null;
 
   const resumo = r.resumo ?? {};
+  // o pacote manda `dia` (um dia, ou null) em vez da lista `dias`
+  const dias = Array.isArray(r.dias) ? r.dias : r.dia && typeof r.dia === 'object' ? [r.dia] : [];
   return {
     resumo: {
-      nDias: resumo.n_dias ?? null,
-      taxaAcerto: resumo.taxa_acerto ?? null,
-      acasoMedia: resumo.acaso_media ?? null,
-      acasoFaixa: resumo.acaso_faixa ?? null,
+      nDias: numeroOuNulo(resumo.n_dias),
+      taxaAcerto: numeroOuNulo(resumo.taxa_acerto),
+      acasoMedia: numeroOuNulo(resumo.acaso_media),
+      acasoFaixa: faixaOuNula(resumo.acaso_faixa),
       nota: resumo.nota ?? null,
     },
-    dias: r.dias ?? [],
+    dias,
   };
 }

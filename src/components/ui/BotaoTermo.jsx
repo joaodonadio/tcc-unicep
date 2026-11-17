@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePreferencias } from '../../context/contextos.js';
+import { usePresenca } from '../../hooks/usePresenca.js';
 import { EXPLICACOES } from '../../lib/explicacoes.js';
 import { TEXTOS } from '../../lib/textos.js';
 
@@ -30,6 +31,8 @@ function BotaoComExplicacao({ chave, explicacao, children }) {
   const idTitulo = `${id}-titulo`;
   const idBalao = `${id}-balao`;
   const [aberto, setAberto] = useState(false);
+  // o balão fica no DOM até a saída terminar (usePresenca)
+  const visivel = usePresenca(aberto);
   const [posicao, setPosicao] = useState(null);
   const botaoRef = useRef(null);
   const balaoRef = useRef(null);
@@ -122,12 +125,14 @@ function BotaoComExplicacao({ chave, explicacao, children }) {
       >
         {children}
       </button>
-      {aberto &&
+      {visivel &&
         createPortal(
           <div
             ref={balaoRef}
             id={idBalao}
             className="termo-balao"
+            data-estado={aberto ? 'entrando' : 'saindo'}
+            inert={aberto ? undefined : ''}
             role="dialog"
             aria-labelledby={idTitulo}
             tabIndex={-1}

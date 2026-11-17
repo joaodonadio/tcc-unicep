@@ -1,5 +1,5 @@
 /*
- * Mascote Pavio. Formas e origens do desenho, depois os humores (reação ao chegar, uma vez
+ * Mascote Cotinha. Formas e origens do desenho, depois os humores (reação ao chegar, uma vez
  * ou fixa) e as ações (loop). Cores pelos tokens --cor-mascote-*. Nenhuma animação depende de JS.
  */
 
@@ -189,6 +189,30 @@
   100% { scale: 1 1; }
 }
 
+/* Animado: pulinho de chegada (o mesmo do contente) */
+.mascote--animado .mascote-corpo {
+  animation: pulo 560ms var(--curva) both;
+}
+
+/* Surpreso: susto de chegada, com o pavio que estica */
+.mascote--surpreso .mascote-corpo {
+  animation: susto 420ms var(--curva) both;
+}
+
+.mascote--surpreso .mascote-pavio {
+  animation: pavio-alerta 420ms var(--curva) both;
+}
+
+/* Preocupado: corpo levemente encolhido, fixo (postura, não movimento) */
+.mascote--preocupado .mascote-corpo {
+  scale: 0.97 0.95;
+}
+
+/* Curioso: corpo inclinado, como quem examina (postura fixa) */
+.mascote--curioso .mascote-corpo {
+  rotate: 6deg;
+}
+
 /* Acenando: balança de um lado para o outro (vem depois da reação, então vence no onboarding) */
 .mascote--acenando .mascote-corpo {
   animation: aceno 1.8s ease-in-out infinite;
@@ -257,6 +281,41 @@
   66% { scale: 1 1; }
   70% { scale: 1 1.2; }
   74%, 100% { scale: 1 1; }
+}
+
+/* Moeda (ação): surge ao lado do corpo, sobe um pouco, desce e sai do quadro; pausa até o próximo ciclo de 4 s */
+.mascote--moeda {
+  overflow: hidden;
+}
+
+.mascote--moeda .mascote-moeda {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moeda-guarda 4s var(--curva) infinite;
+}
+
+/* Brilho parado fica apagado; só aparece no pisca do ciclo */
+.mascote--moeda .mascote-brilho {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moeda-brilho 4s var(--curva) infinite;
+}
+
+@keyframes moeda-guarda {
+  0% { opacity: 0; scale: 0.4 0.4; translate: 0 6px; }
+  10% { opacity: 1; scale: 1 1; translate: 0 0; }
+  25%, 40% { opacity: 1; translate: 0 -6px; }
+  60% { opacity: 1; translate: 0 22px; }
+  75%, 100% { opacity: 0; translate: 0 60px; }
+}
+
+@keyframes moeda-brilho {
+  0%, 6% { opacity: 0; scale: 0 0; rotate: 0deg; }
+  12% { opacity: 1; scale: 1 1; rotate: 20deg; }
+  20% { opacity: 0.6; scale: 0.5 0.5; rotate: 40deg; }
+  28% { opacity: 1; scale: 1 1; rotate: 60deg; }
+  40%, 100% { opacity: 0; scale: 0 0; rotate: 90deg; }
 }
 
 /* Movimento reduzido (preferência do site): nada se mexe; pontos do pensamento e o z ficam parados à mostra */

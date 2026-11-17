@@ -129,9 +129,9 @@ export function PainelHistorico({ ticker }) {
                   {linhas.map((l) => (
                     <tr key={l.campo}>
                       <th scope="row">{l.rotulo}</th>
-                      {n >= 2 && <td>{l.antes_texto}</td>}
-                      <td>{l.agora_texto}</td>
-                      {n >= 2 && <td>{l.diferenca_texto}</td>}
+                      {n >= 2 && <td data-rotulo={TEXTOS.ficha.emData(dataBR(dataSel))}>{l.antes_texto}</td>}
+                      <td data-rotulo={TEXTOS.ficha.maisRecente(dataBR(ultima))}>{l.agora_texto}</td>
+                      {n >= 2 && <td data-rotulo={TEXTOS.ficha.diferenca}>{l.diferenca_texto}</td>}
                     </tr>
                   ))}
                 </tbody>

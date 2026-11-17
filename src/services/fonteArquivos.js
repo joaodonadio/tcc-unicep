@@ -14,6 +14,9 @@ const JANELAS_SEM_CORTE = new Set(['2a', 'max']);
 
 const cachePacotes = new Map();
 
+/** Esquece os pacotes lidos: os testes que simulam pacote ausente começam sem cache. */
+export const limparCachePacotes = () => cachePacotes.clear();
+
 function carregarPacote(pacote) {
   if (!cachePacotes.has(pacote)) {
     const promessa = fetch(`${import.meta.env.BASE_URL}dados/${pacote}.json`).then((resp) => {
@@ -128,6 +131,10 @@ export async function pedirArquivos(caminho, { params = {} } = {}) {
     case 'mercado_dia':
       if (resto.length === 0) return carregarPacote(recurso);
       break;
+
+    case 'dolar-historico':
+      // só a rota local da API monta esta série (scripts/dolarHistorico.mjs); aqui não há como montar
+      return null;
 
     case 'noticias_dia':
       if (resto.length === 0) return carregarPacote(recurso);

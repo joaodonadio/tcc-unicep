@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { usePreferencias } from '../../context/contextos.js';
 import { Manchete } from '../noticias/Manchete.jsx';
 import { useNoticiasAcao } from '../../hooks/useDados.js';
 import { dataBR, dataHoraBR, quandoPublicada } from '../../lib/datas.js';
 import { pct } from '../../lib/formato.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
+import { useAlturaSuave } from '../../hooks/useAlturaSuave.js';
 import { valorOuNulo } from '../../lib/valor.js';
+import { Linhas } from '../ui/Estados.jsx';
 
 /**
  * Notícias da pergunta "O que dizem as notícias?". As manchetes do pregão da
@@ -58,7 +60,7 @@ function Titulo({ item }) {
 const quandoDoItem = (item) => {
   if (item.precisao_hora && item.precisao_hora !== 'hora') {
     const dia = dataBR(item.data_publicacao);
-    return dia ? `${dia}, sem horário` : 'sem horário';
+    return dia ? `${dia}, ${TEXTOS.ficha.noticias.semHorario}` : TEXTOS.ficha.noticias.semHorario;
   }
   return quandoPublicada(item);
 };
@@ -74,6 +76,8 @@ export function PainelNoticias({ ticker }) {
   const { nivel } = usePreferencias();
   const { data, isPending, isError, refetch } = useNoticiasAcao(ticker);
   const [mostrarTodas, setMostrarTodas] = useState(false);
+  const listaRef = useRef(null);
+  useAlturaSuave(listaRef, mostrarTodas);
 
   const itens = ordenarPorDestaque(data?.itens ?? []);
   const visiveis = mostrarTodas ? itens : itens.slice(0, LIMITE_INICIAL);
@@ -87,7 +91,12 @@ export function PainelNoticias({ ticker }) {
     <section className="ficha-noticias" aria-label={titulo}>
       <h3 className="ficha-grupo-titulo">{titulo}</h3>
 
-      {isPending && <p className="ficha-estado">{TEXTOS.ficha.carregandoNoticias}</p>}
+      {isPending && (
+        <div role="status" aria-live="polite">
+          <span className="sr-only">{TEXTOS.ficha.carregandoNoticias}</span>
+          <Linhas quantidade={4} />
+        </div>
+      )}
       {isError && (
         <p className="ficha-estado">
           {N.erro}{' '}
@@ -108,7 +117,7 @@ export function PainelNoticias({ ticker }) {
             <>
               {simples && <p className="ficha-nota">{T.tomExplica}</p>}
               {simples ? (
-                <ol className="ficha-noticias-lista">
+                <ol ref={listaRef} className="ficha-noticias-lista entra-cartoes">
                   {visiveis.map((item) => (
                     <li className="ficha-noticia" key={item.id}>
                       <Tom item={item} />
@@ -140,7 +149,7 @@ export function PainelNoticias({ ticker }) {
                             <Titulo item={item} />
                             <Meta item={item} />
                           </td>
-                          <td className="ficha-tab-num">
+                          <td className="ficha-tab-num" data-rotulo={T.probabilidades}>
                             {T.probabilidadesValor(
                               probabilidade(item.prob_positivo),
                               probabilidade(item.prob_neutro),

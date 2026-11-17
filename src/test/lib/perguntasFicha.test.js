@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PERGUNTAS, chavesDaPergunta, perguntaDaUrl, vizinhas } from '../../lib/perguntasFicha.js';
+import { PERGUNTAS, chavesDaPergunta, perguntaDaUrl } from '../../lib/perguntasFicha.js';
 import { montarIndicadoresFicha } from '../../lib/fichaIndicadores.js';
 
 const ids = PERGUNTAS.map((p) => p.id);
@@ -43,21 +43,6 @@ describe('perguntaDaUrl', () => {
     expect(perguntaDaUrl(new URLSearchParams(''))).toBe('regras');
     expect(perguntaDaUrl(new URLSearchParams('aba=xyz'))).toBe('regras');
     expect(perguntaDaUrl(undefined)).toBe('regras');
-  });
-});
-
-describe('vizinhas', () => {
-  it('devolve anterior e próxima', () => {
-    expect(vizinhas('cara')).toEqual({ anterior: 'divida', proxima: 'proventos' });
-  });
-
-  it('nas pontas, o lado que não existe é null', () => {
-    expect(vizinhas('regras')).toEqual({ anterior: null, proxima: 'divida' });
-    expect(vizinhas('noticias')).toEqual({ anterior: 'preco', proxima: null });
-  });
-
-  it('id desconhecido não tem vizinhas', () => {
-    expect(vizinhas('nada')).toEqual({ anterior: null, proxima: null });
   });
 });
 

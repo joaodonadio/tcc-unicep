@@ -29,3 +29,32 @@ export function empresasComManchetes(registros) {
     .sort((a, b) => b.quantidade - a.quantidade || a.ticker.localeCompare(b.ticker))
     .slice(0, MAX_EMPRESAS_NOTICIAS);
 }
+
+/**
+ * Junta tickers da mesma empresa com os mesmos números num só cartão ("PETR3 · PETR4").
+ * Sem nome conhecido, o ticker fica sozinho: não se juntam empresas diferentes por acaso.
+ * @param {object[]} [empresas] saída de empresasComManchetes
+ * @param {Map<string, string>} [nomePorTicker] ticker -> nome da empresa
+ * @returns {{tickers: string[], nome: string|null, quantidade: number|null, positivas: number|null, neutras: number|null, negativas: number|null}[]}
+ */
+export function agruparEmpresasPorNumeros(empresas, nomePorTicker = new Map()) {
+  const grupos = new Map();
+  for (const e of empresas ?? []) {
+    const nome = nomePorTicker.get(e.ticker) ?? null;
+    const chave = nome
+      ? JSON.stringify([nome, e.quantidade, e.positivas, e.neutras, e.negativas])
+      : `ticker:${e.ticker}`;
+    if (!grupos.has(chave)) {
+      grupos.set(chave, {
+        tickers: [],
+        nome,
+        quantidade: e.quantidade,
+        positivas: e.positivas,
+        neutras: e.neutras,
+        negativas: e.negativas,
+      });
+    }
+    grupos.get(chave).tickers.push(e.ticker);
+  }
+  return [...grupos.values()];
+}

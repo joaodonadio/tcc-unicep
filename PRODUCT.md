@@ -35,15 +35,15 @@ Cada número traz a origem, a comparação com o setor e uma explicação em doi
 - Todo número vem como valor + status. Ausência nunca é mostrada como 0.
 - Linguagem proibida: o termo para conselho de investimento personalizado (e suas variações), o imperativo do verbo que significa adquirir ação, o substantivo que promete chance única de ganho e as expressões de ranking de ações (o superlativo de "bom" seguido de "ações"). Não há exceção: nem o aviso fixo ("Conteúdo educativo: não é indicação de compra ou venda de ações.") escapa.
 - As sugestões da interface são regras transparentes sobre campos prontos, sem métricas novas.
-- O Top 5 do experimento (sugestão de teste acadêmico, não de compra) aguarda a coleta de 5 anos de histórico. O formato já está definido; a tela mostra que falta a coleta. Enquanto isso, a página inicial mostra um "Top 5 para estudar" montado só pelas regras públicas, com a ordem de escolha escrita na tela; ele não é o Top 5 do modelo.
+- O Top 5 do experimento (sugestão de teste acadêmico, não de compra) aguarda a coleta de 5 anos de histórico. Quando o pacote existe, o Top 5 mostra a ordem e os motivos do modelo com o selo "em avaliação"; a chance fica oculta até a conferência. Enquanto o pacote não existe, a página inicial mostra um "Top 5 para estudar" montado só pelas regras públicas, com a ordem de escolha escrita na tela.
 - Sem chat de perguntas ao sistema.
 - Preferências e itens acompanhados ficam só no navegador; a API não aceita escrita.
 
 ## Brand Commitments
 
-- O produto não tem marca comercial. O cabeçalho identifica o conteúdo ("Ações da B3") e tem o Pavio, um candle com olhos, como símbolo; sem logotipo nem slogan.
+- O nome do site é CotAI (de cotação). A logo é o Cotinha, um candle com olhos, seguido do nome, com "AI" na cor do Cotinha e um brilho de quatro pontas; o rodapé repete a logo com uma frase curta.
 - Voz: português simples, frases curtas, sem caixa alta, sem jargão sem explicação.
-- Nada com cara de interface gerada por IA: sem fundo escuro com brilho neon, sem rótulos em caixa alta espaçada, sem texto de efeito nem símbolos decorativos (decisão do usuário em 28/10/2026). A única exceção é o mascote Pavio, e só aparece ao lado de uma frase.
+- Nada com cara de interface gerada por IA: sem fundo escuro com brilho neon, sem rótulos em caixa alta espaçada, sem texto de efeito nem símbolos decorativos (decisão do usuário em 28/10/2026). A única exceção é o mascote Cotinha, e só aparece ao lado de uma frase.
 
 ## Evidence on Hand
 
@@ -61,4 +61,4 @@ Cada número traz a origem, a comparação com o setor e uma explicação em doi
 
 ## Accessibility & Inclusion
 
-WCAG 2.2 AA como piso, com foco em pessoas idosas e com pouca intimidade com finanças: texto grande e ajustável, linguagem simples, termos explicados onde aparecem, leitura do resumo em voz alta.
+WCAG 2.2 AA como piso, com foco em pessoas idosas e com pouca intimidade com finanças: texto grande e ajustável, linguagem simples, termos explicados onde aparecem.

@@ -4,7 +4,7 @@
  */
 import { diasEntre } from './agenda.js';
 
-/** Na tela, a primeira frase ("Resumo do pregão ...") repete o título; a leitura em voz alta mantém. */
+/** Na tela, a primeira frase ("Resumo do pregão ...") repete o título; some aqui. */
 export function semAbertura(texto) {
   return texto?.replace(/^Resumo do pregão[^.]*\.\s*/, '') ?? texto;
 }
@@ -45,12 +45,6 @@ export function centesimosDoTom(tom) {
   return inteiros;
 }
 
-/** Fechamento do pregão anterior pela variação do dia: valor / (1 + variação). Sem os dois números, null. */
-export function fechamentoAnterior(valor, variacao) {
-  if (!finito(valor) || !finito(variacao) || 1 + variacao <= 0) return null;
-  return valor / (1 + variacao);
-}
-
 /** Fração de |valor| sobre o teto (0 a 1), para barras proporcionais. Sem número ou sem teto, null. */
 export function fracaoDe(valor, teto) {
   if (!finito(valor) || !finito(teto) || teto <= 0) return null;
@@ -81,4 +75,18 @@ export function linhaDoTempo(itens, hoje) {
   if (pontos.length === 0) return null;
   const ate = Math.max(7, pontos[pontos.length - 1].dias);
   return { ate, pontos: pontos.map((p) => ({ ...p, posicao: Number((p.dias / ate).toFixed(4)) })) };
+}
+
+/**
+ * Partes da régua de altas, estáveis e quedas, em frações do total (somam 1).
+ * Sem contagens finitas de altas e quedas, ou total zero: null.
+ */
+export function partesDaAmplitude(amp) {
+  const subiram = amp?.subiram;
+  const cairam = amp?.cairam;
+  const estaveis = amp?.estaveis ?? 0;
+  if (!finito(subiram) || !finito(cairam) || !finito(estaveis)) return null;
+  const total = subiram + cairam + estaveis;
+  if (total <= 0) return null;
+  return { alta: subiram / total, estavel: estaveis / total, queda: cairam / total };
 }

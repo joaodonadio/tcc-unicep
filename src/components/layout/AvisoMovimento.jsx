@@ -4,7 +4,7 @@ import { TEXTOS } from '../../lib/textos.js';
 
 /**
  * Aviso discreto, não modal, para quem tem as animações desligadas no sistema
- * operacional. Com a preferência em "Seguir o sistema", o site fica parado sem que a
+ * operacional. Sem escolha própria (o inicial segue o sistema), o site fica parado sem que a
  * pessoa saiba que pode ligar as animações aqui. O aviso aparece até a pessoa
  * responder; a resposta fica guardada e ele não volta. Não rouba o foco.
  */
@@ -27,11 +27,11 @@ function registrarResposta() {
 }
 
 export default function AvisoMovimento() {
-  const { movimento, movimentoReduzido, definirMovimento } = usePreferencias();
+  const { movimentoEscolhido, movimentoReduzido, definirMovimento } = usePreferencias();
   const [respondido, setRespondido] = useState(jaRespondeu);
 
-  // com "Seguir o sistema", movimentoReduzido é a preferência do sistema operacional
-  if (respondido || movimento !== 'sistema' || !movimentoReduzido) return null;
+  // sem escolha, movimentoReduzido é a preferência do sistema operacional
+  if (respondido || movimentoEscolhido || !movimentoReduzido) return null;
 
   const responder = (escolha) => {
     definirMovimento(escolha);

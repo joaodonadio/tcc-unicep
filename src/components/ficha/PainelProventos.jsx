@@ -88,7 +88,7 @@ export function PainelProventos({ ticker, resumo }) {
                     <span
                       key={campo}
                       className={`ficha-prov-parte ficha-prov-parte--${modificador}`}
-                      style={{ height: `${(a[campo] / maior) * 100}%` }}
+                      style={{ '--parte': `${(a[campo] / maior) * 100}%` }}
                     />
                   ) : null,
                 )}
@@ -153,12 +153,12 @@ export function PainelProventos({ ticker, resumo }) {
                 {[...porAno].reverse().map((a) => (
                   <tr key={a.ano}>
                     <th scope="row">{a.ano}</th>
-                    <td className="ficha-tab-num">{brlOuTraco(a.dividendo)}</td>
-                    <td className="ficha-tab-num">{brlOuTraco(a.jcp)}</td>
-                    <td className="ficha-tab-num">{brlOuTraco(a.outros)}</td>
-                    <td className="ficha-tab-num">{brlOuTraco(a.total)}</td>
-                    <td className="ficha-tab-num">{brlOuTraco(a.total_resumo)}</td>
-                    <td className="ficha-tab-num">
+                    <td className="ficha-tab-num" data-rotulo={T.colDividendo}>{brlOuTraco(a.dividendo)}</td>
+                    <td className="ficha-tab-num" data-rotulo={T.colJcp}>{brlOuTraco(a.jcp)}</td>
+                    <td className="ficha-tab-num" data-rotulo={T.colOutros}>{brlOuTraco(a.outros)}</td>
+                    <td className="ficha-tab-num" data-rotulo={T.colTotal}>{brlOuTraco(a.total)}</td>
+                    <td className="ficha-tab-num" data-rotulo={T.colResumo}>{brlOuTraco(a.total_resumo)}</td>
+                    <td className="ficha-tab-num" data-rotulo={T.colPayout}>
                       {a.payout == null ? '—' : pct(a.payout, { casas: 0, sinal: false })}
                     </td>
                   </tr>
@@ -181,10 +181,10 @@ export function PainelProventos({ ticker, resumo }) {
               <tbody>
                 {pagamentos.map((p) => (
                   <tr key={p.id}>
-                    <td>{p.data_com_texto}</td>
-                    <td>{p.pagamento_texto}</td>
-                    <td title={EXPLICA_TIPO[p.tipo] ?? undefined}>{p.tipo_rotulo}</td>
-                    <td className="ficha-tab-num">{p.valor_texto}</td>
+                    <td data-rotulo={P.dataCom}>{p.data_com_texto}</td>
+                    <td data-rotulo={P.pagamento}>{p.pagamento_texto}</td>
+                    <td title={EXPLICA_TIPO[p.tipo] ?? undefined} data-rotulo={P.tipo}>{p.tipo_rotulo}</td>
+                    <td className="ficha-tab-num" data-rotulo={P.valorPorAcao}>{p.valor_texto}</td>
                   </tr>
                 ))}
               </tbody>

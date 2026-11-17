@@ -8,12 +8,37 @@
 import { valorOuNulo } from './valor.js';
 import { dataExtenso } from './datas.js';
 import { pct, pontos, quantidadeCheia } from './formato.js';
+import { variacaoDiaConfiavel, variacaoDiaSuspeita } from './crivel.js';
+import { selicDoPacote } from './mercadoTela.js';
+import { mesesDoPacote } from './series.js';
 
 /** Abaixo deste módulo (em fração) a variação conta como estável. */
 const LIMITE_ESTAVEL = 0.0005;
 
 /** Variação do dólar acima deste módulo (5%) não é crível num dia: a origem já errou antes. */
 const LIMITE_DOLAR_CRIVEL = 0.05;
+
+/**
+ * Manchetes únicas do pregão: a mesma manchete aparece em cada classe de ação da empresa
+ * (ex.: BBDC3 e BBDC4), então conta cada título uma vez. Devolve {total, positivas, neutras,
+ * negativas}, ou null sem nenhuma manchete.
+ */
+export function contarManchetesUnicas(noticias = []) {
+  const rotuloDe = new Map();
+  for (const n of noticias ?? []) {
+    for (const item of n?.itens ?? []) {
+      if (item?.titulo && !rotuloDe.has(item.titulo)) rotuloDe.set(item.titulo, item.rotulo);
+    }
+  }
+  if (rotuloDe.size === 0) return null;
+  const contagem = { total: rotuloDe.size, positivas: 0, neutras: 0, negativas: 0 };
+  for (const rotulo of rotuloDe.values()) {
+    if (rotulo === 'positivo') contagem.positivas += 1;
+    else if (rotulo === 'neutro') contagem.neutras += 1;
+    else if (rotulo === 'negativo') contagem.negativas += 1;
+  }
+  return contagem;
+}
 
 /**
  * @param {object} args
@@ -39,9 +64,11 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
     frases.push(`O Ibovespa ${partes.join(', ')}.`);
   }
 
+  // Variação suspeita (grupamento não ajustado) fica fora de todas as contas e vira "mudou de escala".
   const variacoes = resumos
-    .map((r) => ({ r, v: valorOuNulo(r.cotacao?.variacao_dia) }))
+    .map((r) => ({ r, v: variacaoDiaConfiavel(valorOuNulo(r.cotacao?.variacao_dia)) }))
     .filter(({ v }) => v != null);
+  const emRevisao = resumos.filter((r) => variacaoDiaSuspeita(valorOuNulo(r.cotacao?.variacao_dia))).length;
 
   let amplitude = null;
   let maiorAlta = null;
@@ -53,10 +80,15 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
     const cairam = variacoes.filter(({ v }) => !estavel(v) && v < 0).length;
     const estaveis = variacoes.filter(({ v }) => estavel(v)).length;
     const conta = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
-    frases.push(
-      `${conta(subiram, 'subiu', 'subiram')}, ${conta(cairam, 'caiu', 'caíram')} e ${conta(estaveis, 'ficou estável', 'ficaram estáveis')}.`,
-    );
-    amplitude = { subiram, cairam, estaveis, total: variacoes.length };
+    const partes = [
+      conta(subiram, 'subiu', 'subiram'),
+      conta(cairam, 'caiu', 'caíram'),
+      conta(estaveis, 'ficou estável', 'ficaram estáveis'),
+    ];
+    if (emRevisao) partes.push(`${emRevisao} com o preço em outra escala`);
+    const ultima = partes.pop();
+    frases.push(`${partes.join(', ')} e ${ultima}.`);
+    amplitude = { subiram, cairam, estaveis, emRevisao, total: variacoes.length };
 
     const nomeDe = (ticker) => {
       const empresa = acoes.find((a) => a.ticker === ticker)?.empresa;
@@ -65,8 +97,8 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
     const empresaDe = (ticker) => acoes.find((a) => a.ticker === ticker)?.empresa ?? null;
     const maior = variacoes.reduce((a, b) => (b.v > a.v ? b : a));
     const menor = variacoes.reduce((a, b) => (b.v < a.v ? b : a));
-    frases.push(`Maior alta: ${nomeDe(maior.r.ticker)}, ${pct(maior.v)}.`);
-    frases.push(`Maior queda: ${nomeDe(menor.r.ticker)}, ${pct(menor.v)}.`);
+    if (maior.v > 0) frases.push(`Maior alta: ${nomeDe(maior.r.ticker)}, ${pct(maior.v)}.`);
+    if (menor.v < 0) frases.push(`Maior queda: ${nomeDe(menor.r.ticker)}, ${pct(menor.v)}.`);
     if (maior.v > 0) maiorAlta = { ticker: maior.r.ticker, empresa: empresaDe(maior.r.ticker), variacao: maior.v };
     if (menor.v < 0) maiorQueda = { ticker: menor.r.ticker, empresa: empresaDe(menor.r.ticker), variacao: menor.v };
   }
@@ -76,7 +108,7 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
   const dolar = dolarSuspeito ? null : dolarRecebido;
   const brent = valorOuNulo(mercado.BRENT?.variacao_dia);
   const cambioPetroleo = [];
-  if (dolar != null) cambioPetroleo.push(`dólar ${pct(dolar)}`);
+  if (dolar != null) cambioPetroleo.push(Math.abs(dolar) < 0.0005 ? 'dólar estável' : `dólar ${pct(dolar)}`);
   if (brent != null) cambioPetroleo.push(`Brent ${pct(brent)}`);
   if (cambioPetroleo.length) frases.push(`Câmbio e petróleo: ${cambioPetroleo.join(', ')}.`);
 
@@ -93,6 +125,14 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
     const neg = valorOuNulo(n.resumo.negativas);
     if (pos != null) positivas += pos;
     if (neg != null) negativas += neg;
+  }
+  // conta títulos únicos, não a soma por ticker
+  const unicas = contarManchetesUnicas(noticias);
+  if (unicas) {
+    total = unicas.total;
+    positivas = unicas.positivas;
+    negativas = unicas.negativas;
+    algumaNoticia = true;
   }
   if (algumaNoticia) {
     frases.push(
@@ -114,6 +154,9 @@ export function montarResumoDoPregao({ mercado = {}, resumos = [], noticias = []
         cdi_12m: valorOuNulo(mercado.indices?.CDI?.a1),
         ipca_12m: valorOuNulo(mercado.ipca_12m),
         ipca_ate: valorOuNulo(mercado.ipca_ate),
+        selic: selicDoPacote(mercado),
+        ipca_mensal: mesesDoPacote(mercado.ipca_mensal),
+        cdi_mensal: mesesDoPacote(mercado.cdi_mensal),
       },
       seis_meses: {
         renda_fixa: valorOuNulo(mercado.indices?.CDI?.m6),

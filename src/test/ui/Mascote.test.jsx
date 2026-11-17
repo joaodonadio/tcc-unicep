@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Mascote from '../../components/ui/Mascote.jsx';
 
-describe('Mascote Pavio', () => {
+describe('Mascote Cotinha', () => {
   it('sem rótulo, é decorativo: aria-hidden e fora do foco', () => {
     const { container } = render(<Mascote />);
     const svg = container.querySelector('svg');
@@ -12,8 +12,8 @@ describe('Mascote Pavio', () => {
   });
 
   it('com rótulo, é uma imagem com nome', () => {
-    render(<Mascote humor="contente" rotulo="Pavio contente" />);
-    const imagem = screen.getByRole('img', { name: 'Pavio contente' });
+    render(<Mascote humor="contente" rotulo="Cotinha contente" />);
+    const imagem = screen.getByRole('img', { name: 'Cotinha contente' });
     expect(imagem).not.toHaveAttribute('aria-hidden');
   });
 
@@ -37,16 +37,35 @@ describe('Mascote Pavio', () => {
     expect(svg).not.toHaveClass('mascote--pulando');
   });
 
-  it('dois mascotes na mesma página têm ids de clipPath diferentes e sem dois-pontos', () => {
-    const { container } = render(
-      <>
-        <Mascote />
-        <Mascote />
-      </>,
+  it('os quatro humores novos renderizam com a classe e decorativos', () => {
+    for (const humor of ['animado', 'preocupado', 'surpreso', 'curioso']) {
+      const { container, unmount } = render(<Mascote humor={humor} />);
+      const svg = container.querySelector('svg');
+      expect(svg).toHaveClass('mascote', `mascote--${humor}`);
+      expect(svg).toHaveAttribute('aria-hidden', 'true');
+      unmount();
+    }
+  });
+
+  it('o surpreso tem a boca em "o" e o curioso tem um olho maior', () => {
+    const { container: surpreso, unmount } = render(<Mascote humor="surpreso" />);
+    expect(surpreso.querySelectorAll('.mascote-olhar > ellipse')).toHaveLength(1);
+    unmount();
+
+    const { container: curioso } = render(<Mascote humor="curioso" />);
+    const escalados = [...curioso.querySelectorAll('.mascote-olhos > g')].filter((g) =>
+      g.getAttribute('transform')?.includes('scale(1.18)'),
     );
-    const ids = [...container.querySelectorAll('clipPath')].map((clip) => clip.id);
-    expect(ids).toHaveLength(2);
-    expect(ids[0]).not.toBe(ids[1]);
-    expect(ids[0]).not.toMatch(/:/);
+    expect(escalados).toHaveLength(1);
+  });
+
+  it('corpo e pavios numa cor só, sem lateral escura', () => {
+    const { container } = render(<Mascote />);
+    const cores = [...container.querySelectorAll('.mascote-corpo > rect, .mascote-corpo > line')].map(
+      (el) => el.getAttribute('fill') ?? el.getAttribute('stroke'),
+    );
+    expect(cores.length).toBeGreaterThan(0);
+    expect(new Set(cores)).toEqual(new Set(['var(--cor-mascote)']));
+    expect(container.querySelector('clipPath')).toBeNull();
   });
 });

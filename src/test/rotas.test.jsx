@@ -62,14 +62,14 @@ describe('rotas', () => {
   it('/ mostra a página Hoje: o Top 5 para estudar em destaque e o bloco Como usar', async () => {
     renderizarRota('/');
 
-    expect(await screen.findByRole('heading', { level: 1, name: /Top 5 para estudar hoje/i }, { timeout: 15000 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: /Top 5 para estudar hoje/i }, { timeout: 15000 })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: porNivel(TEXTOS.comoUsar.titulo, 'simples') })).toBeInTheDocument();
   }, 20000);
 
   it.each([
     ['/mercado', TEXTOS.mercado.titulo],
     ['/setores', TEXTOS.paginas.setores],
-    ['/acoes', /ações/],
+    ['/acoes', /^Ações$/],
     ['/proventos', porNivel(TEXTOS.proventos.titulo, 'simples')],
     ['/noticias', porNivel(TEXTOS.paginas.noticiasTitulo, 'simples')],
     ['/modelo', TEXTOS.paginas.modelo],
@@ -81,8 +81,8 @@ describe('rotas', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   }, 20000);
 
-  it('/setores traz o mapa do pregão por setor, abaixo dos cartões', async () => {
-    renderizarRota('/setores');
+  it('/acoes traz o mapa do pregão por setor, com a ação circulada', async () => {
+    renderizarRota('/acoes');
 
     expect(
       await screen.findByRole('heading', { level: 2, name: TEXTOS.setores.mapaTitulo }, { timeout: 5000 }),
@@ -93,7 +93,7 @@ describe('rotas', () => {
     renderizarRota('/modelo');
 
     expect(await screen.findByRole('heading', { level: 2, name: TEXTOS.acerto.titulo }, { timeout: 5000 })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { level: 2, name: TEXTOS.top5.titulo })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2, name: 'Top 5 do experimento' })).not.toBeInTheDocument();
   });
 
   it('/sugestoes redireciona para /acoes', async () => {

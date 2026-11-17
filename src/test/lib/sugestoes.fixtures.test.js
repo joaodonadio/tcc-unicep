@@ -184,3 +184,23 @@ describe('resumirCartao', () => {
     );
   });
 });
+
+describe('período suspeito ou dia suspeito', () => {
+  const com = (campos, dia = 0) =>
+    neutro({
+      cotacao: { fechamento: c(10), variacao_dia: c(dia) },
+      rentabilidade: { ...neutro().rentabilidade, ...campos },
+    });
+
+  it('desempenho_6m dispara com período crível e não dispara com período ou dia suspeito', () => {
+    expect(regra('desempenho_6m').aplica(com({ m6: c(0.2) }))).toBe(true);
+    expect(regra('desempenho_6m').aplica(com({ m6: c(3.5) }))).toBe(false);
+    expect(regra('desempenho_6m').aplica(com({ m6: c(0.2) }, 1.5))).toBe(false);
+  });
+
+  it('queda_forte_mes dispara com período crível e não dispara com período ou dia suspeito', () => {
+    expect(regra('queda_forte_mes').aplica(com({ m1: c(-0.2) }))).toBe(true);
+    expect(regra('queda_forte_mes').aplica(com({ m1: c(-0.9) }))).toBe(false);
+    expect(regra('queda_forte_mes').aplica(com({ m1: c(-0.2) }, -0.8))).toBe(false);
+  });
+});

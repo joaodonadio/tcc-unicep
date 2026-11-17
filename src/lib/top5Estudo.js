@@ -37,9 +37,26 @@ function compararCartoes(a, b) {
   return a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0;
 }
 
-function montarItem(posicao, ticker, cartao, chance = null) {
+const CAMPO_DO_EFEITO = { ajudou: 'forte', atrapalhou: 'atencao', neutro: 'contexto' };
+
+/** Motivos do modelo viram sinais: ajudou → a favor, atrapalhou → atenção, neutro → contexto. */
+function sinaisDoModelo(motivos) {
+  const grupos = { forte: [], atencao: [], contexto: [] };
+  for (const m of motivos ?? []) {
+    const efeito = CAMPO_DO_EFEITO[m?.efeito] ? m.efeito : 'neutro';
+    const T = TEXTOS.top5Hoje.motivoModelo[efeito];
+    grupos[CAMPO_DO_EFEITO[efeito]].push({
+      id: `modelo:${m.fator}`,
+      titulo: m.texto,
+      simples: T.simples,
+      tecnico: T.tecnico,
+    });
+  }
+  return grupos;
+}
+
+function montarItem(posicao, ticker, cartao, chance = null, pontos = null) {
   const R = cartao?.resumo_acao ?? null;
-  const favor = sinaisDe(cartao, 'forte');
   return {
     posicao,
     ticker,
@@ -48,35 +65,43 @@ function montarItem(posicao, ticker, cartao, chance = null) {
     preco: valorOuNulo(R?.cotacao?.fechamento),
     variacao: cartao?.variacao_dia ?? valorOuNulo(R?.cotacao?.variacao_dia),
     chance,
-    favor,
-    atencao: sinaisDe(cartao, 'atencao'),
-    contexto: sinaisDe(cartao, 'contexto'),
-    contagem: cartao?.contagem ?? null,
+    favor: pontos?.favor ?? sinaisDe(cartao, 'forte'),
+    atencao: pontos?.atencao ?? sinaisDe(cartao, 'atencao'),
+    contexto: pontos?.contexto ?? sinaisDe(cartao, 'contexto'),
+    contagem: pontos?.contagem ?? cartao?.contagem ?? null,
     resumo: R,
   };
 }
 
 /**
  * @param {{ experimento?: object|null, sugestoes?: object[] }} args
- * @returns {{ origem: 'modelo'|'regras', itens: object[] }}
+ * @returns {{ origem: 'modelo'|'regras', selo: string|null, avisos: string[], itens: object[] }}
  */
 export function top5ParaEstudar({ experimento = null, sugestoes = [] } = {}) {
   const cartoes = Array.isArray(sugestoes) ? sugestoes : [];
   const porTicker = new Map(cartoes.map((c) => [c.ticker, c]));
 
+  // o modelo manda na ordem e nos motivos mesmo sem chance exibível (a chance vem oculta)
   const doModelo = (experimento?.itens ?? []).filter((i) => i?.ticker);
-  if (doModelo.some((i) => i.chance != null)) {
-    const itens = doModelo
-      .slice(0, TAMANHO_TOP)
-      .map((i, n) => montarItem(i.posicao ?? n + 1, i.ticker, porTicker.get(i.ticker), i.chance ?? null));
-    return { origem: 'modelo', itens };
+  if (doModelo.length > 0) {
+    const itens = doModelo.slice(0, TAMANHO_TOP).map((i, n) => {
+      const grupos = sinaisDoModelo(i.motivos);
+      const contagem = { forte: grupos.forte.length, atencao: grupos.atencao.length, contexto: grupos.contexto.length };
+      return montarItem(i.posicao ?? n + 1, i.ticker, porTicker.get(i.ticker), i.chance ?? null, {
+        favor: grupos.forte,
+        atencao: grupos.atencao,
+        contexto: grupos.contexto,
+        contagem,
+      });
+    });
+    return { origem: 'modelo', selo: experimento?.selo ?? null, avisos: experimento?.avisos ?? [], itens };
   }
 
   const itens = [...cartoes]
     .sort(compararCartoes)
     .slice(0, TAMANHO_TOP)
     .map((c, n) => montarItem(n + 1, c.ticker, c));
-  return { origem: 'regras', itens };
+  return { origem: 'regras', selo: null, avisos: [], itens };
 }
 
 /** Números-chave do resumo da ação (frações); campo ausente fica null. */

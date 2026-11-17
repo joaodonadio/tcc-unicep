@@ -1,11 +1,55 @@
-import { comOpacidade } from '../../lib/temaGraficos.js';
+import { dataBR } from '../../lib/datas.js';
+import { numero } from '../../lib/formato.js';
+import { comOpacidade, lerToken, opacaSobre, temaGraficos } from '../../lib/temaGraficos.js';
+import { TEXTOS } from '../../lib/textos.js';
+import { animacaoGrafico, transicaoBalao } from '../../lib/animacaoGraficos.js';
+import { itensMarcaEvento } from '../../lib/eventosMercado.js';
 
 /**
  * Opções do ECharts para o mini gráfico dos cartões: sem eixos visíveis, grade, tooltip nem rótulos.
- * Funções puras (recebem cores já resolvidas, sem var()).
+ * Funções puras (recebem cores já resolvidas, sem var()); só o tooltip interativo lê os tokens do tema.
  */
 
 const finito = (v) => typeof v === 'number' && Number.isFinite(v);
+
+const escapar = (t) =>
+  String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+/** Valor padrão do balão: pontos, sem casas. */
+const formatarPontosPadrao = (v) => TEXTOS.hoje.mini.valorPontos(numero(v, { casas: 0 }));
+
+/** Balão do cursor na área: data em dd/mm/aaaa e o valor pelo `formatar` (pontos, se não vier outro). Valor nulo é "sem dado", nunca 0. */
+export function formatarBalaoArea(params, datas, tema, formatar = formatarPontosPadrao) {
+  const lista = Array.isArray(params) ? params : [params];
+  const p = lista.find((x) => x?.seriesIndex === 0) ?? lista[0];
+  if (!p) return '';
+  const data = dataBR(datas[p.dataIndex]);
+  const valor = finito(p.data) ? formatar(p.data) : TEXTOS.hoje.mini.semDado;
+  return (
+    `<div style="font-family:${escapar(tema.fonteTexto)};font-size:12px;color:${escapar(tema.suave)}">${escapar(data)}</div>` +
+    `<div style="margin-top:2px;font-family:${escapar(tema.fonte)};font-size:14px;font-weight:500;letter-spacing:-0.02em;` +
+    `font-variant-numeric:tabular-nums slashed-zero;white-space:nowrap;color:${escapar(tema.texto)}">${escapar(valor)}</div>`
+  );
+}
+
+/** Tooltip da área interativa: cursor tracejado fino e balão de vidro. Sem movimento reduzido, o balão não anima. */
+function tooltipArea(datas, animar, formatar) {
+  const tema = temaGraficos();
+  return {
+    trigger: 'axis',
+    confine: true,
+    triggerOn: 'mousemove|click',
+    ...transicaoBalao(animar),
+    backgroundColor: opacaSobre(lerToken('--flutuante-fundo'), tema.fundo) || tema.superficie,
+    borderColor: opacaSobre(lerToken('--flutuante-borda'), tema.fundo) || tema.borda,
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: [8, 12],
+    textStyle: { color: tema.texto, fontFamily: tema.fonteTexto, fontSize: 13 },
+    axisPointer: { type: 'line', lineStyle: { color: comOpacidade(tema.suave, 0.6), width: 1, type: 'dashed' } },
+    formatter: (params) => formatarBalaoArea(params, datas, tema, formatar),
+  };
+}
 
 /** Linhas da matriz de pontos; as colunas saem do total (de cima para baixo, da esquerda para a direita). */
 const LINHAS_PONTOS = 5;
@@ -14,9 +58,6 @@ const DURACAO_LINHA = 1100;
 const ALTURA_PADRAO = 72;
 /** Abaixo desta altura (px) a área fica compacta: ponto parado, sem pulso, margens pequenas. */
 const ALTURA_COMPACTA = 48;
-/** Inclinação: 1% de diferença entre os dois pontos vai de baixo a cima do gráfico. */
-const ESCALA_INCLINACAO = 0.01;
-const DURACAO_INCLINACAO = 600;
 
 /** Há o que desenhar? Pontos: algum grupo positivo. Área e barras: 2 valores finitos. */
 export function temDadosMini(tipo, valores) {
@@ -62,19 +103,38 @@ function pontoFinal(fim, { cor, fundo, animar, atraso = 0, tamanho = 7 }) {
 }
 
 /** Área com brilho, linha tracejada no valor inicial e ponto final que pulsa (parado com movimento reduzido). */
-function opcaoArea({ dados, ultimo, cor, fundo, suave, animar, altura = ALTURA_PADRAO, faixaExata = false }) {
+function opcaoArea({
+  dados,
+  ultimo,
+  cor,
+  fundo,
+  suave,
+  animar,
+  altura = ALTURA_PADRAO,
+  faixaExata = false,
+  interativo = false,
+  datas = [],
+  formatar,
+  degraus = false,
+  marcas = [],
+}) {
   const compacto = altura < ALTURA_COMPACTA;
   const inicio = dados.find(finito) ?? null;
   const fim = [[ultimo, dados[ultimo]]];
+  // interativo: o ponto sob o cursor aparece (círculo na cor da linha, borda do fundo), sem símbolo parado
+  const destaque = interativo ? { symbol: 'circle', symbolSize: 8, itemStyle: { color: cor, borderColor: fundo, borderWidth: 2 } } : {};
   const linha = {
     type: 'line',
-    silent: true,
+    silent: !interativo,
     data: dados,
     connectNulls: false,
-    smooth: 0.3,
+    // degraus: a taxa fica parada até o dia em que muda (ex.: Selic entre reuniões do Copom)
+    smooth: degraus ? false : 0.3,
+    step: degraus ? 'end' : false,
     showSymbol: false,
+    ...destaque,
     lineStyle: { color: cor, width: compacto ? 1.5 : 2, cap: 'round', join: 'round', ...brilho(cor) },
-    itemStyle: { color: cor },
+    itemStyle: { color: cor, ...destaque.itemStyle },
     areaStyle: {
       origin: 'start',
       color: {
@@ -89,8 +149,10 @@ function opcaoArea({ dados, ultimo, cor, fundo, suave, animar, altura = ALTURA_P
         ],
       },
     },
-    emphasis: { disabled: true },
+    emphasis: { disabled: !interativo },
     z: 2,
+    // marcas de evento: linhas verticais discretas no dia (índice da janela)
+    ...(marcas.length ? { markLine: { silent: true, symbol: 'none', data: itensMarcaEvento(marcas, suave, { rotulo: false }) } } : {}),
   };
   const ponto = pontoFinal(fim, { cor, fundo, animar: animar && !compacto, atraso: DURACAO_LINHA, tamanho: compacto ? 5 : 7 });
   // de onde a janela partiu: linha fina, tracejada e apagada no primeiro valor
@@ -105,26 +167,24 @@ function opcaoArea({ dados, ultimo, cor, fundo, suave, animar, altura = ALTURA_P
     z: 1,
   };
   return {
-    animation: animar,
-    animationDuration: DURACAO_LINHA,
-    animationEasing: 'cubicOut',
+    ...animacaoGrafico(animar, DURACAO_LINHA),
     grid: compacto
       ? { left: 1, right: 5, top: 4, bottom: 4 }
       : faixaExata
         ? { left: 2, right: 12, top: 8, bottom: 8 }
         : { left: 2, right: 12, top: 10, bottom: 6 },
-    xAxis: { type: 'category', show: false, boundaryGap: false, data: indices(dados.length) },
+    // interativo: o eixo x leva as datas, para o balão saber de qual dia é o ponto
+    xAxis: { type: 'category', show: false, boundaryGap: false, data: interativo ? datas : indices(dados.length) },
     yAxis: faixaExata ? { type: 'value', show: false, min: 'dataMin', max: 'dataMax' } : { type: 'value', show: false, scale: true },
     series: [linha, ponto, base],
+    ...(interativo ? { tooltip: tooltipArea(datas, animar, formatar) } : {}),
   };
 }
 
 /** Barras-cápsula por mês: a última na cor cheia e com brilho, as outras a 45%; base fina no zero. */
 function opcaoBarras({ dados, ultimo, cor, suave, animar }) {
   return {
-    animation: animar,
-    animationDuration: 600,
-    animationEasing: 'cubicOut',
+    ...animacaoGrafico(animar),
     grid: { left: 2, right: 2, top: 10, bottom: 10 },
     // eixo x só pela linha: fica no zero (onZero) e serve de base apagada
     xAxis: {
@@ -179,9 +239,7 @@ function opcaoPontos({ valores, cor, cores, largura, altura, animar }) {
   const passo = passoX == null ? null : Math.min(passoX, altura / LINHAS_PONTOS);
   const tamanho = passo == null ? 7 : Math.max(3, Math.min(10, Math.round(passo * 0.6)));
   return {
-    animation: animar,
-    animationDuration: 300,
-    animationEasing: 'cubicOut',
+    ...animacaoGrafico(animar),
     grid: { left: 0, right: 0, top: 0, bottom: 0 },
     xAxis: { type: 'category', show: false, boundaryGap: true, data: indices(colunas) },
     yAxis: { type: 'category', show: false, boundaryGap: true, inverse: true, data: indices(LINHAS_PONTOS) },
@@ -201,71 +259,12 @@ function opcaoPontos({ valores, cor, cores, largura, altura, animar }) {
 }
 
 /**
- * Inclinação de dois pontos (antes → hoje): linha com brilho na cor da direção, base tracejada no valor
- * anterior, ponto anterior vazado e ponto de hoje cheio, que pulsa (parado com movimento reduzido).
- * A faixa do eixo y é fixa em torno da média: a inclinação mostra o tamanho do movimento, sem exagerar.
- */
-function opcaoInclinacao({ dados, cor, fundo, suave, animar }) {
-  const [antes, hoje] = dados.filter(finito);
-  const media = (antes + hoje) / 2;
-  const meiaFaixa = Math.max(Math.abs(hoje - antes), Math.abs(media) * ESCALA_INCLINACAO) / 2 || 1;
-  const linha = {
-    type: 'line',
-    silent: true,
-    data: [antes, hoje],
-    showSymbol: false,
-    lineStyle: { color: cor, width: 2, cap: 'round', ...brilho(cor) },
-    areaStyle: {
-      origin: 'start',
-      color: {
-        type: 'linear',
-        x: 0,
-        y: 0,
-        x2: 0,
-        y2: 1,
-        colorStops: [
-          { offset: 0, color: comOpacidade(cor, 0.22) },
-          { offset: 1, color: comOpacidade(cor, 0) },
-        ],
-      },
-    },
-    emphasis: { disabled: true },
-    z: 2,
-  };
-  const pontoAntes = {
-    type: 'scatter',
-    silent: true,
-    symbolSize: 8,
-    itemStyle: { color: fundo, borderColor: comOpacidade(suave, 0.8), borderWidth: 1.5 },
-    data: [[0, antes]],
-    z: 3,
-  };
-  const base = {
-    type: 'line',
-    silent: true,
-    data: [antes, antes],
-    showSymbol: false,
-    lineStyle: { color: comOpacidade(suave, 0.35), width: 1, type: [3, 4] },
-    emphasis: { disabled: true },
-    animation: false,
-    z: 1,
-  };
-  return {
-    animation: animar,
-    animationDuration: DURACAO_INCLINACAO,
-    animationEasing: 'cubicOut',
-    grid: { left: 8, right: 12, top: 10, bottom: 10 },
-    xAxis: { type: 'category', show: false, boundaryGap: false, data: [0, 1] },
-    yAxis: { type: 'value', show: false, min: media - meiaFaixa, max: media + meiaFaixa },
-    series: [linha, pontoFinal([[1, hoje]], { cor, fundo, animar, atraso: DURACAO_INCLINACAO }), pontoAntes, base],
-  };
-}
-
-/**
- * tipo: 'area' | 'barras' | 'pontos' | 'inclinacao'. `cor` vale para a série; nos pontos, `cores[i]` pinta o grupo `valores[i]`.
+ * tipo: 'area' | 'barras' | 'pontos'. `cor` vale para a série; nos pontos, `cores[i]` pinta o grupo `valores[i]`.
  * `fundo` contorna o ponto final parado; `suave` pinta as linhas de apoio; `animar` segue o movimento reduzido.
  * `largura` vale só para os pontos. `altura` (px) vale para pontos e área; `faixaExata` (área) prende o eixo y
  * entre a mínima e a máxima; altura abaixo de 48px deixa a área compacta.
+ * `degraus` (área) desenha em escada, sem curva. `interativo` (área) liga o tooltip com a data (`datas`, 'AAAA-MM-DD', uma por valor) e o valor (`formatarValor`, ou pontos).
+ * `marcas` (área) são [{ indice, marca }]: linhas verticais tracejadas com o rótulo no topo.
  */
 export function montarOpcaoMini({
   tipo,
@@ -278,11 +277,15 @@ export function montarOpcaoMini({
   largura = null,
   altura = ALTURA_PADRAO,
   faixaExata = false,
+  interativo = false,
+  datas = [],
+  formatarValor,
+  degraus = false,
+  marcas = [],
 }) {
   if (tipo === 'pontos') return opcaoPontos({ valores, cor, cores, largura, altura, animar });
   const dados = valores.map((v) => (finito(v) ? v : null));
   const ultimo = ultimoIndice(dados);
   if (tipo === 'barras') return opcaoBarras({ dados, ultimo, cor, suave, animar });
-  if (tipo === 'inclinacao') return opcaoInclinacao({ dados, cor, fundo, suave, animar });
-  return opcaoArea({ dados, ultimo, cor, fundo, suave, animar, altura, faixaExata });
+  return opcaoArea({ dados, ultimo, cor, fundo, suave, animar, altura, faixaExata, interativo, datas, formatar: formatarValor, degraus, marcas });
 }

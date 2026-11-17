@@ -3,7 +3,17 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { brl } from '../../lib/formato.js';
-import { agruparPorSemana, alertasDeProventos, calendarioDoMes, DATA_A_DEFINIR, diasEntre, MAX_PROXIMOS, montarAgenda, somarMeses, tipoDoProvento } from '../../lib/agenda.js';
+import {
+  alertasDeProventos,
+  calendarioDoMes,
+  DATA_A_DEFINIR,
+  diasEntre,
+  MAX_PROXIMOS,
+  mesesDosPagamentos,
+  montarAgenda,
+  somarMeses,
+  tipoDoProvento,
+} from '../../lib/agenda.js';
 
 const HOJE = '2026-10-22';
 const acoes = [
@@ -174,34 +184,6 @@ describe('montarAgenda', () => {
   });
 });
 
-describe('agruparPorSemana', () => {
-  const item = (data) => ({ id: data, data_pagamento: data });
-
-  it('quinta 22/10: 23/10 e 25/10 são desta semana; 26/10 e 01/11 da próxima; 02/11 é mais adiante', () => {
-    const itens = ['2026-10-23', '2026-10-25', '2026-10-26', '2026-11-01', '2026-11-02'].map(item);
-    const grupos = agruparPorSemana(itens, '2026-10-22');
-    expect(grupos.map((g) => g.rotulo)).toEqual(['Esta semana', 'Próxima semana', 'Mais adiante']);
-    expect(grupos[0].itens.map((i) => i.data_pagamento)).toEqual(['2026-10-23', '2026-10-25']);
-    expect(grupos[1].itens.map((i) => i.data_pagamento)).toEqual(['2026-10-26', '2026-11-01']);
-    expect(grupos[2].itens.map((i) => i.data_pagamento)).toEqual(['2026-11-02']);
-  });
-
-  it('domingo 25/10 é o fim da semana: 25/10 fica em "Esta semana" e 26/10 em "Próxima semana"', () => {
-    const grupos = agruparPorSemana([item('2026-10-25'), item('2026-10-26')], '2026-10-25');
-    expect(grupos[0].rotulo).toBe('Esta semana');
-    expect(grupos[0].itens[0].data_pagamento).toBe('2026-10-25');
-    expect(grupos[1].rotulo).toBe('Próxima semana');
-    expect(grupos[1].itens[0].data_pagamento).toBe('2026-10-26');
-  });
-
-  it('grupo sem itens não aparece; lista vazia ou sem hoje devolve []', () => {
-    const grupos = agruparPorSemana([item('2026-11-02')], '2026-10-22');
-    expect(grupos.map((g) => g.rotulo)).toEqual(['Mais adiante']);
-    expect(agruparPorSemana([], '2026-10-22')).toEqual([]);
-    expect(agruparPorSemana([item('2026-10-23')])).toEqual([]);
-  });
-});
-
 describe('alertasDeProventos', () => {
   const ev = (ticker, dataCom, pagamento, extra = {}) => ({
     id: `${ticker}|${dataCom}|${pagamento}`,
@@ -232,17 +214,19 @@ describe('alertasDeProventos', () => {
     expect(r.find((a) => a.chave === 'pagamento').itens.map((i) => i.ticker)).toEqual(['A1']);
   });
 
-  it('lista traz só ações guardadas, inclusive com pagamento a definir', () => {
-    const r = alertasDeProventos([ev('A1', '2026-09-01', '2026-12-25'), ev('B1', '2026-09-01', null), ev('C1', '2026-09-01', '2026-12-30')], HOJE, ['a1', 'B1']);
-    const lista = r.find((a) => a.chave === 'lista');
-    expect(lista.itens.map((i) => [i.ticker, i.dias === null])).toEqual([['A1', false], ['B1', true]]);
-  });
-
   it('alerta sem itens não sai; sem eventos ou sem hoje devolve vazio', () => {
     expect(alertasDeProventos([], HOJE)).toEqual([]);
     expect(alertasDeProventos([ev('A1', '2026-12-01', '2027-01-10')], HOJE)).toEqual([]);
     expect(alertasDeProventos([ev('A1', HOJE, HOJE)], undefined)).toEqual([]);
     expect(alertasDeProventos(undefined, HOJE)).toEqual([]);
+  });
+});
+
+describe('diasEntre', () => {
+  it('conta dias corridos sem fuso e vira o ano', () => {
+    expect(diasEntre('2026-10-22', '2026-10-25')).toBe(3);
+    expect(diasEntre('2026-12-30', '2027-01-02')).toBe(3);
+    expect(diasEntre('2026-10-22', null)).toBeNull();
   });
 });
 
@@ -258,18 +242,78 @@ describe('diasEntre, somarMeses e calendarioDoMes', () => {
     expect(somarMeses('2026-01', -1)).toBe('2025-12');
   });
 
-  it('monta a grade com domingo primeiro e conta pagamentos por dia', () => {
+  it('monta a grade com domingo primeiro e conta pagamentos e datas-com por dia', () => {
     const semanas = calendarioDoMes(
-      [{ data_pagamento: '2026-10-05' }, { data_pagamento: '2026-10-05' }, { data_pagamento: '2026-11-01' }],
+      [
+        { data_pagamento: '2026-10-05', data_com: '2026-09-28' },
+        { data_pagamento: '2026-10-05', data_com: '2026-10-05' },
+        { data_pagamento: '2026-11-01', data_com: '2026-10-20' },
+        { data_pagamento: null, data_com: '2026-10-05' },
+      ],
       '2026-10',
     );
+    expect(semanas).toHaveLength(6);
     expect(semanas.every((s) => s.length === 7)).toBe(true);
     const celulas = semanas.flat();
     // 1º de outubro de 2026 é quinta-feira: 4 vazios antes
     expect(celulas.slice(0, 4)).toEqual([null, null, null, null]);
-    expect(celulas[4]).toEqual({ iso: '2026-10-01', dia: 1, qtd: 0 });
-    expect(celulas.find((c) => c?.iso === '2026-10-05').qtd).toBe(2);
+    expect(celulas[4]).toEqual({ iso: '2026-10-01', dia: 1, qtd: 0, com: 0 });
+    const dia5 = celulas.find((c) => c?.iso === '2026-10-05');
+    expect(dia5.qtd).toBe(2);
+    expect(dia5.com).toBe(2);
+    expect(celulas.find((c) => c?.iso === '2026-10-20').com).toBe(1);
     expect(celulas.filter(Boolean)).toHaveLength(31);
     expect(calendarioDoMes([], 'lixo')).toEqual([]);
+  });
+
+  it('sempre 42 células, mesmo em mês de 4 ou 5 semanas', () => {
+    // fevereiro de 2027 começa numa segunda e tem 28 dias: cabe em 4 semanas, o resto vira null
+    const fev = calendarioDoMes([], '2027-02').flat();
+    expect(fev).toHaveLength(42);
+    expect(fev.filter(Boolean)).toHaveLength(28);
+    // outubro de 2026 começa numa quinta: 5 semanas
+    expect(calendarioDoMes([], '2026-10').flat()).toHaveLength(42);
+    // mês que começa num sábado com 31 dias
+    expect(calendarioDoMes([], '2026-08').flat()).toHaveLength(42);
+  });
+});
+
+describe('mesesDosPagamentos', () => {
+  const ev = (id, data_pagamento) => ({ id, data_pagamento });
+
+  it('agrupa por mês mantendo a ordem da lista', () => {
+    const grupos = mesesDosPagamentos([
+      ev('a', '2026-10-23'),
+      ev('b', '2026-10-26'),
+      ev('c', '2026-11-05'),
+      ev('d', '2026-11-20'),
+    ]);
+    expect(grupos.map((g) => g.chave)).toEqual(['2026-10', '2026-11']);
+    expect(grupos[0].itens.map((e) => e.id)).toEqual(['a', 'b']);
+    expect(grupos[1].itens.map((e) => e.id)).toEqual(['c', 'd']);
+  });
+
+  it('rótulo em português com mês por extenso e inicial maiúscula', () => {
+    const grupos = mesesDosPagamentos([ev('a', '2026-11-05'), ev('b', '2027-03-01')]);
+    expect(grupos.map((g) => g.rotulo)).toEqual(['Novembro de 2026', 'Março de 2027']);
+  });
+
+  it('virada de ano separa dezembro e janeiro em grupos distintos', () => {
+    const grupos = mesesDosPagamentos([ev('a', '2026-12-30'), ev('b', '2027-01-04')]);
+    expect(grupos.map((g) => g.chave)).toEqual(['2026-12', '2027-01']);
+    expect(grupos.map((g) => g.rotulo)).toEqual(['Dezembro de 2026', 'Janeiro de 2027']);
+  });
+
+  it('data inválida ou ausente vai para o grupo vazio, sem rótulo, sem quebrar', () => {
+    const grupos = mesesDosPagamentos([ev('a', '2026-11-05'), ev('b', null), ev('c', 'lixo'), ev('d', undefined)]);
+    expect(grupos).toEqual([
+      { chave: '2026-11', rotulo: 'Novembro de 2026', itens: [ev('a', '2026-11-05')] },
+      { chave: '', rotulo: null, itens: [ev('b', null), ev('c', 'lixo'), ev('d', undefined)] },
+    ]);
+  });
+
+  it('lista vazia ou inválida devolve lista vazia', () => {
+    expect(mesesDosPagamentos([])).toEqual([]);
+    expect(mesesDosPagamentos(null)).toEqual([]);
   });
 });

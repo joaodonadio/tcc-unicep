@@ -13,6 +13,12 @@
   transition: opacity 0.2s ease;
 }
 
+/* Contêiner do ECharts: ao girar o aparelho, o desenho e o balão da largura antiga não passam da tela. */
+[_echarts_instance_] {
+  max-width: 100%;
+  overflow: hidden;
+}
+
 .chart-stage svg {
   display: block;
   max-width: 100%;

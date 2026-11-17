@@ -63,7 +63,14 @@ describe('resumo do pregão sem dados', () => {
 
   it('juros e seis meses ficam nulos quando não há dados', () => {
     const { fatos } = montarResumoDoPregao({});
-    expect(fatos.juros).toEqual({ cdi_12m: null, ipca_12m: null, ipca_ate: null });
+    expect(fatos.juros).toEqual({
+      cdi_12m: null,
+      ipca_12m: null,
+      ipca_ate: null,
+      selic: { status: 'sem_dado', valor: null, data: null },
+      ipca_mensal: null,
+      cdi_mensal: null,
+    });
     expect(fatos.seis_meses).toEqual({ renda_fixa: null, bolsa: null });
   });
 });
@@ -76,10 +83,50 @@ describe('juros e seis meses com dados reais', () => {
     expect(fatos.juros.ipca_ate).toBe(mercado.ipca_ate.valor);
   });
 
+  it('IPCA mensal do pacote: 12 meses em ordem, terminando no mais recente', () => {
+    const meses = Array.from({ length: 13 }, (_, i) => {
+      const total = 2025 * 12 + 2 + i; // começa em 2025-03
+      const mes_ref = `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+      return { mes_ref, variacao: { valor: 0.001 * (i + 1), status: 'ok' } };
+    });
+    const embaralhado = [...meses].reverse();
+    const { fatos } = montarResumoDoPregao({ mercado: { ...mercado, ipca_mensal: embaralhado }, resumos, noticias, acoes });
+    expect(fatos.juros.ipca_mensal.meses).toHaveLength(12);
+    expect(fatos.juros.ipca_mensal.meses).toEqual([...meses].slice(1).map((m) => m.mes_ref));
+    expect(fatos.juros.ipca_mensal.meses.at(-1)).toBe('2026-03');
+    expect(fatos.juros.ipca_mensal.valores.at(-1)).toBeCloseTo(0.013);
+  });
+
   it('renda fixa é o CDI de 6 meses e bolsa é o Ibovespa de 6 meses do primeiro resumo', () => {
     const { fatos } = montarResumoDoPregao({ mercado, resumos, noticias, acoes });
     expect(fatos.seis_meses.renda_fixa).toBe(mercado.indices.CDI.m6.valor);
     expect(fatos.seis_meses.bolsa).toBe(resumos[0].rentabilidade.ibov.m6.valor);
+  });
+});
+
+describe('variação de ação suspeita (grupamento não ajustado)', () => {
+  // RAIZ4: a origem trouxe +8.933% no dia (fechamento de R$ 0,30 para R$ 27,10).
+  const suspeita = {
+    ...resumos[0],
+    ticker: 'RAIZ4',
+    cotacao: { ...resumos[0].cotacao, variacao_dia: { valor: 89.33, status: 'ok' } },
+  };
+
+  it('não escolhe a suspeita como maior alta e a conta como "mudou de escala", fora do total', () => {
+    const { fatos, texto } = montarResumoDoPregao({ mercado, resumos: [...resumos, suspeita], noticias, acoes });
+    expect(fatos.maior_alta?.ticker).not.toBe('RAIZ4');
+    expect(fatos.maior_alta?.variacao ?? 0).toBeLessThan(1);
+    expect(fatos.amplitude.total).toBe(85);
+    expect(fatos.amplitude.emRevisao).toBe(1);
+    expect(texto).toContain('1 com o preço em outra escala');
+    expect(texto).not.toContain('8.933');
+    expect(texto).not.toContain('8933');
+  });
+
+  it('sem suspeita, a frase de contagem não menciona revisão', () => {
+    const { texto, fatos } = montarResumoDoPregao({ mercado, resumos, noticias, acoes });
+    expect(texto).not.toContain('outra escala');
+    expect(fatos.amplitude.emRevisao).toBe(0);
   });
 });
 

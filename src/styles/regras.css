@@ -35,13 +35,6 @@
   list-style: none;
 }
 
-/* Celular estreito: os três placares empilham, para o rótulo ("Contexto") não quebrar no meio */
-@media (max-width: 30rem) {
-  .placar-cartoes {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* Bloco interno da Ficha (dentro do painel de vidro): sub-superfície com véu do tom, sem vidro */
 .placar-cartao {
   --icone: var(--cor-texto-suave);
@@ -53,6 +46,12 @@
   background: color-mix(in srgb, var(--tom) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--tom) 30%, transparent);
   border-radius: var(--raio-3);
+}
+
+/* Celular estreito: os três placares ficam em linha, com texto menor para o rótulo ("Contexto") caber */
+@media (max-width: 30rem) {
+  .placar-cartao { padding: var(--espaco-3) var(--espaco-2); font-size: var(--texto-xs); }
+  .placar-cartao__nome { font-size: var(--texto-xs); }
 }
 
 .placar-cartao[data-tipo='forte'] {
@@ -127,6 +126,57 @@
   color: var(--cor-texto);
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
+}
+
+/* Setinha que gira ao abrir */
+.regras-detalhes > summary::after {
+  content: '';
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  margin-inline-start: var(--espaco-3);
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  translate: 0 -2px;
+  rotate: 45deg;
+  transition: rotate var(--duracao-suave) var(--curva-suave), translate var(--duracao-suave) var(--curva-suave);
+}
+
+.regras-detalhes[open] > summary::after {
+  translate: 0 2px;
+  rotate: 225deg;
+}
+
+/* A altura anima onde há ::details-content; sem suporte, abre direto */
+@supports selector(::details-content) {
+  :root:not([data-movimento='reduzido']) .regras-detalhes {
+    interpolate-size: allow-keywords;
+  }
+
+  :root:not([data-movimento='reduzido']) .regras-detalhes::details-content {
+    block-size: 0;
+    opacity: 0;
+    overflow: clip;
+    transition:
+      block-size 760ms var(--curva-suave),
+      opacity var(--duracao-suave) var(--curva-suave),
+      content-visibility 760ms allow-discrete;
+  }
+
+  :root:not([data-movimento='reduzido']) .regras-detalhes[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-movimento='livre']) .regras-detalhes::details-content,
+  :root:not([data-movimento='livre']) .regras-detalhes > summary::after {
+    transition: none;
+  }
+}
+
+:root[data-movimento='reduzido'] .regras-detalhes > summary::after {
+  transition: none;
 }
 
 .regras-detalhes > summary:focus-visible {

@@ -44,11 +44,13 @@ describe('SecaoSobreDados com pacote sem mudança e número ausente', () => {
 
     renderizar(<SecaoSobreDados nivelTitulo={1} />);
 
-    expect(await screen.findByText(porNivel(TEXTOS.dados.selos.semMudanca, 'simples'))).toBeInTheDocument();
+    const semMudanca = porNivel(TEXTOS.dados.selos.semMudanca, 'simples');
+    expect(await screen.findByText(new RegExp(`^${semMudanca}\\.`))).toBeInTheDocument();
     expect(screen.getByText(TEXTOS.dados.selos.retirados(2))).toBeInTheDocument();
-    expect(screen.getByText(TEXTOS.dados.semQuantidade)).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^${TEXTOS.dados.semQuantidade}\\.`))).toBeInTheDocument();
     expect(screen.queryByText(/itens/)).not.toBeInTheDocument();
-    expect(screen.queryByText(TEXTOS.dados.selos.atualizado)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Atualizado\./)).not.toBeInTheDocument();
   });
 
   it('sem avisos, a frase de nenhum aviso aparece e a nota da coleta fica recolhida, sem lista crua', async () => {
@@ -59,7 +61,7 @@ describe('SecaoSobreDados com pacote sem mudança e número ausente', () => {
 
     expect(await screen.findByText(TEXTOS.dados.avisosResumo.nenhum)).toBeInTheDocument();
     const nota = screen.getByText(registroBase.coleta_status.nota);
-    expect(nota.closest('details')).not.toHaveAttribute('open');
-    expect(screen.queryByText(TEXTOS.dados.detalhesTecnicos)).toBeInTheDocument();
+    expect(nota.closest('.detalhes-painel')).toHaveAttribute('inert');
+    expect(screen.getByRole('button', { name: TEXTOS.dados.equipe.abrir })).toBeInTheDocument();
   });
 });

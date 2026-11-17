@@ -1,5 +1,5 @@
 /*
- * Tokens. Tema escuro neutro, quase preto (nunca preto puro), com a malha de pontos por cima.
+ * Tokens. Tema escuro neutro, cinza-escuro (nunca preto puro), com a malha de pontos por cima.
  * A interface em si é monocromática: branco para o ativo, o foco e a ação principal.
  * A cor mora nos cartões (manchas grandes e difusas que dizem o assunto) e nos dados:
  * verde e rosa marcam alta e queda, sempre com sinal ou palavra junto.
@@ -9,7 +9,7 @@
   color-scheme: dark;
 
   /* Chão e superfícies */
-  --cor-fundo: #0b0b0c;
+  --cor-fundo: #242428;
   --cor-superficie: rgb(255 255 255 / 0.04);
   --cor-superficie-2: rgb(255 255 255 / 0.07);
   --cor-borda: rgb(255 255 255 / 0.09);
@@ -26,8 +26,14 @@
    * Cor: --brilho e --brilho-2 (tokens --poca-*); força: --brilho-forca; posição: --poca-1-pos/--poca-2-pos.
    * --vidro é montado em "*" (base.css) para que cada cartão leia as próprias variáveis.
    */
-  --vidro-base: #141416;
-  --vidro-base-hover: #19191c;
+  /* o cartão fica um degrau mais escuro que o chão cinza: recorta sem precisar de sombra */
+  --vidro-base: #19191c;
+  --vidro-base-hover: #1e1e22;
+  /* reserva opaca (menos transparência): mesmos valores de --vidro-base */
+  --vidro-base-opaco: #19191c;
+  --vidro-base-opaco-hover: #1e1e22;
+  /* texto de apoio sobre as manchas de cor (data-brilho) */
+  --cor-texto-suave-na-mancha: #dedee3;
   --brilho: #ffffff;
   --brilho-forca: 3%;
   --poca-1-pos: 0% 0%;
@@ -46,21 +52,21 @@
    * Use trocando --vidro-base/--vidro-base-hover no contêiner da página e somando
    * backdrop-filter: var(--vidro-desfoque) nos cartões.
    */
-  --vidro-base-translucido: rgb(0 0 0 / 0.12);
-  --vidro-base-translucido-hover: rgb(10 10 12 / 0.22);
+  --vidro-base-translucido: rgb(0 0 0 / 0.3);
+  --vidro-base-translucido-hover: rgb(6 6 8 / 0.36);
   /* desfoque leve com véu leve: os pontos de trás seguem visíveis, só suavizados (desfoque longo vira névoa cinza e parece placa) */
   --vidro-desfoque: blur(2.0px) saturate(160%) brightness(0.95);
 
-  /* Cores das manchas: vivas e saturadas; sobre a placa escura, a ~50% viram luz colorida difusa */
-  --poca-teal: #14b8a6;
-  --poca-azul: #3158e8;
-  --poca-carmim: #c8284c;
-  --poca-magenta: #c73cbd;
-  --poca-violeta: #6c3cf2;
-  --poca-verde: #2fb855;
-  --poca-oliva: #8fa61c;
+  /* Cores das manchas: tons suaves, de saturação contida, para não cansar o olho sobre o cinza */
+  --poca-teal: #43a89c;
+  --poca-azul: #4e68cc;
+  --poca-carmim: #bd4a66;
+  --poca-magenta: #ad55a4;
+  --poca-violeta: #7558cc;
+  --poca-verde: #4faa66;
+  --poca-oliva: #8fa248;
   /* ardósia: segunda mancha do par "aço" (estável/sem direção), fria e menos saturada */
-  --poca-ardosia: #5a6f96;
+  --poca-ardosia: #5f7096;
 
   /* Sub-superfície: bloco dentro de um cartão. Sem mancha, sem sombra externa. */
   --sub-fundo: rgb(255 255 255 / 0.04);
@@ -69,7 +75,7 @@
   --sub-luz: inset 0 1px 0 rgb(255 255 255 / 0.03);
 
   /* Vidro flutuante (cabeçalho, barra inferior, painéis suspensos): translúcido com desfoque */
-  --flutuante-fundo: rgb(14 14 16 / 0.72);
+  --flutuante-fundo: rgb(30 30 34 / 0.78);
   --flutuante-borda: rgb(255 255 255 / 0.08);
   --flutuante-desfoque: blur(20px) saturate(140%);
 
@@ -100,6 +106,7 @@
   --cor-queda: #f08a8a;
   --cor-queda-suave: rgb(240 138 138 / 0.14);
   --cor-estavel: #b4b4bb;
+  --cor-cinza-claro: var(--cor-estavel);
 
   /* Sinais das regras: a cor fica no texto; o fundo é um véu da própria cor.
      Atenção é amarelo-limão: sinal de cuidado, nunca botão nem estado ativo. */
@@ -121,11 +128,16 @@
   --cor-dado-6: #5fc9c0;
   --cor-dado-7: #e09ad6;
 
-  /* Mascote (Pavio): corpo na cor de dado 6, sombra da lateral, olhos escuros e brilho branco */
+  /* Mascote (Cotinha): corpo inteiro na cor de dado 6, olhos escuros e brilho branco */
   --cor-mascote: var(--cor-dado-6);
-  --cor-mascote-sombra: #3fa89f;
-  --cor-mascote-olho: var(--cor-fundo);
+  --cor-mascote-bochecha: #f08fa8;
+  --cor-porquinho: #f2a3b6;
+  --cor-porquinho-focinho: #e88aa3;
+  --cor-porquinho-traco: #a4546c;
+  --cor-mascote-olho: #111113;
   --cor-mascote-brilho: #fff;
+  /* Casco do porquinho: rosa do corpo escurecido ~28%, fixo nos dois temas */
+  --cor-mascote-casco: #a46d90;
 
   /* Séries de gráfico (nomes antigos) */
   --cor-serie-1: var(--cor-dado-1);
@@ -191,10 +203,22 @@
   --sombra-cartao: var(--vidro-sombra);
 
   --altura-cabecalho: 5.5rem;
+  /* altura real da barra do cabeçalho: onde encosta o que fica fixo logo abaixo dela */
+  --topo-fixo: 4.25rem;
   --altura-barra-inferior: 4.5rem;
   --largura-max: 80rem;
   --duracao: 180ms;
   --curva: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Movimento: entrada 280-420ms, saída 120-180ms, sem quique. Ondas e cascatas escalonam por --passo-*. */
+  --duracao-entrada: 340ms;
+  --duracao-saida: 160ms;
+  --duracao-toque: 120ms;
+  --passo-onda: 25ms;
+  --passo-suave: 45ms;
+  --duracao-hover: 280ms;
+  --duracao-suave: 520ms;
+  --curva-suave: cubic-bezier(0.22, 1, 0.36, 1);
+  --passo-lista: 12ms;
 
   /* Superfícies de hover e bordas de acento */
   --cor-superficie-hover: rgb(255 255 255 / 0.13);
@@ -202,8 +226,9 @@
   --cor-acento-borda: rgb(255 255 255 / 0.35);
   --cor-alta-borda: rgb(143 196 160 / 0.45);
   --cor-queda-borda: rgb(227 139 127 / 0.45);
-  --cor-barra: var(--flutuante-fundo);
-  --cor-menu: #18181b;
+  /* barra inferior do celular: sólida e um degrau acima do chão e dos cartões, para nunca se misturar com a página */
+  --cor-barra: #2c2c31;
+  --cor-menu: #26262a;
 
   /* Camadas */
   --z-cabecalho: 40;
@@ -216,6 +241,7 @@
 @media (max-width: 720px) {
   :root {
     --altura-cabecalho: 0rem;
+    --topo-fixo: 0rem;
     --texto-3xl: 2.125rem;
   }
 }

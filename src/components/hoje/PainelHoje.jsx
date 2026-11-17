@@ -1,6 +1,4 @@
-import { Volume2 } from 'lucide-react';
 import { useAnaliseDoDia, useRecarregarAnalise } from '../../hooks/useAnalise.js';
-import { useLeituraEmVoz } from '../../hooks/useLeituraEmVoz.js';
 import { diaMes, diaSemanaCurto } from '../../lib/datas.js';
 import { semAbertura } from '../../lib/hoje.js';
 import { usePreferencias } from '../../context/contextos.js';
@@ -9,7 +7,7 @@ import { BlocoErro, Linhas } from '../ui/Estados.jsx';
 import { DestaquesDoDia } from './DestaquesDoDia.jsx';
 import { GraficoIbovespa } from './GraficoIbovespa.jsx';
 import { NumerosDoDia } from './NumerosDoDia.jsx';
-import { ResumoMinhaLista } from './ResumoMinhaLista.jsx';
+import { ResumoDoPregao } from './ResumoDoPregao.jsx';
 import { ResumoNoticias } from './ResumoNoticias.jsx';
 import { ResumoProventos } from './ResumoProventos.jsx';
 import Top5Destaque from './Top5Destaque.jsx';
@@ -23,7 +21,7 @@ export default function PainelHoje() {
   const { data, isPending, isError } = useAnaliseDoDia();
   const recarregar = useRecarregarAnalise();
   const resumo = data ? semAbertura(data.resumo_simples) : undefined;
-  const voz = useLeituraEmVoz(resumo);
+  const temDestaques = isPending || (data?.painel_alertas?.volume?.itens ?? []).length > 0;
 
   const ref = data?.data_referencia;
   const titulo = ref ? porNivel(TEXTOS.hoje.titulo, nivel)(`${diaSemanaCurto(ref)}, ${diaMes(ref)}`) : porNivel(TEXTOS.hoje.tituloSemData, nivel);
@@ -40,19 +38,7 @@ export default function PainelHoje() {
         ) : isPending ? (
           <Linhas quantidade={3} larguras={['100%', '94%', '72%']} />
         ) : (
-          <>
-            <p className="hoje-resumo">{resumo}</p>
-            {voz.disponivel && (
-              <button
-                type="button"
-                className="botao hoje-ouvir"
-                onClick={voz.alternar}
-              >
-                <Volume2 size={16} aria-hidden="true" focusable="false" />
-                {voz.falando ? TEXTOS.hoje.parar : TEXTOS.hoje.ouvir}
-              </button>
-            )}
-          </>
+          <ResumoDoPregao fatos={data?.fatos_pregao} resumo={resumo} />
         )}
 
       </header>
@@ -64,7 +50,8 @@ export default function PainelHoje() {
         <NumerosDoDia fatos={data?.fatos_pregao} dataPregao={data?.data_referencia} carregando={isPending} />
       </section>
 
-      <div className="hoje-secao hoje-duas">
+      {/* sem volume incomum o bloco some: o gráfico ocupa a linha inteira, sem buraco na grade */}
+      <div className={temDestaques ? 'hoje-secao hoje-duas' : 'hoje-secao'}>
         <GraficoIbovespa />
         <DestaquesDoDia alertas={data?.painel_alertas} carregando={isPending} />
       </div>
@@ -72,7 +59,6 @@ export default function PainelHoje() {
       <div className="hoje-secao hoje-trios">
         <ResumoProventos />
         <ResumoNoticias tom={data?.tom_noticias} sentimento={data?.sentimento_geral} carregando={isPending} />
-        <ResumoMinhaLista acoes={data?.acoes_pregao} carregando={isPending} />
       </div>
     </div>
   );

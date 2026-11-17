@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { montarAnaliseDoDia } from '../../lib/analiseDoDia.js';
-import { valorOuNulo } from '../../lib/valor.js';
 
 const lerRegistros = (arquivo) =>
   JSON.parse(readFileSync(path.join(process.cwd(), 'public', 'dados', arquivo), 'utf8')).registros;
@@ -16,41 +15,6 @@ const execucao = lerRegistros('execucao.json')[0];
 const analise = montarAnaliseDoDia({ acoes, resumos, noticias, mercado, execucao });
 
 describe('análise do dia: campos do redesign com dados reais', () => {
-  describe('ativos do globo', () => {
-    it('tem tickers únicos e inclui as 3 primeiras sugestões', () => {
-      const tickers = analise.ativos.map((a) => a.ticker);
-      expect(new Set(tickers).size).toBe(tickers.length);
-      for (const s of analise.sugestoes.slice(0, 3)) {
-        expect(tickers).toContain(s.ticker);
-      }
-    });
-
-    it('inclui a ação de maior volume de cada setor', () => {
-      const tickers = new Set(analise.ativos.map((a) => a.ticker));
-      const setorDe = new Map(acoes.map((a) => [a.ticker, a.setor]));
-      const lideres = new Map();
-      for (const r of resumos) {
-        const setor = setorDe.get(r.ticker);
-        const volume = valorOuNulo(r.volume?.total);
-        if (!setor || volume == null) continue;
-        const atual = lideres.get(setor);
-        if (!atual || volume > atual.volume) lideres.set(setor, { ticker: r.ticker, volume });
-      }
-      expect(lideres.size).toBeGreaterThan(0);
-      for (const { ticker } of lideres.values()) {
-        expect(tickers).toContain(ticker);
-      }
-    });
-
-    it('tem no máximo 13 nós e todo nó traz setor_nome e tipo válido', () => {
-      expect(analise.ativos.length).toBeLessThanOrEqual(13);
-      for (const a of analise.ativos) {
-        expect(a).toHaveProperty('setor_nome');
-        expect(['forte', 'atencao', 'neutro']).toContain(a.tipo);
-      }
-    });
-  });
-
   describe('painel de alertas', () => {
     it('tem título com o dia e mês do pregão', () => {
       expect(analise.painel_alertas.titulo).toMatch(/^Alertas do pregão de \d{2}\/\d{2}$/);
@@ -111,10 +75,10 @@ describe('análise do dia: campos do redesign com dados reais', () => {
   });
 
   describe('manchetes por tom', () => {
-    it('tem as chaves positivo, neutro e negativo, com até 3 itens cada', () => {
+    it('tem as chaves positivo, neutro e negativo, com até 12 itens cada', () => {
       expect(Object.keys(analise.manchetes_por_tom).sort()).toEqual(['negativo', 'neutro', 'positivo']);
       for (const lista of Object.values(analise.manchetes_por_tom)) {
-        expect(lista.length).toBeLessThanOrEqual(3);
+        expect(lista.length).toBeLessThanOrEqual(12);
       }
     });
 
@@ -162,6 +126,36 @@ describe('análise do dia: campos do redesign com dados reais', () => {
       const cdi = outra.indicadores.find((i) => i.label === 'CDI 12M');
       expect(cdi.periodos[0]).toEqual({ rotulo: '1 mês', valor_texto: '—', sinal: 'flat' });
       expect(cdi.periodos[1].valor_texto).toBe('+6,8%');
+    });
+
+    const ok = (valor) => ({ valor, status: 'ok' });
+    const indisponivel = { valor: null, status: 'historico_insuficiente' };
+
+    it('Dólar ganha periodos do pacote quando indices.USDBRL existe', () => {
+      const comDolar = structuredClone(mercado);
+      comDolar.indices.USDBRL = { m1: ok(0.01), m6: ok(-0.02), a1: indisponivel };
+      const outra = montarAnaliseDoDia({ acoes, resumos, noticias, mercado: comDolar, execucao });
+      const dolar = outra.indicadores.find((i) => i.label === 'Dólar (R$)');
+      expect(dolar.periodos.map((p) => p.valor_texto)).toEqual(['+1,0%', '−2,0%', '—']);
+    });
+
+    it('Brent ganha periodos do pacote quando indices.BRENT existe', () => {
+      const comBrent = structuredClone(mercado);
+      comBrent.indices.BRENT = { m1: ok(0.01), m6: ok(-0.02), a1: indisponivel };
+      const outra = montarAnaliseDoDia({ acoes, resumos, noticias, mercado: comBrent, execucao });
+      const brent = outra.indicadores.find((i) => i.label === 'Petróleo Brent (US$)');
+      expect(brent.periodos.map((p) => p.valor_texto)).toEqual(['+1,0%', '−2,0%', '—']);
+    });
+
+    it('sem indices.USDBRL nem indices.BRENT, Dólar e Brent não têm periodos', () => {
+      const semDolarBrent = structuredClone(mercado);
+      delete semDolarBrent.indices.USDBRL;
+      delete semDolarBrent.indices.BRENT;
+      const outra = montarAnaliseDoDia({ acoes, resumos, noticias, mercado: semDolarBrent, execucao });
+      const dolar = outra.indicadores.find((i) => i.label === 'Dólar (R$)');
+      const brent = outra.indicadores.find((i) => i.label === 'Petróleo Brent (US$)');
+      expect(dolar.periodos).toBeUndefined();
+      expect(brent.periodos).toBeUndefined();
     });
   });
 });

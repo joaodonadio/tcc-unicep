@@ -218,10 +218,13 @@ button.ficha-voltar {
   list-style: none;
 }
 
-@media (max-width: 52rem) {
-  .ficha-fundamentos {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+@media (min-width: 30.01rem) and (max-width: 52rem) {
+  .ficha-fundamentos { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .ficha-fundamento { grid-column: span 2; }
+  .ficha-fundamento:first-child:nth-last-child(5),
+  .ficha-fundamento:first-child:nth-last-child(5) + .ficha-fundamento,
+  .ficha-fundamento:first-child:nth-last-child(4),
+  .ficha-fundamento:first-child:nth-last-child(4) ~ .ficha-fundamento { grid-column: span 3; }
 }
 
 @media (max-width: 30rem) {
@@ -232,25 +235,22 @@ button.ficha-voltar {
   .ficha-fundamento {
     padding: var(--espaco-4);
   }
+
+  .ficha-fundamento:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
 }
 
-/* Abas: seletor em pílula, rolável na horizontal, fixo logo abaixo do cabeçalho do site. Ativa: fundo claro, texto escuro. */
+/* Abas: seletor em pílula, quebram em linhas, fixo logo abaixo do cabeçalho do site. Ativa: fundo claro, texto escuro. */
 .ficha-abas {
   position: sticky;
-  top: var(--altura-cabecalho);
+  top: var(--topo-fixo);
   z-index: 2;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--espaco-2);
-  overflow-x: auto;
-  scrollbar-width: none;
   padding: var(--espaco-3) 0;
   background: color-mix(in srgb, var(--cor-fundo) 92%, transparent);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-}
-
-.ficha-abas::-webkit-scrollbar {
-  display: none;
 }
 
 .ficha-aba {
@@ -264,6 +264,7 @@ button.ficha-voltar {
   font: inherit;
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
+  white-space: nowrap;
   color: var(--cor-texto-suave);
   cursor: pointer;
   transition:
@@ -287,6 +288,51 @@ button.ficha-voltar {
 .ficha-aba:focus-visible {
   outline: 3px solid var(--cor-foco);
   outline-offset: 2px;
+}
+
+/* Marcador que desliza (useIndicador): fica sob as abas e leva o fundo da aba ativa. Sem medida, some e a aba
+   ativa segue com o próprio fundo. O movimento está em movimento.css (seção 21). O .ficha-abas já é sticky,
+   então serve de referência para o marcador. */
+.ficha-aba {
+  position: relative;
+  z-index: 1;
+}
+
+.ficha-aba-marcador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  border-radius: var(--raio-pilula);
+  background: color-mix(in srgb, var(--cor-texto) 92%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ficha-abas[data-indicador='ligado'] > .ficha-aba-marcador {
+  opacity: 1;
+}
+
+.ficha-abas[data-indicador='ligado'] .ficha-aba[aria-selected='true'] {
+  background: transparent;
+}
+
+/* Celular: 7 abas em 4 + 3, a segunda fileira preenche a largura. */
+@media (max-width: 47.5rem) {
+  .ficha-abas {
+    gap: var(--espaco-1);
+    padding-block: var(--espaco-2);
+  }
+
+  .ficha-aba {
+    flex: 1 1 22%;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding-inline: var(--espaco-1);
+    font-size: var(--texto-xs);
+    text-align: center;
+  }
 }
 
 /* Painel da pergunta: um cartão de vidro. A mancha de cor vem de data-brilho (ver BRILHO_DA_PERGUNTA em lib/perguntasFicha.js). */
@@ -861,6 +907,83 @@ button.ficha-voltar {
   color: var(--cor-texto-suave);
 }
 
+/* Celular: cada linha vira um bloco; o rótulo da coluna (data-rotulo) fica ao lado do valor. */
+@media (max-width: 47.5rem) {
+  .ficha-rolagem {
+    overflow-x: visible;
+  }
+
+  .ficha-rolagem :is(table, tbody, tr, th, td) {
+    display: block;
+  }
+
+  .ficha-rolagem thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .ficha-rolagem caption {
+    display: block;
+  }
+
+  .ficha-rolagem tbody tr {
+    padding-block: var(--espaco-3);
+    border-bottom: 1px solid var(--cor-fio);
+  }
+
+  .ficha-rolagem tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .ficha-rolagem tbody th {
+    padding: 0 0 var(--espaco-1);
+    border: 0;
+    text-align: left;
+    font-weight: var(--peso-medio);
+  }
+
+  .ficha-rolagem tbody td {
+    padding: var(--espaco-1) 0;
+    border: 0;
+    text-align: left;
+  }
+
+  .ficha-rolagem tbody td[data-rotulo] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--espaco-3);
+    white-space: normal;
+    text-align: right;
+  }
+
+  .ficha-rolagem td[data-rotulo]::before {
+    content: attr(data-rotulo);
+    flex: 0 1 auto;
+    font-family: var(--fonte-texto);
+    font-stretch: normal;
+    font-variant-numeric: normal;
+    font-size: var(--texto-xs);
+    color: var(--cor-texto-suave);
+    text-align: left;
+    letter-spacing: normal;
+  }
+
+  /* Motivo ocupa a linha de baixo, sob o valor. */
+  .ficha-rolagem td[data-rotulo] .ficha-tab-motivo {
+    flex: 0 0 100%;
+    text-align: right;
+  }
+}
+
 /* Gráficos dos painéis: cada gráfico é um bloco separado por fio fino */
 .ficha-controles {
   display: flex;
@@ -873,6 +996,39 @@ button.ficha-voltar {
 .ficha-comparar,
 .ficha-campo {
   font-size: var(--texto-sm);
+}
+
+.ficha-hist-bloco > h3 {
+  margin-bottom: var(--espaco-3);
+}
+
+/* Rótulo e select lado a lado, com respiro até o texto seguinte */
+.ficha-campo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-3);
+}
+
+.ficha-campo select {
+  padding: var(--espaco-2) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--sub-fundo);
+  color: var(--cor-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ficha-campo select:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* a lista aberta usa o fundo do tema, senão o sistema pinta branco no escuro */
+.ficha-campo option {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
 }
 
 .ficha-grafico,
@@ -988,7 +1144,6 @@ button.ficha-voltar {
   margin: 0;
   padding: 0;
   list-style: none;
-  overflow-x: auto;
 }
 
 .ficha-prov-ano {
@@ -1013,6 +1168,7 @@ button.ficha-voltar {
 .ficha-prov-parte {
   display: block;
   width: 100%;
+  height: var(--parte);
   min-height: 2px;
 }
 
@@ -1064,6 +1220,58 @@ button.ficha-voltar {
   height: 0.7rem;
   border-radius: 3px;
   vertical-align: baseline;
+}
+
+/* Celular: barras deitadas, um ano por linha (ano | barra | total). A largura de cada parte vem de --parte. */
+@media (max-width: 40rem) {
+  .ficha-prov-grafico {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--espaco-2);
+  }
+
+  .ficha-prov-ano {
+    display: grid;
+    flex: none;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--espaco-3);
+    text-align: left;
+  }
+
+  .ficha-prov-rotulo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .ficha-prov-coluna {
+    grid-column: 2;
+    grid-row: 1;
+    flex-direction: row;
+    height: 0.75rem;
+    max-width: none;
+    border-bottom: 0;
+  }
+
+  .ficha-prov-total {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .ficha-prov-conferencia {
+    grid-column: 1 / -1;
+  }
+
+  .ficha-prov-parte {
+    width: var(--parte);
+    height: 100%;
+    min-height: 0;
+    min-width: 2px;
+  }
+
+  .ficha-prov-parte:last-child {
+    border-radius: 0 6px 6px 0;
+  }
 }
 
 /* Histórico de 1 ano (pergunta "Está cara?"): abas por indicador, um gráfico por vez. */

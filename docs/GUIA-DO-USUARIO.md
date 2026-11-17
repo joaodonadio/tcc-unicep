@@ -16,61 +16,52 @@ Todo dia útil, o site mostra o que aconteceu no pregão anterior com as ações
 
   Para fechar o painel, toque fora dele ou use a tecla Esc.
 - **Termos explicados:** palavras com um traço pontilhado abrem um balão com a explicação. Para fechar o balão, use a tecla Esc. Não há um painel lateral de glossário.
-- **Lembrança no seu navegador:** o nível de leitura, o tamanho do texto, a Minha lista e o bloco Como usar fechado ficam guardados só no seu navegador.
+- **Lembrança no seu navegador:** o nível de leitura, o tamanho do texto e o bloco Como usar fechado ficam guardados só no seu navegador.
 
 ## Cabeçalho
 
 Fica sempre no topo da página:
 
-- o nome "Ações da B3", que leva à página Hoje;
+- a logo CotAI (o Cotinha e o nome), que leva à página Hoje;
 - os links das páginas: Hoje, Mercado, Setores e Ações. Em telas a partir de 1280px, todas aparecem na linha. Entre 721px e 1279px, e no celular, Proventos, Notícias, O modelo e Sobre os dados ficam no menu Mais (no celular, o botão Mais fica na barra inferior);
-- o ícone de lista, com o número de ações em Minha lista;
 - o botão Leitura.
 
 ## Hoje
 
 A página inicial (`/`). Mostra o essencial do pregão. Cada bloco tem um link para a página completa.
 
-- **Como usar:** explica os blocos da página. Use o X para fechar; ele não volta enquanto você não reabrir pelo botão Como usar do cabeçalho.
-- **Top 5 para estudar hoje:** cinco ações que as regras destacaram no pregão. Cada cartão traz o principal motivo; toque numa ação para ver o resto. No celular, as cinco ficam numa faixa que rola para o lado.
+- **Como usar:** explica os blocos da página. Use o X para fechar; ele não volta enquanto você não reabrir pelo botão Como usar do painel Leitura.
+- **Top 5 para estudar hoje:** cinco ações destacadas no pregão, pelas regras (o Top 5 do modelo experimental ainda não é publicado). Cada cartão traz o principal motivo; toque numa ação para ver o resto. "Como escolhemos" explica a origem. No celular, as cinco ficam numa faixa que rola para o lado.
   - O botão Como escolhemos explica como a lista é feita: o site olha as mesmas checagens em cada ação e ordena por mais pontos a favor, depois menos pontos de atenção e, no empate, mais negociação que o normal. Se ainda empatar, vale a ordem alfabética do código.
   - Junto da ação escolhida aparece o preço dos últimos 6 meses.
   - Em Por que está aqui, uma frase resume os pontos, e cada um aparece numa linha marcada como A favor, Atenção ou Para saber. Toque na linha para ler a explicação completa.
   - O bloco Entenda com um objeto mostra um objeto 3D que ilustra o ponto escolhido.
-- **Resumo do dia:** um texto curto sobre o pregão. "Ouvir o resumo" faz o navegador ler o texto em voz alta. O botão só aparece se o navegador tiver essa função.
+- **Resumo do dia:** um texto curto sobre o pregão.
 - **Números do dia:** Ibovespa, dólar, CDI, IPCA e a amplitude do pregão. Logo abaixo, uma linha diz de onde vem cada dado, por exemplo: "Ibovespa, dólar, CDI, IPCA e altas e quedas: pacotes do pregão de 22/10/2026."
 - **Gráfico do Ibovespa:** a variação do índice nos últimos 6 meses.
 - **Destaques do dia:** quem mais subiu, quem mais caiu e as ações com volume fora do comum.
-- **Proventos, notícias e Minha lista:** um resumo de cada um, com link para a página completa.
+- **Proventos e notícias:** um resumo de cada um, com link para a página completa.
 
 ## Mercado
 
-Duas abas: Índices e Destaques. A página também mostra o mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação.
+Uma frase sobre o pregão e os índices, em grupos: Bolsa, Juros e inflação, Câmbio e petróleo. Abaixo, o gráfico do dólar e o de juros. A página não tem abas. Índice sem dado fica sem número: o site não troca por zero.
 
 ## Setores
 
-Mostra o que mudou em cada setor e compara os setores entre si. Você escolhe o período (1 dia, 1 mês, 6 meses ou 1 ano). A cena com colunas 3D é decorativa: a lista ao lado traz as mesmas informações em texto.
+Mostra o que mudou em cada setor e compara os setores entre si. Você escolhe o período: Último pregão, 1 semana, 1 mês, 6 meses ou 1 ano. A vitrine 3D é decorativa: a lista ao lado traz as mesmas informações em texto. Abaixo, o mosaico mostra cada setor em um cartão. No modo Técnico, aparece também um gráfico de velas: uma vela por setor, do começo ao fim do período, feita com os fechamentos de cada dia.
 
 ## Ações
 
-- **Abas:** Todas, Pontos fortes, Atenção, Só contexto e Minha lista. Uma ação pode aparecer em mais de uma aba, conforme as regras que se aplicaram a ela.
-- **Busca:** digite o código (por exemplo, PETR4) ou parte do nome da empresa.
-- **Guardar:** cada linha tem o botão Guardar, que leva a ação para a Minha lista.
-- **Endereço:** a aba escolhida fica no endereço da página. Se você copiar o endereço, ele abre na mesma aba.
-
-## Minha lista
-
-- Reúne as ações que você quer acompanhar.
-- Fica só no seu navegador. Nada é enviado. Outro navegador ou outro computador mostram outra lista.
-- Para usar, toque em Guardar numa ação da página Ações. O ícone de lista do cabeçalho mostra quantas ações há na lista e leva a ela.
+- **Mapa por setor:** cada setor é um grupo, com a variação média do dia e quantas ações subiram. Cada ação aparece com a variação do dia, e a mais negociada de cada setor vem circulada. Toque numa ação para abrir a ficha.
+- **Sem abas nem busca:** a página mostra todas as ações do pregão.
 
 ## Proventos
 
-Agenda de pagamentos de dividendos e JCP, com gráfico por mês e um ranking de quem mais pagou.
+Um resumo, os próximos pagamentos de dividendos e JCP, o gráfico de pagamentos por mês e o top 5 em barras de quem mais pagou.
 
 ## Notícias
 
-O tom das manchetes do último pregão, com as empresas mais citadas. As manchetes aparecem no idioma original.
+O termômetro com o tom das notícias do último pregão, as manchetes separadas por tom e as barras por empresa. As manchetes aparecem no idioma original.
 
 ## O modelo
 
@@ -86,7 +77,7 @@ Endereço `/acao/` seguido do código da ação, por exemplo `/acao/PETR4`. Abre
 
 A ficha traz uma faixa de fundamentos da empresa e responde perguntas, uma por vez, em abas:
 
-1. O que as regras dizem?
+1. O que as checagens mostram?
 2. Ela deve muito?
 3. Está cara?
 4. Paga proventos?
@@ -99,7 +90,7 @@ A ficha traz uma faixa de fundamentos da empresa e responde perguntas, uma por v
 - **Motivo da ausência:** quando um indicador não existe para a empresa, o lugar do valor mostra "Indisponível" ou "Não se aplica", com o motivo logo abaixo.
 - **Voltar:** o botão "Voltar à página anterior" volta à página de onde você veio. Se você abriu a ficha direto pelo endereço, o botão leva à página Ações.
 - **Entenda com um objeto:** alguns blocos trazem um objeto 3D que ilustra a ideia da pergunta.
-- **Modo Técnica:** a ficha mostra mais detalhes.
+- **Modo Técnico:** a ficha mostra mais detalhes.
   - Em "Ela deve muito?", os balanços trimestrais.
   - Em "Está cara?", o histórico do indicador, dia a dia.
   - Em "Como foi o preço?", o retorno da ação por período.
@@ -113,4 +104,4 @@ A ficha traz uma faixa de fundamentos da empresa e responde perguntas, uma por v
 
 - **Por que os dados são de ontem?** O pregão de hoje ainda não terminou quando os dados chegam de manhã.
 - **O site indica compra ou venda?** Não. As regras apontam fatos para estudar. Elas não preveem preço.
-- **Onde ficam as minhas marcações?** Só no seu navegador, na Minha lista. Nada é enviado.
+- **Onde ficam as minhas marcações?** Só no seu navegador, como o nível de leitura e o tamanho do texto. Nada é enviado.

@@ -7,7 +7,9 @@ import { dataBR } from '../../lib/datas.js';
 import { brl } from '../../lib/formato.js';
 import { movimentoReduzido } from '../../lib/movimento.js';
 import { TEXTOS } from '../../lib/textos.js';
+import { ariaDosEventos, marcasDosEventos } from '../../lib/eventosMercado.js';
 import { montarOpcao } from './opcoesGrafico.js';
+import { acompanharTamanho } from './redimensionar.js';
 
 echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, MarkLineComponent, SVGRenderer]);
 
@@ -38,6 +40,7 @@ export function GraficoInterativo({
   categorias,
   carregando,
   series,
+  trocaSuave = false,
   modo = 'linha',
   formatar = brl,
   formatarData = dataBR,
@@ -48,6 +51,7 @@ export function GraficoInterativo({
   notaLegenda,
   altura = ALTURA_PADRAO,
   corPorSinal = false,
+  eventos = [],
 }) {
   const alvoRef = useRef(null);
   const graficoRef = useRef(null);
@@ -66,6 +70,9 @@ export function GraficoInterativo({
   const n = Math.max(0, ...lista.map((s) => s.valores.length));
   const rotulosEixo = horizontal ? (categorias ?? []) : datas;
   const temDados = horizontal ? n >= 1 : n >= 2 && lista.some((s) => s.valores.filter(finito).length >= 2);
+  // eventos fora das datas somem; as marcas entram como [{ indice, marca }]
+  const marcas = horizontal ? [] : marcasDosEventos(eventos, datas);
+  const chaveMarcas = marcas.map((m) => `${m.indice}:${m.marca}`).join('|');
 
   const opcao = useMemo(
     () =>
@@ -81,11 +88,13 @@ export function GraficoInterativo({
             rotulosX,
             corPorSinal,
             animar: !reduzirMovimento(),
+            trocaSuave,
+            eventos: marcas,
           })
         : null,
     // formatar/formatarData costumam ser funções novas a cada render; os dados e o modo definem o desenho.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [temDados, lista, rotulosEixo, modo, linhaZero, eixo, rotulosX, corPorSinal],
+    [temDados, lista, rotulosEixo, modo, linhaZero, eixo, rotulosX, corPorSinal, trocaSuave, chaveMarcas],
   );
 
   // Cria o gráfico uma vez por montagem do contêiner; sem suporte de desenho (jsdom), cai para só a tabela.
@@ -100,13 +109,9 @@ export function GraficoInterativo({
       return undefined;
     }
     graficoRef.current = grafico;
-    let observador = null;
-    if (typeof ResizeObserver !== 'undefined') {
-      observador = new ResizeObserver(() => grafico.resize());
-      observador.observe(alvo);
-    }
+    const desligar = acompanharTamanho(alvo, grafico);
     return () => {
-      observador?.disconnect();
+      desligar();
       grafico.dispose();
       graficoRef.current = null;
     };
@@ -115,11 +120,12 @@ export function GraficoInterativo({
   useEffect(() => {
     if (!opcao || !graficoRef.current) return;
     try {
-      graficoRef.current.setOption(opcao, true);
+      // trocaSuave mantém as séries pelo id: as que ficam deslizam e só a nova se desenha
+      graficoRef.current.setOption(opcao, trocaSuave ? { replaceMerge: ['series'] } : true);
     } catch {
       /* sem desenho: a tabela segue disponível */
     }
-  }, [opcao, temDados]);
+  }, [opcao, temDados, trocaSuave]);
 
   if (!temDados) {
     // Sem `carregando` explícito, segue o comportamento antigo (esqueleto); com consulta terminada, mostra o vazio.
@@ -129,12 +135,13 @@ export function GraficoInterativo({
     return <p className="grafico-vazio">{TEXTOS.grafico.semDados}</p>;
   }
 
-  const textoAria = descricao
+  const textoBase = descricao
     ?? (horizontal
       ? TEXTOS.grafico.descricaoBarras(n)
       : series?.length
         ? `${lista.map((s) => TEXTOS.grafico.descricaoMulti(s.rotulo, formatar(primeiroFinito(s.valores)), formatar(ultimoFinito(s.valores)))).join('; ')}.`
         : TEXTOS.grafico.descricaoSerie(formatar(primeiroFinito(serie)), formatar(ultimoFinito(serie))));
+  const textoAria = [textoBase, horizontal ? '' : ariaDosEventos(eventos, datas)].filter(Boolean).join(' ');
 
   const inicio = Math.max(0, n - MAX_LINHAS_TABELA);
   const indices = Array.from({ length: n - inicio }, (_, k) => inicio + k);

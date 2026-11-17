@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import Cabecalho from '../../components/layout/Cabecalho.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
@@ -16,7 +16,6 @@ vi.mock('../../hooks/useMetaPublicacao.js', () => ({
   useMetaPublicacao: () => ({ data: analise.atual }),
 }));
 
-const CHAVE_LISTA = 'painel-b3:lista';
 const CHAVE_PREFS = 'painel-b3:preferencias';
 
 /** Abre o painel Leitura, que começa fechado. */
@@ -81,19 +80,11 @@ describe('Cabecalho', () => {
     );
   });
 
-  it('Minha lista é um ícone com o número no selinho, e o nome completo fica no aria-label', () => {
-    localStorage.setItem(CHAVE_LISTA, JSON.stringify(['PETR4', 'VALE3']));
-    renderizar(<Cabecalho />);
-    const link = screen.getByRole('link', { name: TEXTOS.cabecalho.contadorLista(2) });
-    expect(link).toHaveAttribute('href', '/acoes?filtro=minha');
-    expect(link).toHaveTextContent('2');
-  });
-
   it('o cabeçalho não mostra mais a data do pregão nem o termo Pregão', () => {
     analise.atual = { data_referencia: '2026-10-29', gerado_em: '2026-10-30T11:15:00-03:00' };
     renderizar(<Cabecalho />);
 
-    expect(screen.queryByRole('button', { name: TEXTOS.cabecalho.pregao })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pregão' })).not.toBeInTheDocument();
     expect(screen.queryByText(/publicado em/)).not.toBeInTheDocument();
   });
 
@@ -103,13 +94,16 @@ describe('Cabecalho', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  it('com atualização que falhou, o aviso aparece como pílula de alerta', () => {
+  it('com atualização que falhou, o aviso aparece numa faixa própria, com a data e o link para os dados', () => {
     analise.atual = { status_execucao: 'falhou', data_referencia: '2026-10-29' };
     renderizar(<Cabecalho />);
-    expect(screen.getByRole('status')).toHaveTextContent(/A atualização de hoje falhou/);
+    const aviso = screen.getByRole('status');
+    expect(aviso).toHaveTextContent(/A atualização de hoje não chegou/);
+    expect(aviso).toHaveTextContent('29/10/2026');
+    expect(within(aviso).getByRole('link', { name: TEXTOS.cabecalho.avisoDetalhes })).toHaveAttribute('href', '/dados');
   });
 
-  it('o botão Leitura abre o painel com aria-expanded e Esc fecha e devolve o foco ao botão', () => {
+  it('o botão Leitura abre o painel com aria-expanded e Esc fecha e devolve o foco ao botão', async () => {
     renderizar(<Cabecalho />);
     const botao = screen.getByRole('button', { name: TEXTOS.leitura.botao });
     expect(botao).toHaveAttribute('aria-expanded', 'false');
@@ -121,7 +115,8 @@ describe('Cabecalho', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(botao).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('region', { name: TEXTOS.leitura.rotulo })).not.toBeInTheDocument();
+    // o painel sai com animação: fica no DOM (oculto) até o fim da saída
+    await waitFor(() => expect(screen.queryByRole('region', { name: TEXTOS.leitura.rotulo })).not.toBeInTheDocument());
     expect(botao).toHaveFocus();
   });
 
@@ -134,7 +129,7 @@ describe('Cabecalho', () => {
     expect(botao).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('Modo simples é o padrão e cada modo traz a sua frase explicativa', () => {
+  it('Simples é o padrão e só a descrição do modo escolhido aparece', () => {
     renderizar(<Cabecalho />);
     abrirLeitura();
     expect(screen.getByRole('button', { name: TEXTOS.leitura.simples })).toHaveAttribute(
@@ -142,7 +137,7 @@ describe('Cabecalho', () => {
       'true',
     );
     expect(screen.getByText(TEXTOS.leitura.dicaSimples)).toBeInTheDocument();
-    expect(screen.getByText(TEXTOS.leitura.dicaTecnica)).toBeInTheDocument();
+    expect(screen.queryByText(TEXTOS.leitura.dicaTecnica)).not.toBeInTheDocument();
   });
 
   it('o botão Como usar no painel leva ao bloco da página inicial', () => {
@@ -161,7 +156,7 @@ describe('Cabecalho', () => {
 
     fireEvent.click(mais);
     expect(mais).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.queryByRole('button', { name: TEXTOS.cabecalho.glossario })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Glossário' })).not.toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(mais).toHaveAttribute('aria-expanded', 'false');

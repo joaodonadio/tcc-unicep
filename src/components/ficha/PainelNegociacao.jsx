@@ -2,7 +2,7 @@ import { usePreferencias } from '../../context/contextos.js';
 import { useResumo } from '../../hooks/useDados.js';
 import { faixaOscilacao } from '../../lib/fichaIndicadores.js';
 import { numero, numeroCompacto, quantidade } from '../../lib/formato.js';
-import { TEXTOS } from '../../lib/textos.js';
+import { porNivel, TEXTOS } from '../../lib/textos.js';
 import { exibir, valorOuNulo } from '../../lib/valor.js';
 import { BotaoTermo } from '../ui/BotaoTermo.jsx';
 import { BlocoErro, Linhas } from '../ui/Estados.jsx';
@@ -11,6 +11,10 @@ const N = TEXTOS.ficha.negociacao;
 const F = TEXTOS.ficha.frases;
 
 const limitarFracao = (x) => Math.min(1, Math.max(0, x));
+
+/** Status em que a API segurou o número (fora do normal ou sem base); "não se aplica" e prejuízo não contam. */
+const RETIDO = new Set(['historico_insuficiente', 'indisponivel']);
+const algumRetido = (...campos) => campos.some((c) => c && RETIDO.has(c.status));
 
 /** Uma barra do volume: nome, trilha proporcional (aria-hidden) e o número em texto. */
 function BarraVolume({ nome, proporcao, campo }) {
@@ -119,6 +123,10 @@ export function PainelNegociacao({ ticker }) {
         )}
         {textoOscilacao && <p className="ficha-negociacao-frase">{textoOscilacao}</p>}
       </div>
+
+      {algumRetido(R?.volume?.total, R?.volume?.mediana_20, R?.volume?.relativo, R?.volume?.posicao_pct, R?.volatilidade_20d) && (
+        <p className="ficha-nota">{porNivel(N.retido, nivel)}</p>
+      )}
     </div>
   );
 }

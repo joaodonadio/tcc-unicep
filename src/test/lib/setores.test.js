@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { maiorMediaAbsoluta, setoresPorPeriodo } from '../../lib/setores.js';
+import { distribuirFileiras, maiorMediaAbsoluta, nomearVelas, setoresPorPeriodo } from '../../lib/setores.js';
 
 const campo = (valor) => (valor === undefined ? { valor: null, status: 'sem_dado' } : { valor, status: 'ok' });
 const resumo = (ticker, d1, m1) => ({ ticker, variacao_preco: { d1: campo(d1), m1: campo(m1) } });
@@ -62,5 +62,46 @@ describe('setoresPorPeriodo', () => {
   it('aceita entradas vazias', () => {
     expect(setoresPorPeriodo(undefined, undefined, 'a1')).toEqual([]);
     expect(maiorMediaAbsoluta([])).toBe(0);
+  });
+});
+
+describe('distribuirFileiras', () => {
+  it('cobre todos os cartões em fileiras de 3 ou 4, sem buraco', () => {
+    expect(distribuirFileiras(8)).toEqual([4, 4]);
+    expect(distribuirFileiras(9)).toEqual([3, 3, 3]);
+    expect(distribuirFileiras(10)).toEqual([3, 3, 4]);
+    expect(distribuirFileiras(7)).toEqual([3, 4]);
+    expect(distribuirFileiras(6)).toEqual([3, 3]);
+    expect(distribuirFileiras(5)).toEqual([2, 3]);
+    expect(distribuirFileiras(4)).toEqual([4]);
+    expect(distribuirFileiras(3)).toEqual([3]);
+    expect(distribuirFileiras(2)).toEqual([2]);
+    expect(distribuirFileiras(1)).toEqual([1]);
+  });
+
+  it('soma sempre n, com o máximo por fileira respeitado', () => {
+    for (let n = 1; n <= 30; n += 1) {
+      for (const maximo of [2, 3, 4]) {
+        const fileiras = distribuirFileiras(n, maximo);
+        expect(fileiras.reduce((soma, f) => soma + f, 0)).toBe(n);
+        expect(Math.max(...fileiras)).toBeLessThanOrEqual(maximo);
+      }
+    }
+  });
+
+  it('com máximo 3 (tablet), 8 cartões ficam em [2, 3, 3]; sem cartões, nenhuma fileira', () => {
+    expect(distribuirFileiras(8, 3)).toEqual([2, 3, 3]);
+    expect(distribuirFileiras(0)).toEqual([]);
+  });
+});
+
+describe('nomearVelas', () => {
+  it('troca o nome bruto do setor pelo curto, sem setor nulo', () => {
+    const lista = nomearVelas([{ setor: 'Petróleo, Gás e Biocombustíveis', vela: null }, { setor: null, vela: null }]);
+    expect(lista.map((v) => v.setor)).toEqual(['Petróleo e gás']);
+  });
+
+  it('lista ausente vira []', () => {
+    expect(nomearVelas(undefined)).toEqual([]);
   });
 });

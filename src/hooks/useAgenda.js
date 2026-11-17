@@ -13,28 +13,12 @@ import { montarAgenda } from '../lib/agenda.js';
 import { hojeISO } from '../lib/datas.js';
 import { useAcoes } from './useDados.js';
 
-// A busca por ticker leva dezenas de segundos e os dados mudam uma vez por dia:
-// a última agenda fica no navegador, aparece na hora e é atualizada em segundo plano.
-const CHAVE_CACHE = 'agenda_proventos_v1';
-const VALIDADE_CACHE_MS = 24 * 60 * 60_000;
-
-function lerCache() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem(CHAVE_CACHE));
-    return salvo && Date.now() - salvo.em < VALIDADE_CACHE_MS ? salvo : null;
-  } catch {
-    return null;
-  }
-}
-
-function gravarCache(resultado) {
-  // Só os registros com data de pagamento entram na agenda; o resto não precisa ficar guardado.
-  const registros = resultado.registros.filter((r) => r.data_pagamento?.valor);
-  try {
-    localStorage.setItem(CHAVE_CACHE, JSON.stringify({ em: Date.now(), dados: { registros, falhas: resultado.falhas } }));
-  } catch {
-    // navegador sem armazenamento: segue sem cache
-  }
+// Nada fica guardado no navegador: a agenda chega rápido pela rota /proventos-todos, que o servidor mantém pronta.
+// Apaga a cópia que versões antigas do site deixavam no localStorage.
+try {
+  localStorage.removeItem('agenda_proventos_v1');
+} catch {
+  // navegador sem armazenamento: nada a apagar
 }
 
 export function useAgendaProventos() {
@@ -43,13 +27,7 @@ export function useAgendaProventos() {
   const porTicker = FONTE === 'api';
   const consulta = useQuery({
     queryKey: ['dados', 'agenda_proventos', porTicker ? tickers : 'pacote'],
-    queryFn: async ({ signal }) => {
-      const resultado = await buscarProventosDeTodas(tickers, { signal });
-      if (porTicker) gravarCache(resultado);
-      return resultado;
-    },
-    initialData: porTicker ? () => lerCache()?.dados : undefined,
-    initialDataUpdatedAt: porTicker ? () => lerCache()?.em : undefined,
+    queryFn: ({ signal }) => buscarProventosDeTodas(tickers, { signal }),
     enabled: !porTicker || tickers.length > 0,
     staleTime: 10 * 60_000, gcTime: 10 * 60_000,
     retry: false, // a repetição é por ticker, dentro da busca

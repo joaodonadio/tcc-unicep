@@ -5,6 +5,7 @@
 @import './tokens.css';
 @import './base.css';
 @import './layout.css';
+@import './marca.css';
 @import './componentes.css';
 @import './regras.css';
 @import './graficos.css';
@@ -22,3 +23,4 @@
 @import './setores3d.css';
 @import './mascote.css';
 @import './movimento.css';
+@import './contador.css';

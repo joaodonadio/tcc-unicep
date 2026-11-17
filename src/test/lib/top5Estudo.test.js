@@ -80,13 +80,69 @@ describe('top5ParaEstudar', () => {
     expect(itens[1].empresa).toBeNull();
   });
 
-  it('modelo sem chance exibível cai para as regras', () => {
-    const experimento = { itens: [{ posicao: 1, ticker: 'B', chance: null, motivos: [] }] };
-    expect(top5ParaEstudar({ experimento, sugestoes: [cartao('A', 1, 0)] }).origem).toBe('regras');
+  it('modelo sem chance exibível usa a ordem do modelo, não as regras', () => {
+    const experimento = {
+      itens: [
+        { posicao: 1, ticker: 'Z', chance: null, motivos: [] },
+        { posicao: 2, ticker: 'A', chance: null, motivos: [] },
+      ],
+    };
+    const { origem, itens } = top5ParaEstudar({ experimento, sugestoes: [cartao('A', 3, 0), cartao('B', 1, 0)] });
+    expect(origem).toBe('modelo');
+    expect(itens.map((i) => i.ticker)).toEqual(['Z', 'A']);
+    expect(itens.every((i) => i.chance === null)).toBe(true);
+  });
+
+  it('motivos do modelo viram favor, atenção e contexto, com a contagem certa', () => {
+    const experimento = {
+      itens: [
+        {
+          posicao: 1,
+          ticker: 'B',
+          chance: null,
+          motivos: [
+            { fator: 'tom_noticias', texto: 'Notícias positivas', efeito: 'ajudou' },
+            { fator: 'volume', texto: 'Volume alto', efeito: 'ajudou' },
+            { fator: 'dolar', texto: 'Dólar subiu', efeito: 'atrapalhou' },
+            { fator: 'beta', texto: 'Beta perto de 1', efeito: 'neutro' },
+          ],
+        },
+      ],
+    };
+    const { itens } = top5ParaEstudar({ experimento, sugestoes: [cartao('B', 9, 9)] });
+    const [item] = itens;
+    expect(item.favor.map((s) => s.id)).toEqual(['modelo:tom_noticias', 'modelo:volume']);
+    expect(item.atencao.map((s) => s.id)).toEqual(['modelo:dolar']);
+    expect(item.contexto.map((s) => s.id)).toEqual(['modelo:beta']);
+    expect(item.favor[0]).toEqual({
+      id: 'modelo:tom_noticias',
+      titulo: 'Notícias positivas',
+      simples: TEXTOS.top5Hoje.motivoModelo.ajudou.simples,
+      tecnico: TEXTOS.top5Hoje.motivoModelo.ajudou.tecnico,
+    });
+    expect(item.contagem).toEqual({ forte: 2, atencao: 1, contexto: 1 });
+    // o preço e o resumo continuam vindo do cartão de sugestões
+    expect(item.empresa).toBe('Empresa B');
+    expect(item.preco).toBe(10);
+  });
+
+  it('o selo e os avisos do modelo passam para o resultado; sem modelo, vêm vazios', () => {
+    const experimento = {
+      selo: 'em avaliação',
+      avisos: ['Dados de hoje parciais'],
+      itens: [{ posicao: 1, ticker: 'B', chance: null, motivos: [] }],
+    };
+    const r = top5ParaEstudar({ experimento, sugestoes: [cartao('B', 1, 0)] });
+    expect(r.selo).toBe('em avaliação');
+    expect(r.avisos).toEqual(['Dados de hoje parciais']);
+
+    const semModelo = top5ParaEstudar({ sugestoes: [cartao('A', 1, 0)] });
+    expect(semModelo.selo).toBeNull();
+    expect(semModelo.avisos).toEqual([]);
   });
 
   it('sem nada devolve lista vazia', () => {
-    expect(top5ParaEstudar({})).toEqual({ origem: 'regras', itens: [] });
+    expect(top5ParaEstudar({})).toEqual({ origem: 'regras', selo: null, avisos: [], itens: [] });
     expect(top5ParaEstudar({ experimento: null, sugestoes: null }).itens).toEqual([]);
   });
 });

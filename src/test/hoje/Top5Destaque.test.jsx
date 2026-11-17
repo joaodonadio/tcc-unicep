@@ -20,7 +20,7 @@ describe('Top5Destaque', () => {
   it('mostra o título, cinco itens e, em "Como escolhemos", quantas coisas o site olha', async () => {
     renderizar(<Top5Destaque />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: /Top 5 para estudar hoje/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: /Top 5 para estudar hoje/ })).toBeInTheDocument();
     const lista = await screen.findByRole('list', { name: T.listaRotulo });
     expect(within(lista).getAllByRole('button')).toHaveLength(5);
 
@@ -82,7 +82,7 @@ describe('Top5Destaque', () => {
     await screen.findByRole('list', { name: T.listaRotulo });
     const conteudo = screen.getByRole('tabpanel');
     expect(conteudo.querySelector('.top5-resumo').textContent).toMatch(/a favor/);
-    // o Pavio fica ao lado da frase-resumo, com o humor que o resumo pede
+    // o Cotinha fica ao lado da frase-resumo, com o humor que o resumo pede
     const pavio = conteudo.querySelector('.top5-resumo-linha .mascote');
     expect(pavio.getAttribute('class')).toMatch(/mascote--(neutro|contente|atento)/);
     // e no Top 5 ele usa a ação vivo (animação em ciclo)

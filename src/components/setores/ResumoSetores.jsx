@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { IconeSetor } from '../ui/IconeSetor.jsx';
+import { SeloCalculo } from '../ui/SeloCalculo.jsx';
 import { pct } from '../../lib/formato.js';
+import { movimentoReduzido } from '../../lib/movimento.js';
 import { ancoraDoSetor, maiorMediaAbsoluta, sinalDaVariacao } from '../../lib/setores.js';
 import { colunasDosSetores } from '../../lib/setores3d.js';
 import { TEXTOS } from '../../lib/textos.js';
@@ -16,7 +18,7 @@ const larguraDaBarra = (v, maximo) => (v == null || !(maximo > 0) ? 0 : Math.min
  * Acima da lista, a vitrine dos setores: passar o mouse (ou o foco) numa linha gira a vitrine até o setor,
  * e a legenda da vitrine tem "Ver o setor", que aciona o link da lista.
  */
-export function ResumoSetores({ setores, periodo }) {
+export function ResumoSetores({ setores, periodo, semanaCalculada = false }) {
   const frase = fraseDosSetores(setores, periodo);
   const maximo = maiorMediaAbsoluta(setores);
   const [destaque, setDestaque] = useState(null);
@@ -28,23 +30,37 @@ export function ResumoSetores({ setores, periodo }) {
     listaRef.current?.querySelector(`a[href="#${ancoraDoSetor(nome)}"]`)?.click();
   }, []);
 
+  // Rola até o cartão sem trocar o endereço: um "#" novo virava entrada de histórico que o roteador
+  // tratava como a carga da página e devolvia a rolagem ao topo (o 1º toque não ia, o 2º ia).
+  const irAoCartao = (evento, nome) => {
+    const cartao = document.getElementById(ancoraDoSetor(nome));
+    if (!cartao) return;
+    evento.preventDefault();
+    cartao.scrollIntoView({ behavior: movimentoReduzido() ? 'auto' : 'smooth', block: 'start' });
+    if (!cartao.hasAttribute('tabindex')) cartao.setAttribute('tabindex', '-1');
+    cartao.focus({ preventScroll: true });
+  };
+
   return (
     <section className="setores-ranking cartao" aria-labelledby="setores-ranking-titulo">
       <h2 id="setores-ranking-titulo" className="setores-titulo">
         {TEXTOS.setores.rankingTitulo}
       </h2>
       <p className="setores-como-ler">{TEXTOS.setores.comoLerRanking}</p>
+      <SeloCalculo conta="mediaSetor" />
+      {semanaCalculada && <SeloCalculo conta="semana" curto />}
 
       <div className="setores-ranking__corpo">
         <Setores3D colunas={colunas} destaque={destaque} aoEscolher={escolher} />
 
-        <ul key={periodo} ref={listaRef} className="setores-lista" aria-label={TEXTOS.setores.rankingLista}>
+        <ul ref={listaRef} className="setores-lista" aria-label={TEXTOS.setores.rankingLista}>
           {setores.map((s) => (
-            <li key={s.setor}>
+            <li key={s.setor} style={{ viewTransitionName: `linha-${ancoraDoSetor(s.setor)}` }}>
               <a
                 className="setor-linha"
                 href={`#${ancoraDoSetor(s.setor)}`}
                 data-destaque={destaque === s.setor ? 'true' : undefined}
+                onClick={(e) => irAoCartao(e, s.setor)}
                 onMouseEnter={() => setDestaque(s.setor)}
                 onMouseLeave={() => sair(s.setor)}
                 onFocus={() => setDestaque(s.setor)}
@@ -63,6 +79,7 @@ export function ResumoSetores({ setores, periodo }) {
                   <span className="setor-trilho-div" aria-hidden="true">
                     <span className="setor-eixo" />
                     <span
+                      key={periodo}
                       className="setor-barra-div"
                       data-sinal={sinalDaVariacao(s.media)}
                       style={{ width: `${larguraDaBarra(s.media, maximo)}%` }}

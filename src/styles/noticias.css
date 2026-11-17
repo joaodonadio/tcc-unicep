@@ -1,158 +1,624 @@
-/* Notícias: o tom do pregão num cartão lavanda. Manchetes em Atkinson Hyperlegible Next, com um chip de tom que traz a palavra;
-   contagens e códigos em Atkinson Hyperlegible Mono. A tabela de empresas cabe na largura do celular sem rolar a página.
-   O bloco nasce em inicio.css (carregado antes); aqui fica só o que muda na página Notícias. */
+/* Notícias: termômetro do dia, manchetes por tom e empresas. Cartões de vidro (receita em base.css);
+   a cor do assunto vem de data-brilho. Manchetes em Atkinson Hyperlegible Next; números em Mono (classe .num).
+   Sem animação: nada a respeitar em movimento reduzido. */
 
-/* Cartão de vidro com mancha lavanda (notícias, tom) */
-.dia-bloco.dia-noticias {
-  --brilho: var(--poca-magenta);
-  --brilho-2: var(--poca-violeta);
-  --brilho-forca: 50%;
-  --cor-texto-suave: #dedee3;
-  background: var(--vidro);
-  border: 1px solid transparent;
-  border-radius: var(--raio-cartao);
-  box-shadow: var(--vidro-sombra);
+.noticias {
+  display: grid;
+  gap: var(--espaco-7);
+  min-width: 0;
 }
 
-.dia-noticias .dia-bloco-titulo {
-  font-size: var(--texto-xl);
-  font-weight: var(--peso-titulo);
+.noticias-bloco {
+  display: grid;
+  gap: var(--espaco-4);
+  min-width: 0;
+}
+
+.noticias-bloco-titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
   letter-spacing: -0.02em;
 }
 
-/* Aviso de poucas manchetes: fórmula de aviso amarela (atenção) */
-.dia-noticias .dia-nota[data-aviso='poucas-manchetes'] {
+.noticias-bloco-nota {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+/* Título de bloco com o Cotinha ao lado */
+.noticias-bloco-titulo-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.noticias-pavio-titulo {
+  --pavio-tam: 2.75rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+}
+
+/* ---------- Termômetro do dia ---------- */
+
+.noticias-termometro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-5);
+  min-width: 0;
+}
+
+.noticias-termometro-topo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-5);
+}
+
+.noticias-pavio {
+  --pavio-tam: 4.5rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+}
+
+.noticias-termometro-texto {
+  display: grid;
+  gap: var(--espaco-2);
+  min-width: 0;
+}
+
+.noticias-termometro-titulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  letter-spacing: 0;
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+.noticias-frase {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-forte);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Celular estreito: mascote e frase menores, para a palavra mais longa caber ao lado */
+@media (max-width: 400px) {
+  .noticias-termometro-topo {
+    gap: var(--espaco-3);
+  }
+
+  .noticias-pavio {
+    --pavio-tam: 3.5rem;
+  }
+
+  .noticias-frase {
+    font-size: var(--texto-xl);
+  }
+}
+
+.noticias-total {
+  font-size: var(--texto-base);
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+.noticias-total .num {
+  font-size: var(--texto-lg);
+  font-weight: 500;
+  color: var(--cor-texto);
+}
+
+/* Barra grossa com as três fatias proporcionais (aria-hidden: a legenda já traz os números) */
+.noticias-barra {
+  display: flex;
+  block-size: 0.75rem;
+  gap: var(--espaco-1);
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.noticias-barra span {
+  flex-basis: 0;
+  min-width: 0;
+  border-radius: var(--raio-pilula);
+}
+
+.noticias-barra [data-contagem='positivas'] {
+  background: var(--cor-alta);
+}
+
+.noticias-barra [data-contagem='neutras'] {
+  background: var(--cor-texto-suave);
+}
+
+.noticias-barra [data-contagem='negativas'] {
+  background: var(--cor-queda);
+}
+
+/* Legenda: ícone + palavra + número + porcentagem; uma coluna no celular, três a partir de 640px */
+.noticias-legenda {
+  display: grid;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .noticias-legenda {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.noticias-legenda-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.noticias-legenda-icone {
+  flex: none;
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+}
+
+.noticias-legenda-numeros {
+  font-weight: var(--peso-forte);
+}
+
+.noticias-legenda-numeros .num {
+  font-size: var(--texto-base);
+  font-weight: 500;
+}
+
+.noticias-legenda-item[data-contagem='positivas'] .noticias-legenda-icone {
+  color: var(--cor-alta);
+}
+
+.noticias-legenda-item[data-contagem='neutras'] .noticias-legenda-icone {
+  color: var(--cor-texto-suave);
+}
+
+.noticias-legenda-item[data-contagem='negativas'] .noticias-legenda-icone {
+  color: var(--cor-queda);
+}
+
+/* Nota do modelo e aviso de poucas manchetes */
+.noticias-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+.noticias-nota-icone {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin-block-start: 0.15em;
+}
+
+.noticias-aviso {
+  margin: 0;
   padding: var(--espaco-3) var(--espaco-4);
   border: 1px solid color-mix(in srgb, var(--cor-atencao) 30%, transparent);
   border-radius: var(--raio-3);
   background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
   color: var(--cor-texto);
+  font-size: var(--texto-sm);
 }
 
-/* Contagens: sub-superfícies, número grande em Atkinson Hyperlegible Mono */
-.dia-noticias .dia-contagem {
-  background: var(--sub-fundo);
+/* ---------- Manchetes por tom ---------- */
+
+.noticias-vazio {
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+/* Abas em trilho de pílula, como o seletor de período de Setores; o marcador da aba escolhida desliza (useIndicador) */
+.noticias-abas {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-1);
+  padding: var(--espaco-1);
   border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-cartao);
+  background: var(--sub-fundo);
   box-shadow: var(--sub-luz);
 }
 
-.dia-noticias .dia-contagem dt {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  letter-spacing: 0;
-}
-
-.dia-noticias .dia-contagem dd {
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: 2.5rem;
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums slashed-zero;
-}
-
-@media (max-width: 760px) {
-  .dia-noticias .dia-contagem dd {
-    font-size: 2rem;
-  }
-}
-
-/* Manchetes: uma coluna no celular; uma coluna por tom a partir de 900px */
-.dia-noticias .dia-manchetes {
-  gap: var(--espaco-5);
-}
-
-@media (min-width: 900px) {
-  .dia-noticias .dia-manchetes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--espaco-6);
-  }
-}
-
-.dia-noticias .dia-manchetes-titulo {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  letter-spacing: 0;
-}
-
-/* Manchete: linha com fio fino, sem caixa; o chip de tom diz a palavra */
-.dia-noticias .dia-manchetes-lista {
-  gap: 0;
-}
-
-.dia-noticias .dia-manchetes-lista li {
-  padding: var(--espaco-3) 0;
+/* Rótulo e contagem na mesma linha; em tela estreita quebram para a linha de baixo */
+.noticias-aba {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-1) var(--espaco-2);
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--espaco-2);
   border: 0;
-  border-top: 1px solid var(--cor-fio);
-  border-radius: 0;
-  background: none;
-}
-
-.dia-noticias .dia-manchetes-lista li:first-child {
-  padding-top: 0;
-  border-top: 0;
-}
-
-.dia-noticias .dia-manchetes-lista li > .pilula {
-  margin-bottom: var(--espaco-2);
+  border-radius: var(--raio-3);
+  background: transparent;
+  color: var(--cor-texto);
+  font: inherit;
   font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--duracao) var(--curva),
+    color var(--duracao) var(--curva);
 }
 
-.dia-noticias .pilula[data-tom='alta'] {
-  border-color: color-mix(in srgb, var(--cor-alta) 30%, transparent);
+.noticias-aba:hover {
+  background: var(--sub-fundo-hover);
 }
 
-.dia-noticias .pilula[data-tom='queda'] {
-  border-color: color-mix(in srgb, var(--cor-queda) 30%, transparent);
+.noticias-aba:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
 }
 
-.dia-noticias .dia-manchete {
-  font-family: var(--fonte-texto);
+.noticias-aba[aria-selected='true'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-weight: var(--peso-forte);
+}
+
+.noticias-aba-indicador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  border-radius: var(--raio-3);
+  background: var(--cor-acento);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--duracao-entrada) var(--curva),
+    width var(--duracao-entrada) var(--curva),
+    height var(--duracao-entrada) var(--curva);
+}
+
+.noticias-abas[data-indicador='ligado'] > .noticias-aba-indicador {
+  opacity: 1;
+}
+
+.noticias-abas[data-indicador='ligado'] .noticias-aba[aria-selected='true'] {
+  background: transparent;
+}
+
+:root[data-movimento='reduzido'] .noticias-aba-indicador {
+  transition: none;
+}
+
+/* Ícone com a cor do sinal; na aba escolhida ele segue a cor do texto sobre o acento */
+.noticias-aba-icone {
+  flex: none;
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+}
+
+.noticias-aba[data-brilho='alta']:not([aria-selected='true']) .noticias-aba-icone {
+  color: var(--cor-alta);
+}
+
+.noticias-aba[data-brilho='queda']:not([aria-selected='true']) .noticias-aba-icone {
+  color: var(--cor-queda);
+}
+
+.noticias-aba[data-brilho='aco']:not([aria-selected='true']) .noticias-aba-icone {
+  color: var(--cor-texto-suave);
+}
+
+.noticias-aba-contagem {
+  font-size: var(--texto-base);
+  font-weight: 500;
+}
+
+/* Em celular de 320px, rótulo menor para as três abas caberem na largura */
+@media (max-width: 400px) {
+  .noticias-aba {
+    font-size: var(--texto-xs);
+    padding-inline: var(--espaco-1);
+  }
+}
+
+/* Painel da aba escolhida: a lista ocupa a largura toda */
+.noticias-painel {
+  display: grid;
+  gap: var(--espaco-3);
+  min-width: 0;
+  padding: var(--espaco-5);
+}
+
+.noticias-tom-vazio {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Duas colunas quando cabem (22rem cada); em celular, uma só */
+.noticias-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--espaco-1) var(--espaco-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.noticias-lista li {
+  min-width: 0;
+}
+
+/* Cada manchete é o cartão inteiro: o link cobre título e fonte */
+.noticias-item {
+  display: grid;
+  gap: var(--espaco-1);
+  margin-inline: calc(var(--espaco-2) * -1);
+  padding: var(--espaco-3) var(--espaco-2);
+  border-radius: var(--raio-2);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.noticias-item:hover {
+  background: var(--sub-fundo-hover);
+}
+
+.noticias-item:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* Título em texto normal, no máximo três linhas */
+.noticias-item .manchete {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: var(--texto-base);
   font-weight: var(--peso-medio);
-  line-height: 1.45;
+  line-height: 1.4;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
-.dia-noticias .dia-mais-manchetes {
-  min-height: 2.75rem;
+.noticias-item-fonte {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.noticias-item-icone {
+  flex: none;
+  inline-size: 0.9rem;
+  block-size: 0.9rem;
+}
+
+.noticias-mais {
+  justify-self: start;
+  margin-top: var(--espaco-2);
+  min-height: 2.5rem;
+  padding: 0 var(--espaco-5);
   border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-pilula);
   background: var(--sub-fundo);
   box-shadow: var(--sub-luz);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+  cursor: pointer;
 }
 
-.dia-noticias .dia-mais-manchetes:hover {
+.noticias-mais:hover {
   background: var(--sub-fundo-hover);
   border-color: var(--cor-borda-hover);
 }
 
-/* Empresas com mais manchetes: tabela com ticker em Atkinson Hyperlegible Mono */
-.dia-noticias .dia-tabela-empresas thead th {
+.noticias-mais:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+/* ---------- Empresas com mais manchetes: barras horizontais empilhadas ---------- */
+
+.noticias-bloco-nota-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.noticias-pavio-nota {
+  --pavio-tam: 3rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+}
+
+.noticias-barras {
+  display: grid;
+  gap: var(--espaco-4);
+  min-width: 0;
+  padding: var(--espaco-5);
+}
+
+.noticias-barras-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2) var(--espaco-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
 }
 
-.dia-noticias .dia-tabela-empresas tbody th a {
+.noticias-barras-legenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.noticias-barras-legenda li[data-contagem='positivas'] {
+  color: var(--cor-alta);
+}
+
+.noticias-barras-legenda li[data-contagem='negativas'] {
+  color: var(--cor-queda);
+}
+
+.noticias-barras-legenda li[data-contagem='neutras'] {
+  color: var(--cor-texto-suave);
+}
+
+.noticias-barras-lista {
+  display: grid;
+  gap: var(--espaco-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Abaixo de 640px: o rótulo fica em cima e a barra ocupa a largura toda */
+.noticias-barra-linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-4);
+}
+
+.noticias-barra-rotulo {
+  min-width: 0;
+}
+
+.noticias-barra-tickers {
+  margin: 0;
+  font-size: var(--texto-base);
+}
+
+.noticias-ticker {
   font-family: var(--fonte-numeros);
   font-stretch: var(--numeros-largura);
-  font-size: 0.92em;
   font-weight: 500;
-  letter-spacing: -0.02em;
+  color: var(--cor-texto);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  /* alvo de toque de pelo menos 24px (WCAG 2.5.8) */
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
 }
 
-.dia-noticias .dia-tabela-empresas tbody tr:hover {
-  background: var(--sub-fundo-hover);
+.noticias-barra-nome {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  overflow-wrap: anywhere;
 }
 
-/* Empresas: a tabela rola por dentro e a página não */
-.dia-empresas {
+.noticias-barra-trilha {
+  grid-column: 1 / -1;
+  grid-row: 2;
   min-width: 0;
-  overflow-x: auto;
+  block-size: 2rem;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
 }
 
-/* Celular estreito: células mais justas para a tabela de quatro colunas caber em 390px */
-@media (max-width: 479px) {
-  .dia-tabela-empresas th,
-  .dia-tabela-empresas td {
-    padding: var(--espaco-2) var(--espaco-1);
+.noticias-barra-preenchida {
+  display: flex;
+  block-size: 100%;
+  max-inline-size: 100%;
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+}
+
+.noticias-barra-preenchida > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-basis: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--cor-fundo);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+}
+
+.noticias-barra-preenchida [data-contagem='positivas'] {
+  background: var(--cor-alta);
+}
+
+.noticias-barra-preenchida [data-contagem='neutras'] {
+  background: var(--cor-texto-suave);
+}
+
+.noticias-barra-preenchida [data-contagem='negativas'] {
+  background: var(--cor-queda);
+}
+
+.noticias-barra-total {
+  display: grid;
+  justify-items: end;
+  gap: var(--espaco-1);
+  text-align: end;
+}
+
+.noticias-barra-quantidade {
+  margin: 0;
+  font-size: var(--texto-xl);
+}
+
+.noticias-barra-quantidade .num {
+  font-weight: 500;
+}
+
+.noticias-barra-predomina {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  margin: 0;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.noticias-empresa-icone {
+  flex: none;
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .noticias-barra-linha {
+    grid-template-columns: 14rem minmax(0, 1fr) 8.5rem;
+  }
+
+  .noticias-barra-trilha {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .noticias-barra-total {
+    grid-column: auto;
+    grid-row: auto;
   }
 }

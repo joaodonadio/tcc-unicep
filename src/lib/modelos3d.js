@@ -18,6 +18,10 @@ export const LIMITE_MOEDAS_PL = 40;
 export const LIMITE_MOEDAS_PROVENTO = 20;
 export const LIMITE_BLOCOS = 9;
 export const AMPLITUDE_BOLSA = 0.32;
+/** Maior ângulo do pêndulo: com ele o peso para antes da coluna da estrutura. */
+export const AMPLITUDE_MAXIMA = 0.62;
+/** Medidas do pêndulo: haste, raio do peso, distância do eixo ao centro e posição das colunas. */
+export const MEDIDAS_PENDULO = { haste: 5.2, raio: 0.62, eixo: 2.2, coluna: 6, meiaColuna: 0.15, soltura: 0.6 };
 const INCLINACAO_MAXIMA = 0.36;
 
 const finito = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -50,9 +54,39 @@ export function blocosBalanca(dlEbitda) {
   return { caixa: 1, divida };
 }
 
-/** Amplitude (radianos) do pêndulo da ação: beta vezes a da bolsa, entre 0,06 e 1,0; sem beta, null. */
+/** Amplitude (radianos) do pêndulo da ação: beta vezes a da bolsa, entre 0,06 e a máxima; sem beta, null. */
 export function amplitudePendulo(beta) {
-  return finito(beta) ? limitar(AMPLITUDE_BOLSA * beta, 0.06, 1) : null;
+  return finito(beta) ? limitar(AMPLITUDE_BOLSA * beta, 0.06, AMPLITUDE_MAXIMA) : null;
+}
+
+/** Quanto a perna do porquinho desce abaixo do corpo, em fração da altura do corpo. */
+export const FRACAO_PERNA = 0.12;
+
+/**
+ * Quatro perninhas medidas pela caixa do corpo ({ min, max }, cada um com x, y e z). A cápsula desce
+ * FRACAO_PERNA da altura abaixo da base e sobe até dentro do corpo, para não deixar fresta.
+ * `miolo` é o trecho reto da cápsula, sem as pontas arredondadas.
+ */
+export function medidasPernas({ min, max }) {
+  const altura = max.y - min.y;
+  const raio = altura * 0.125;
+  const base = min.y - altura * FRACAO_PERNA;
+  const topo = min.y + altura * 0.35;
+  const y = (base + topo) / 2;
+  const cx = (min.x + max.x) / 2;
+  const cz = (min.z + max.z) / 2;
+  const dx = (max.x - min.x) * 0.26;
+  const dz = (max.z - min.z) * 0.26;
+  return {
+    raio,
+    miolo: topo - base - 2 * raio,
+    centros: [
+      [cx + dx, y, cz + dz],
+      [cx - dx, y, cz + dz],
+      [cx + dx, y, cz - dz],
+      [cx - dx, y, cz - dz],
+    ],
+  };
 }
 
 /** Altura visível do palco (unidades do mundo): cabe o objeto na altura e na largura do quadro. Proximidade > 1 aproxima. */

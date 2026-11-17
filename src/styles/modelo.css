@@ -56,7 +56,7 @@
 .estacao {
   position: relative;
   /* Celular: a régua vertical fica à esquerda do cartão, com o ponto da etapa na borda do cartão */
-  padding-left: 3.5rem;
+  padding-left: 1.75rem;
   transition:
     opacity 500ms var(--saida),
     transform 500ms var(--saida);
@@ -67,7 +67,7 @@
   content: '';
   position: absolute;
   top: 1.25rem;
-  left: 2.75rem;
+  left: 0.75rem;
   width: 0.6rem;
   height: 0.6rem;
   margin: -0.3rem 0 0 -0.3rem;
@@ -372,7 +372,7 @@
 .estacao__ligacao {
   position: absolute;
   top: 100%;
-  left: 2.75rem;
+  left: 0.75rem;
   z-index: 0;
   width: 2px;
   height: var(--liga);
@@ -523,25 +523,67 @@
   }
 }
 
-/* Cartões do modelo experimental */
+/* Frase-guia com o Cotinha, acima dos cartões */
+.modelo-guia {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin: 0 0 var(--espaco-4);
+  color: var(--cor-texto-suave);
+}
+
+.modelo-guia p {
+  margin: 0;
+}
+
+/* Cotinha ao lado da frase de abertura da página */
+.modelo-topo-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.modelo-guia__pavio {
+  flex: none;
+  inline-size: 3rem;
+  block-size: 3rem;
+}
+
+/* Cartões do modelo experimental: cinco mini cartões, três em cima e dois embaixo (os de baixo
+   mais largos, sem buraco na fileira). Celular: uma coluna. */
 .modelo-cartoes {
   display: grid;
   gap: var(--espaco-4);
 }
 
 .modelo-cartao {
-  padding: var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  padding: var(--espaco-5);
   background: var(--vidro);
   border: 1px solid transparent;
   border-radius: var(--raio-cartao);
   box-shadow: var(--vidro-sombra);
 }
 
+.modelo-cartao__icone {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: 50%;
+  background: var(--cor-acento-suave);
+  color: var(--cor-acento);
+}
+
 .modelo-cartao__titulo {
   font-size: var(--texto-lg);
   font-weight: var(--peso-titulo);
   letter-spacing: -0.02em;
-  margin: 0 0 var(--espaco-2);
+  margin: var(--espaco-1) 0 0;
 }
 
 .modelo-cartao__texto {
@@ -550,17 +592,79 @@
   max-width: 55ch;
 }
 
-.modelo-cartao[data-cartao='naoE'] {
-  --aresta-topo: 0.4;
+/* Chips: o que o modelo lê */
+.modelo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modelo-chip {
+  padding: 2px 0.75rem;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+  font-size: var(--texto-sm);
+}
+
+/* Pílula de status neutra: sem cor de atenção */
+.modelo-pilula {
+  margin: 0;
+  max-width: 100%;
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-3);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+}
+
+/* Régua do acaso em miniatura: trilho com a marca de 50% e o rótulo embaixo */
+.modelo-regua {
+  position: relative;
+  inline-size: 100%;
+  block-size: 0.5rem;
+  margin: var(--espaco-4) 0 calc(var(--espaco-4) + 1.25rem);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-2);
+}
+
+.modelo-regua__marca {
+  position: absolute;
+  top: 50%;
+  left: var(--pos);
+  inline-size: 3px;
+  block-size: 1rem;
+  border-radius: 2px;
+  background: var(--cor-acento);
+  transform: translate(-50%, -50%);
+}
+
+.modelo-regua__rotulo {
+  position: absolute;
+  top: 1rem;
+  left: var(--pos);
+  transform: translateX(-50%);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
 }
 
 @media (min-width: 48rem) {
   .modelo-cartoes {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
-  .modelo-cartao[data-cartao='naoE'] {
-    grid-column: 1 / -1;
+  .modelo-cartao {
+    grid-column: span 2;
+  }
+
+  .modelo-cartao:nth-child(n + 4) {
+    grid-column: span 3;
   }
 }
 
@@ -786,6 +890,8 @@
 
 /* Máquina do modelo: entradas, modelo, chance e Top 5, tudo em movimento leve (decorativo) */
 .maq {
+  /* desenho decorativo (aria-hidden): fora da seleção, para o texto não sair duplicado ao copiar */
+  user-select: none;
   --comp: 2.5rem;
   --saida: var(--curva);
   display: grid;
@@ -1248,4 +1354,9 @@
 .modelo-cartoes[data-visto='false'] .modelo-cartao {
   opacity: 0;
   transform: translateY(1rem);
+}
+
+@media (max-width: 30rem) {
+  .modelo-fluxo { padding: var(--espaco-4); }
+  .estacao__cartao { padding: var(--espaco-4); }
 }

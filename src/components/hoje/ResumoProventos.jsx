@@ -6,6 +6,7 @@ import { usePreferencias } from '../../context/contextos.js';
 import { ROTULO_STATUS, TEXTOS, porNivel } from '../../lib/textos.js';
 import { BotaoDetalhes, PainelDetalhes } from '../ui/Detalhes.jsx';
 import { Linhas } from '../ui/Estados.jsx';
+import Mascote from '../ui/Mascote.jsx';
 import { TextoComTermo } from '../ui/TextoComTermo.jsx';
 
 const MAX_PROXIMOS = 3;
@@ -53,11 +54,21 @@ export function ResumoProventos() {
   } else if (isError) {
     conteudo = <p className="hoje-vazio">{ROTULO_STATUS.indisponivel}</p>;
   } else if (proximos.length === 0) {
-    conteudo = <p className="hoje-vazio">{porNivel(TEXTOS.hoje.proventosVazio, nivel)}</p>;
+    conteudo = (
+      <div className="hoje-vazio-linha">
+        <Mascote humor="dormindo" className="hoje-pavio" />
+        <p className="hoje-vazio">{porNivel(TEXTOS.hoje.proventosVazio, nivel)}</p>
+      </div>
+    );
   } else {
     conteudo = (
       <>
-        {tempo && <LinhaDoTempo tempo={tempo} quantidade={proximos.length} />}
+        {tempo && (
+          <div className="hoje-proximos-linha">
+            <Mascote humor="animado" acao="moeda" className="hoje-pavio" />
+            <LinhaDoTempo tempo={tempo} quantidade={proximos.length} />
+          </div>
+        )}
         <ul className="hoje-lista">
           {proximos.map((ev) => (
             <li key={ev.id} className="hoje-linha hoje-linha--compacta">

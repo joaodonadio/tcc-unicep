@@ -5,23 +5,19 @@
  * status), nunca 0. Os textos descrevem o que os dados mostram e não são
  * indicação de decisão; o aviso legal fica em AVISO_FIXO (textos.js).
  *
- * Campos para as telas novas: painel_alertas, acoes_pregao, tom_por_setor e
- * manchetes_por_tom. Os campos antigos (alertas, leituras, noticias_destaque,
- * sugestoes) continuam até as telas migrarem.
+ * Campos lidos pelas telas: painel_alertas, acoes_pregao, tom_por_setor,
+ * manchetes_por_tom e sugestoes.
  */
 
 import { exibir, ok, valorOuNulo, textoStatus } from './valor.js';
 import { contar, numero, pct, tons, vezes } from './formato.js';
 import { dataBR, diaMes, mesAno, quandoPublicada } from './datas.js';
-import { montarResumoDoPregao } from './resumoDia.js';
+import { contarManchetesUnicas, montarResumoDoPregao } from './resumoDia.js';
+import { variacaoDiaConfiavel } from './crivel.js';
 import { gerarSugestoes, resumirCartao } from './sugestoes.js';
-import { TEXTO_EXECUCAO } from './textos.js';
+import { TEXTO_EXECUCAO, TEXTOS } from './textos.js';
 
-const MAX_ALERTAS = 5;
-const TOP_SINAIS_GLOBO = 3;
-const MAX_LEITURAS = 3;
-const MAX_NOTICIAS_DESTAQUE = 8;
-const MAX_MANCHETES_POR_TOM = 3;
+const MAX_MANCHETES_POR_TOM = 12;
 const VARIACAO_IBOV_VOLATIL = 0.015;
 const REGRA_VOLUME_INCOMUM = 'volume_incomum';
 const VARIACAO_DO_DIA = 'Variação do dia';
@@ -75,7 +71,8 @@ function rotuloSentimento(saldo) {
 
 /** Tom geral das notícias: saldo (positivas − negativas) ÷ total. Sem notícias, sem rótulo. */
 function montarSentimento(noticias) {
-  const tom_noticias = {
+  // títulos únicos; sem manchetes, a soma dos resumos por ticker
+  const tom_noticias = contarManchetesUnicas(noticias) ?? {
     total: somarResumoNoticias(noticias, 'quantidade'),
     positivas: somarResumoNoticias(noticias, 'positivas'),
     neutras: somarResumoNoticias(noticias, 'neutras'),
@@ -142,24 +139,31 @@ function montarIndicadores(mercado) {
       formatar: (v) => numero(v, { casas: 0 }),
       variacao: mercado?.IBOV?.variacao_dia,
     }),
-    indicador({
-      label: 'Dólar (R$)',
-      nivel: mercado?.USDBRL?.fechamento,
-      formatar: (v) => numero(v),
-      variacao: mercado?.USDBRL?.variacao_dia,
-    }),
-    indicador({
-      label: 'Petróleo Brent (US$)',
-      nivel: mercado?.BRENT?.fechamento,
-      formatar: (v) => numero(v),
-      variacao: mercado?.BRENT?.variacao_dia,
-    }),
+    {
+      ...indicador({
+        label: 'Dólar (R$)',
+        nivel: mercado?.USDBRL?.fechamento,
+        formatar: (v) => numero(v),
+        variacao: mercado?.USDBRL?.variacao_dia,
+      }),
+      // períodos só quando o pacote traz o índice; sem ele, a tela calcula
+      ...(indices.USDBRL ? { periodos: periodosDo(indices.USDBRL) } : {}),
+    },
+    {
+      ...indicador({
+        label: 'Petróleo Brent (US$)',
+        nivel: mercado?.BRENT?.fechamento,
+        formatar: (v) => numero(v),
+        variacao: mercado?.BRENT?.variacao_dia,
+      }),
+      ...(indices.BRENT ? { periodos: periodosDo(indices.BRENT) } : {}),
+    },
     {
       ...indicador({
         label: 'CDI 12M',
         nivel: indices.CDI?.a1,
         formatar: (v) => pct(v, { casas: 2, sinal: false }),
-        variacao: indices.CDI?.d1,
+        deltaFixo: TEXTOS.mercado.cdi12m,
       }),
       periodos: periodosDo(indices.CDI),
     },
@@ -180,32 +184,6 @@ function montarIndicadores(mercado) {
     somenteVariacao('IFIX', 'IFIX'),
     somenteVariacao('IVVB11', 'IVVB11'),
   ];
-}
-
-/** Média simples da variação do dia por setor, em % com 2 casas, do maior para o menor. */
-function montarSetores(resumos, acoes) {
-  const setorDe = new Map(acoes.map((a) => [a.ticker, a.setor]));
-  const grupos = new Map();
-  for (const r of resumos) {
-    const setor = setorDe.get(r.ticker);
-    const variacao = valorOuNulo(r.cotacao?.variacao_dia);
-    if (!setor || variacao == null) continue;
-    const g = grupos.get(setor) ?? { soma: 0, n: 0, subiram: 0, caíram: 0 };
-    g.soma += variacao;
-    g.n += 1;
-    if (variacao > 0) g.subiram += 1;
-    if (variacao < 0) g.caíram += 1;
-    grupos.set(setor, g);
-  }
-  return [...grupos.entries()]
-    .map(([setor, g]) => ({
-      setor: nomeSetor(setor),
-      variacao: Math.round((g.soma / g.n) * 10000) / 100,
-      n: g.n,
-      subiram: g.subiram,
-      caíram: g.caíram,
-    }))
-    .sort((a, b) => b.variacao - a.variacao);
 }
 
 /** Faixa de oscilação pela posição da volatilidade de 20 pregões entre as ações (fração). */
@@ -250,34 +228,6 @@ function montarCartoes({ resumos, noticias, acoes }) {
   });
 }
 
-/** Nós do globo: a ação de maior volume de cada setor e as 3 com mais sinais, sem repetir. */
-function montarAtivos(cartoes, resumos, acoes) {
-  const acaoDe = new Map(acoes.map((a) => [a.ticker, a]));
-  const cartaoDe = new Map(cartoes.map((c) => [c.ticker, c]));
-  const lideres = new Map();
-  for (const r of resumos) {
-    const setor = acaoDe.get(r.ticker)?.setor;
-    const volume = valorOuNulo(r.volume?.total);
-    if (!setor || volume == null) continue;
-    const atual = lideres.get(setor);
-    if (!atual || volume > atual.volume) lideres.set(setor, { ticker: r.ticker, volume });
-  }
-  const tickers = [
-    ...cartoes.slice(0, TOP_SINAIS_GLOBO).map((c) => c.ticker),
-    ...[...lideres.values()].sort((a, b) => b.volume - a.volume).map((l) => l.ticker),
-  ];
-  return [...new Set(tickers)].map((ticker) => {
-    const c = cartaoDe.get(ticker);
-    const a = acaoDe.get(ticker);
-    return {
-      ticker,
-      nome: c?.nome ?? a?.empresa ?? null,
-      tipo: !c || c.tipo === 'contexto' ? 'neutro' : c.tipo,
-      setor_nome: nomeSetor(a?.setor) ?? null,
-    };
-  });
-}
-
 function montarPainelAlertas({ execucao, resumos, cartoes, acoes }) {
   const dataRef = resumos[0]?.data_referencia ?? null;
   const dia = diaMes(dataRef);
@@ -293,7 +243,7 @@ function montarPainelAlertas({ execucao, resumos, cartoes, acoes }) {
   }
 
   const variacoes = resumos
-    .map((r) => ({ ticker: r.ticker, v: valorOuNulo(r.cotacao?.variacao_dia) }))
+    .map((r) => ({ ticker: r.ticker, v: variacaoDiaConfiavel(valorOuNulo(r.cotacao?.variacao_dia)) }))
     .filter((x) => x.v != null);
   const destaque = (x, motivo) => ({
     ticker: x.ticker,
@@ -375,78 +325,6 @@ function montarTomPorSetor(noticias, acoes) {
     .sort((a, b) => b.saldo - a.saldo || a.setor.localeCompare(b.setor, 'pt-BR'));
 }
 
-function montarAlertas({ execucao, resumos, cartoes }) {
-  const dataRef = resumos[0]?.data_referencia ?? null;
-  const quando = dataRef ? `pregão de ${diaMes(dataRef)}` : null;
-  const alertas = [];
-
-  const status = execucao?.status;
-  if (status === 'parcial' || status === 'falhou') {
-    const texto = TEXTO_EXECUCAO[status].replace('{data}', dataBR(dataRef));
-    alertas.push({
-      severidade: 'atencao',
-      texto,
-      quando,
-      tipo: 'execucao',
-      ticker: null,
-      frase: texto,
-      motivo: 'A atualização diária não terminou por completo.',
-    });
-  }
-
-  const variacoes = resumos
-    .map((r) => ({ ticker: r.ticker, v: valorOuNulo(r.cotacao?.variacao_dia) }))
-    .filter((x) => x.v != null);
-  if (variacoes.length) {
-    const maior = variacoes.reduce((a, b) => (b.v > a.v ? b : a));
-    const menor = variacoes.reduce((a, b) => (b.v < a.v ? b : a));
-    if (menor.v < 0) {
-      const frase = `caiu ${pct(Math.abs(menor.v), { sinal: false })} no pregão`;
-      alertas.push({
-        severidade: 'atencao',
-        texto: `${menor.ticker} ${frase}`,
-        quando,
-        tipo: 'queda',
-        ticker: menor.ticker,
-        frase,
-        motivo: `Maior queda entre as ${variacoes.length} ações acompanhadas.`,
-      });
-    }
-    if (maior.v > 0) {
-      const frase = `subiu ${pct(maior.v, { sinal: false })} no pregão`;
-      alertas.push({
-        severidade: 'positivo',
-        texto: `${maior.ticker} ${frase}`,
-        quando,
-        tipo: 'alta',
-        ticker: maior.ticker,
-        frase,
-        motivo: `Maior alta entre as ${variacoes.length} ações acompanhadas.`,
-      });
-    }
-  }
-
-  const volumes = cartoes
-    .filter((c) => c.sinais.some((s) => s.id === REGRA_VOLUME_INCOMUM))
-    .map((c) => ({ ticker: c.ticker, v: valorOuNulo(c.resumo_acao.volume?.relativo) }))
-    .filter((x) => x.v != null)
-    .sort((a, b) => b.v - a.v);
-  for (const { ticker, v } of volumes) {
-    const frase = `negociou ${vezes(v)} o volume normal`;
-    alertas.push({
-      severidade: 'info',
-      texto: `${ticker} ${frase}`,
-      quando,
-      tipo: 'volume',
-      ticker,
-      frase,
-      motivo: 'Regra "volume incomum": 1,5× a mediana de 20 pregões ou mais.',
-    });
-  }
-
-  return alertas.slice(0, MAX_ALERTAS);
-}
-
 const temProbabilidades = (item) => [item.prob_positivo, item.prob_neutro, item.prob_negativo].every(Number.isFinite);
 
 const forcaDaManchete = (item) => Math.abs(item.prob_positivo - item.prob_negativo);
@@ -461,7 +339,7 @@ function movimentoDoDia(v) {
 /** Uma leitura do sistema: manchete em destaque do ticker, com o contexto do pregão dele. */
 function leituraDe({ item, ticker }, resumoDe, noticiaDe) {
   const probMax = Math.max(item.prob_positivo, item.prob_neutro, item.prob_negativo);
-  const v = valorOuNulo(resumoDe.get(ticker)?.cotacao?.variacao_dia);
+  const v = variacaoDiaConfiavel(valorOuNulo(resumoDe.get(ticker)?.cotacao?.variacao_dia));
   const N = noticiaDe.get(ticker)?.resumo;
   const q = valorOuNulo(N?.quantidade);
   const pos = valorOuNulo(N?.positivas);
@@ -502,11 +380,7 @@ function montarLeituras(noticias, resumoDe, noticiaDe) {
         .map(leitura),
     ]),
   );
-  return {
-    leituras: destaques.slice(0, MAX_LEITURAS).map(leitura),
-    noticias_destaque: destaques.slice(0, MAX_NOTICIAS_DESTAQUE).map(leitura),
-    manchetes_por_tom,
-  };
+  return { manchetes_por_tom };
 }
 
 /**
@@ -530,7 +404,7 @@ export function montarAnaliseDoDia({
   const resumoDe = new Map(resumos.map((r) => [r.ticker, r]));
   const noticiaDe = new Map(noticias.map((n) => [n.ticker, n]));
   const sentimento = montarSentimento(noticias);
-  const { leituras, noticias_destaque, manchetes_por_tom } = montarLeituras(noticias, resumoDe, noticiaDe);
+  const { manchetes_por_tom } = montarLeituras(noticias, resumoDe, noticiaDe);
 
   const resumoPregao = montarResumoDoPregao({ mercado: mercado ?? {}, resumos, noticias, acoes });
 
@@ -549,12 +423,7 @@ export function montarAnaliseDoDia({
       sugestoes: cartoes.length,
     },
     sugestoes: cartoes,
-    ativos: montarAtivos(cartoes, resumos, acoes),
-    alertas: montarAlertas({ execucao, resumos, cartoes }),
     indicadores: montarIndicadores(mercado),
-    setores: montarSetores(resumos, acoes),
-    leituras,
-    noticias_destaque,
     manchetes_por_tom,
     painel_alertas: montarPainelAlertas({ execucao, resumos, cartoes, acoes }),
     acoes_pregao: montarAcoesDoPregao(resumos, acoes, cartoes),

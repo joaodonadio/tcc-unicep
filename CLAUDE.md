@@ -1,4 +1,4 @@
-# Ações da B3 — regras do projeto
+# CotAI — regras do projeto
 
 Painel educativo da bolsa brasileira para quem está começando. React 18 + Vite, React Query,
 ECharts, three.js. Design em `DESIGN.md`, produto em `PRODUCT.md`, arquitetura em `docs/`.
@@ -17,16 +17,39 @@ ECharts, three.js. Design em `DESIGN.md`, produto em `PRODUCT.md`, arquitetura e
 - Fontes tipográficas e qualquer outro recurso também são locais (`@fontsource-variable`),
   nunca por CDN.
 
-### Dados que faltam na API privada
+### Dados que a API privada não vai mandar (resolvidos no front)
 
-| Dado | Usaria em | Situação |
+| Dado | Como o site resolve |
+|---|---|
+| Ajuste de grupamento/desdobramento (`fator_ajuste`; RAIZ4 em 03/11/2026) | O fator não é calculado: a razão real (ex.: 0,30 → 27,10) não diz se foi 100:1 com queda ou 90:1. A interface descarta variação acima de +100% ou abaixo de −75% no dia e janelas com salto de escala (`src/lib/crivel.js`), com o selo "mudou de escala"; o gráfico de preço da ficha começa depois do último salto (`ultimoSalto`) |
+| Proventos de todas as ações numa rota só | O servidor do Vite junta as 85 consultas de `/v1/proventos/{ticker}` na rota local `/api/v1/proventos-todos` (`scripts/proventosAgregados.mjs`, só na memória); sem a rota, o cliente consulta ação por ação (`src/services/proventosTodos.js`) |
+| Fatos de mercado que explicam um salto real (ex.: 26/10/2026, pregão após o 2º turno, Ibovespa −13,88% com circuit breaker; confirmado pela equipe da API) | Lista fixa em `src/lib/eventosMercado.js` + `TEXTOS.eventos`: marcação "Eleição" nos gráficos de linha e nota curta. Queda real forte não é "mudou de escala": o critério de salto usa os mesmos limites do dia (+100% / −75%) |
+| Abertura, máxima e mínima diárias por ação | Sem gráfico de velas por ação na ficha (só linha de fechamento). As velas por setor de Setores saem dos fechamentos diários (máxima e mínima de fechamento), pela rota local `/api/v1/velas-setores` ou pelas séries de 1 ano |
+
+### Número calculado no site sempre se mostra
+
+- Toda conta feita no site com os dados da API tem uma entrada em `TEXTOS.contas.itens` (usa / como / aparece em) e o selo `<SeloCalculo conta="…" />` (`src/components/ui/SeloCalculo.jsx`) onde o número aparece, **só quando a conta de fato é feita** (origem dinâmica: série publicada não leva selo). A página Dados lista todas em "O que o site calcula" (`ContasDoSite.jsx`, âncora `#conta-<chave>`).
+- Nada de estimar o que não sai dos dados (ex.: fator de grupamento).
+
+### Deploy (Vercel)
+
+`vercel.json` + `api/`: `api/proxy.js` repassa `/api/v1/*` à API com `X-API-Key` (env `API_BASE_URL`, `API_KEY`; `VITE_FONTE_DADOS=api`); as rotas montadas (`proventos-todos`, `dolar-historico`, `series-semana`, `velas-setores`) são funções em `api/v1/` que reutilizam `scripts/*.mjs`. Cache só na CDN (`s-maxage`), nunca no navegador.
+
+Título das notícias em português: a API não vai fazer. As manchetes ficam no idioma original.
+
+### Campos que vêm da API a partir de 16/11/2026 (com volta à conta local se ausentes)
+
+Campo ausente (`undefined`) = a API ainda não manda, e a tela usa a conta local. Presente sem `status: "ok"` = indisponível, e fica `null`.
+
+| Campo | Usado em | Sem ele |
 |---|---|---|
-| Meta da Selic (valor atual e histórico) | Hoje (card da Selic), Mercado (aba "Juros e dólar") | não existe em nenhum pacote; o card e a aba saíram |
-| Dólar (USDBRL) em série diária, ou `indices.USDBRL.{m1,m6,a1}` em `mercado_dia` | Hoje (mini gráfico do dólar), Mercado (períodos da linha Dólar) | `mercado_dia` só traz o valor e a variação do dia |
-| Brent em série ou por períodos | Mercado (períodos da linha Brent) | só o valor do dia |
-| Título das notícias em português (ex.: `titulo_pt`) | Notícias, ficha da ação, "Tom das notícias" | manchetes vêm no idioma original; a tradução saiu |
-| IPCA mensal com mês de referência (ex.: `{mes_ref, variacao}`) | Hoje (barras do IPCA) | hoje é derivado da série de índice `IPCA` (degrau no 1º dia útil, cortado por `ipca_ate`) |
-| CDI mensal pronto, ou série que cubra 12 meses completos | Hoje (barras do CDI) | a janela `1a` dá só 11 meses completos |
+| `resumo_acao.variacao_preco.s1` / `rentabilidade.s1` | Setores (1 semana), ficha (coluna 1 semana da tabela de retornos) | rota local `/api/v1/series-semana` (`scripts/seriesSemana.mjs`) ou 85 séries; a ficha fica sem a coluna |
+| `mercado_dia.indices.USDBRL.{d1,m1,m6,a1}` / `indices.BRENT.{...}` | Mercado (períodos das linhas Dólar e Brent) | dólar pela série (`useSerieDoDolar` + `periodosPorCalendario`); Brent só com o valor do dia |
+| `series_diarias/USDBRL` | Hoje (mini gráfico), Mercado (gráfico do dólar) | rota local `/api/v1/dolar-historico` (`scripts/dolarHistorico.mjs`), montada pelas publicações de `mercado_dia` desde 16/10/2026 |
+| `series_diarias/SELIC` (tipo `taxa`; `indice_retorno_total` é a meta ao ano, nível, não índice) | Mercado (gráfico de juros) | estimativa pelo índice `CDI` (`selicPelaSerieCdi`); o valor de hoje já vem de `mercado_dia.selic_meta` |
+| `series_diarias/BRENT` | nenhum lugar ainda (não há gráfico de Brent); `serieDoCampo` já pula pontos indisponíveis | — |
+| `mercado_dia.ipca_mensal` (`[{mes_ref, variacao}]`, mês de referência) | Hoje (barras do IPCA) | derivado da série `IPCA` (degrau no 1º dia útil, cortado por `ipca_ate`) |
+| `mercado_dia.cdi_mensal` (12 meses completos) | Hoje (barras do CDI) | série `CDI` de 1 ano (só 11 meses completos) |
 
 ## Conteúdo e linguagem
 

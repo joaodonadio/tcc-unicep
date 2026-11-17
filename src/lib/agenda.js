@@ -6,7 +6,7 @@
  */
 
 import { brl } from './formato.js';
-import { dataBR, dataExtenso, diaMes, mesAno } from './datas.js';
+import { dataBR, dataExtenso, diaMes, mesAno, mesExtenso } from './datas.js';
 import { valorOuNulo } from './valor.js';
 
 export const DATA_A_DEFINIR = '9999-12-31';
@@ -96,38 +96,21 @@ export function montarAgenda({ proventos = [], acoes = [], hoje, max = MAX_PROXI
   };
 }
 
-/** Soma n dias a "AAAA-MM-DD" e devolve "AAAA-MM-DD". */
-function somarDias(iso, n) {
-  const [a, m, d] = iso.split('-').map(Number);
-  return new Date(Date.UTC(a, m - 1, d + n)).toISOString().slice(0, 10);
-}
-
-/** Domingo da semana (segunda a domingo) que contém a data. */
-function domingoDaSemana(iso) {
-  const [a, m, d] = iso.split('-').map(Number);
-  const diaSemana = new Date(Date.UTC(a, m - 1, d)).getUTCDay(); // 0 = domingo
-  return somarDias(iso, diaSemana === 0 ? 0 : 7 - diaSemana);
-}
-
-export const GRUPOS_SEMANA = [
-  { chave: 'esta_semana', rotulo: 'Esta semana' },
-  { chave: 'proxima_semana', rotulo: 'Próxima semana' },
-  { chave: 'mais_adiante', rotulo: 'Mais adiante' },
-];
-
-/** Agrupa itens da agenda (com data_pagamento) por semana a partir de `hoje`; grupos vazios saem. */
-export function agruparPorSemana(itens = [], hoje) {
-  if (!hoje) return [];
-  const fimEsta = domingoDaSemana(hoje);
-  const fimProxima = somarDias(fimEsta, 7);
-  const grupos = { esta_semana: [], proxima_semana: [], mais_adiante: [] };
-  for (const item of itens) {
-    const d = item.data_pagamento;
-    if (!d) continue;
-    const chave = d <= fimEsta ? 'esta_semana' : d <= fimProxima ? 'proxima_semana' : 'mais_adiante';
-    grupos[chave].push(item);
+/**
+ * Agrupa eventos (já ordenados) por mês de pagamento, na ordem em que o mês aparece.
+ * Data inválida ou ausente vai para o grupo '' (rótulo null), sem quebrar.
+ *
+ * @returns {{ chave: string, rotulo: string | null, itens: object[] }[]}
+ */
+export function mesesDosPagamentos(eventos) {
+  const grupos = new Map();
+  for (const ev of Array.isArray(eventos) ? eventos : []) {
+    const m = /^(\d{4}-\d{2})-\d{2}/.exec(String(ev?.data_pagamento ?? ''));
+    const chave = m ? m[1] : '';
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave).push(ev);
   }
-  return GRUPOS_SEMANA.map((g) => ({ ...g, itens: grupos[g.chave] })).filter((g) => g.itens.length > 0);
+  return [...grupos].map(([chave, itens]) => ({ chave, rotulo: mesExtenso(chave) || null, itens }));
 }
 
 /** Dias corridos de `de` até `ate` ("AAAA-MM-DD"), sem fuso; null se alguma data for inválida. */
@@ -151,35 +134,27 @@ const porPagamento = (a, b) => comparar(a.data_pagamento ?? DATA_A_DEFINIR, b.da
  * Cada alerta traz `itens` com `dias` (dias corridos até a data do alerta). Alerta sem itens não sai.
  *
  *  - data_com: data-com hoje ou nos próximos 7 dias;
- *  - pagamento: pagamento hoje ou nos próximos 7 dias;
- *  - lista: proventos futuros de ações guardadas (`lista` = tickers).
+ *  - pagamento: pagamento hoje ou nos próximos 7 dias.
  *
- * @returns {{ chave: 'data_com' | 'pagamento' | 'lista', itens: object[] }[]}
+ * @returns {{ chave: 'data_com' | 'pagamento', itens: object[] }[]}
  */
-export function alertasDeProventos(eventos, hoje, lista = []) {
+export function alertasDeProventos(eventos, hoje) {
   if (!Array.isArray(eventos) || !hoje) return [];
-  const guardadas = new Set((Array.isArray(lista) ? lista : []).map((t) => String(t).toUpperCase()));
   const dentro = (d) => d !== null && d >= 0 && d <= JANELA_ALERTA_DIAS;
 
   const dataCom = [];
   const pagamento = [];
-  const daLista = [];
   for (const ev of eventos) {
     if (!ev?.ticker) continue;
     const diasCom = diasEntre(hoje, ev.data_com);
     if (dentro(diasCom)) dataCom.push({ ...ev, dias: diasCom });
     const diasPag = ev.data_pagamento ? diasEntre(hoje, ev.data_pagamento) : null;
     if (dentro(diasPag)) pagamento.push({ ...ev, dias: diasPag });
-    if (guardadas.has(String(ev.ticker).toUpperCase())) {
-      // sem data de pagamento ("a definir") entra na lista, com dias nulo
-      if (!ev.data_pagamento || (diasPag !== null && diasPag >= 0)) daLista.push({ ...ev, dias: diasPag });
-    }
   }
 
   const alertas = [
     { chave: 'data_com', itens: dataCom.sort(porDataCom) },
     { chave: 'pagamento', itens: pagamento.sort(porPagamento) },
-    { chave: 'lista', itens: daLista.sort(porPagamento) },
   ];
   return alertas.filter((a) => a.itens.length > 0);
 }
@@ -196,10 +171,10 @@ export function somarMeses(mes, n) {
 }
 
 /**
- * Grade do mês (domingo a sábado): semanas de 7 células; fora do mês é null.
- * Cada célula: { iso, dia, qtd } com `qtd` = pagamentos naquele dia (0 sem pagamento).
+ * Grade do mês (domingo a sábado): sempre 6 semanas de 7 células (42), fora do mês é null.
+ * Cada célula: { iso, dia, qtd, com }: `qtd` = pagamentos no dia, `com` = datas-com no dia (0 sem evento).
  *
- * @param {object[]} eventos itens com data_pagamento
+ * @param {object[]} eventos itens com data_pagamento e/ou data_com
  * @param {string} mes "AAAA-MM"
  */
 export function calendarioDoMes(eventos, mes) {
@@ -207,17 +182,20 @@ export function calendarioDoMes(eventos, mes) {
   const [a, m] = mes.split('-').map(Number);
   const total = new Date(Date.UTC(a, m, 0)).getUTCDate();
   const primeiro = new Date(Date.UTC(a, m - 1, 1)).getUTCDay();
-  const contagem = new Map();
+  const pagos = new Map();
+  const coms = new Map();
   for (const ev of Array.isArray(eventos) ? eventos : []) {
-    const d = ev?.data_pagamento;
-    if (typeof d === 'string' && d.startsWith(mes)) contagem.set(d, (contagem.get(d) ?? 0) + 1);
+    const pag = ev?.data_pagamento;
+    if (typeof pag === 'string' && pag.startsWith(mes)) pagos.set(pag, (pagos.get(pag) ?? 0) + 1);
+    const com = ev?.data_com;
+    if (typeof com === 'string' && com.startsWith(mes)) coms.set(com, (coms.get(com) ?? 0) + 1);
   }
   const celulas = Array(primeiro).fill(null);
   for (let d = 1; d <= total; d += 1) {
     const iso = diaDoMes(mes, d);
-    celulas.push({ iso, dia: d, qtd: contagem.get(iso) ?? 0 });
+    celulas.push({ iso, dia: d, qtd: pagos.get(iso) ?? 0, com: coms.get(iso) ?? 0 });
   }
-  while (celulas.length % 7 !== 0) celulas.push(null);
+  while (celulas.length < 42) celulas.push(null);
   const semanas = [];
   for (let i = 0; i < celulas.length; i += 7) semanas.push(celulas.slice(i, i + 7));
   return semanas;

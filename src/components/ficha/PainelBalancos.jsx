@@ -4,6 +4,10 @@ import { montarBalancos } from '../../lib/balancos.js';
 import { TEXTOS } from '../../lib/textos.js';
 import { BlocoErro, BlocoVazio, Linhas } from '../ui/Estados.jsx';
 
+/** Rótulo da coluna no celular (data-rotulo): trimestre e, se houver, a data de entrega. */
+const rotuloColuna = (coluna) =>
+  coluna.entrega ? `${coluna.rotulo} · ${TEXTOS.ficha.entregue(coluna.entrega)}` : coluna.rotulo;
+
 /** Balanços trimestrais da ficha (nível técnico, na pergunta "Ela deve muito?"): 8 trimestres, um por coluna. */
 export function PainelBalancos({ ticker }) {
   const fundamentos = useFundamentos(ticker);
@@ -42,7 +46,12 @@ export function PainelBalancos({ ticker }) {
               <tr key={linha.id}>
                 <th scope="row">{linha.rotulo}</th>
                 {linha.celulas.map((celula, i) => (
-                  <td key={tabela.colunas[i].data} className="ficha-tab-num" title={celula.motivo || undefined}>
+                  <td
+                    key={tabela.colunas[i].data}
+                    className="ficha-tab-num"
+                    title={celula.motivo || undefined}
+                    data-rotulo={rotuloColuna(tabela.colunas[i])}
+                  >
                     {celula.texto}
                   </td>
                 ))}

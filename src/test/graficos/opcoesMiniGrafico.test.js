@@ -87,39 +87,6 @@ describe('montarOpcaoMini: pontos', () => {
   });
 });
 
-describe('montarOpcaoMini: inclinação', () => {
-  it('dois pontos, base no anterior, ponto anterior vazado e ponto de hoje no fim', () => {
-    const o = montarOpcaoMini({ ...BASE, tipo: 'inclinacao', valores: [5.02, 5.03] });
-    const [linha, hoje, antes, base] = o.series;
-    expect(linha.data).toEqual([5.02, 5.03]);
-    expect(linha.lineStyle.shadowBlur).toBe(10);
-    expect(hoje.type).toBe('scatter');
-    expect(hoje.data).toEqual([[1, 5.03]]);
-    expect(antes.data).toEqual([[0, 5.02]]);
-    expect(antes.itemStyle.color).toBe(BASE.fundo);
-    expect(base.data).toEqual([5.02, 5.02]);
-  });
-
-  it('faixa fixa: movimento pequeno não vai de canto a canto; 2% enche a altura', () => {
-    const pequeno = montarOpcaoMini({ ...BASE, tipo: 'inclinacao', valores: [100, 100.3] });
-    expect(pequeno.yAxis.min).toBeLessThan(100);
-    expect(pequeno.yAxis.max).toBeGreaterThan(100.3);
-    const grande = montarOpcaoMini({ ...BASE, tipo: 'inclinacao', valores: [100, 102] });
-    expect(grande.yAxis.min).toBeCloseTo(100);
-    expect(grande.yAxis.max).toBeCloseTo(102);
-  });
-
-  it('com animação, o ponto de hoje pulsa', () => {
-    const o = montarOpcaoMini({ ...BASE, animar: true, tipo: 'inclinacao', valores: [1, 2] });
-    expect(o.series[1].type).toBe('effectScatter');
-  });
-
-  it('precisa de dois valores finitos', () => {
-    expect(temDadosMini('inclinacao', [5, null])).toBe(false);
-    expect(temDadosMini('inclinacao', [5.02, 5.03])).toBe(true);
-  });
-});
-
 describe('montarOpcaoMini: área compacta e faixa exata', () => {
   it('abaixo de 48px: margens pequenas e ponto parado mesmo com animação', () => {
     const o = montarOpcaoMini({ ...BASE, animar: true, tipo: 'area', valores: [1, 2, 3], altura: 32 });
@@ -133,5 +100,72 @@ describe('montarOpcaoMini: área compacta e faixa exata', () => {
     expect(o.yAxis.min).toBe('dataMin');
     expect(o.yAxis.max).toBe('dataMax');
     expect(o.grid.top).toBe(o.grid.bottom);
+  });
+});
+
+describe('montarOpcaoMini: área interativa', () => {
+  const DATAS = ['2026-11-02', '2026-11-03'];
+  // params como o ECharts entrega no tooltip por eixo: a linha (série 0) e a base (série 2)
+  const params = (i, valor) => [
+    { seriesIndex: 0, dataIndex: i, data: valor },
+    { seriesIndex: 2, dataIndex: i, data: 1 },
+  ];
+
+  it('sem `interativo`, não há tooltip nem eixo com datas', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2], datas: DATAS });
+    expect(o.tooltip).toBeUndefined();
+    expect(o.xAxis.data).toEqual([0, 1]);
+    expect(o.series[0].silent).toBe(true);
+  });
+
+  it('com `interativo`, tooltip por eixo com cursor tracejado e eixo x com as datas', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2], interativo: true, datas: DATAS });
+    expect(o.tooltip.trigger).toBe('axis');
+    expect(o.tooltip.confine).toBe(true);
+    expect(o.tooltip.triggerOn).toBe('mousemove|click');
+    expect(o.tooltip.borderRadius).toBe(14);
+    expect(o.tooltip.axisPointer.type).toBe('line');
+    expect(o.tooltip.axisPointer.lineStyle.type).toBe('dashed');
+    expect(o.xAxis.data).toEqual(DATAS);
+    expect(o.series[0].silent).toBe(false);
+    expect(o.series[0].symbol).toBe('circle');
+    expect(o.series[0].symbolSize).toBe(8);
+  });
+
+  it('movimento reduzido zera a transição do balão; com movimento, ela existe', () => {
+    const parado = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2], interativo: true, datas: DATAS, animar: false });
+    expect(parado.tooltip.transitionDuration).toBe(0);
+    const animado = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2], interativo: true, datas: DATAS, animar: true });
+    expect(animado.tooltip.transitionDuration).toBeGreaterThan(0);
+  });
+
+  it('formatter devolve a data em dd/mm/aaaa e o valor em pontos, sem casas, em pt-BR', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [165000, 165529.4], interativo: true, datas: DATAS });
+    const html = o.tooltip.formatter(params(1, 165529.4));
+    expect(html).toContain('03/11/2026');
+    expect(html).toContain('165.529 pontos');
+    expect(html).not.toContain('165.529,4');
+  });
+
+  it('valor ausente no ponto vira "sem dado", nunca 0', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [165000, null], interativo: true, datas: DATAS });
+    const html = o.tooltip.formatter(params(1, null));
+    expect(html).toContain('03/11/2026');
+    expect(html).toContain('sem dado');
+    expect(html).not.toContain('0 pontos');
+  });
+});
+
+describe('montarOpcaoMini: marcas de evento', () => {
+  it('na área, as marcas viram markLine vertical na série da linha', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2, 3], marcas: [{ indice: 1, marca: 'Eleição' }] });
+    const [linha] = o.series;
+    expect(linha.markLine.silent).toBe(true);
+    expect(linha.markLine.data[0]).toMatchObject({ xAxis: 1, label: { formatter: 'Eleição' } });
+  });
+
+  it('sem marcas, a série da linha não tem markLine', () => {
+    const o = montarOpcaoMini({ ...BASE, tipo: 'area', valores: [1, 2, 3] });
+    expect(o.series[0].markLine).toBeUndefined();
   });
 });

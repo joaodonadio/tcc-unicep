@@ -5,8 +5,13 @@
  * Valores ausentes são null e nunca viram 0.
  */
 
-/** Tamanho das janelas em pontos (pregões). */
-export const JANELAS = { '1m': 22, '6m': 127, '1a': 253 };
+import { valorOuNulo } from './valor.js';
+
+/**
+ * Tamanho das janelas em pontos. Pontos = pregões + 1: a variação mede n intervalos
+ * (1 semana = 5 intervalos = 6 pontos; 1 mês = 22 pontos = 21 intervalos).
+ */
+export const JANELAS = { '1s': 6, '1m': 22, '6m': 127, '1a': 253 };
 
 /** Últimos n pontos de datas e de cada campo de valores. */
 export function cortarJanela(serie, n) {
@@ -35,9 +40,6 @@ export function serieInsuficiente(serie, campo, n) {
   if (primeiro == null) return true;
   return n === JANELAS['1a'] && serie.datas[0] > serie.inicio_janela;
 }
-
-/** Mesma variação de rebase, escrita como índice base 100. */
-export const base100 = (arr) => rebase(arr).map((v) => (v == null ? null : v * 100 + 100));
 
 /** Valores de `outra` nas datas da base: mesma data ou null. */
 export function alinharPorData(datasBase = [], datasOutra = [], valoresOutra = []) {
@@ -122,4 +124,20 @@ export function variacoesMensais(serie, campo, { meses = 12, semUltimoMes = fals
     valores.push(antes === mesAnterior(atual) ? ultimoDoMes.get(atual) / ultimoDoMes.get(antes) - 1 : null);
   }
   return { meses: saidaMeses.slice(-meses), valores: valores.slice(-meses) };
+}
+
+/**
+ * Meses prontos do pacote (ipca_mensal, cdi_mensal: [{mes_ref: 'AAAA-MM', variacao: {valor, status}}]) no
+ * formato de variacoesMensais: {meses, valores}, do mais antigo ao mais recente, só os `meses` últimos.
+ * Sem status 'ok' vira null. Campo ausente, vazio ou sem nenhum valor: null (a tela volta à conta pela série).
+ */
+export function mesesDoPacote(lista, { meses = 12 } = {}) {
+  if (!Array.isArray(lista)) return null;
+  const validos = lista
+    .filter((m) => typeof m?.mes_ref === 'string' && /^\d{4}-\d{2}$/.test(m.mes_ref))
+    .sort((a, b) => a.mes_ref.localeCompare(b.mes_ref))
+    .slice(-meses);
+  const valores = validos.map((m) => valorOuNulo(m?.variacao));
+  if (!valores.some((v) => v != null)) return null;
+  return { meses: validos.map((m) => m.mes_ref), valores };
 }

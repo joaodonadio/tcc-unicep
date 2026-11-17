@@ -1,9 +1,8 @@
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAcoes, useResumo } from '../hooks/useDados.js';
 import { usePreferencias } from '../context/contextos.js';
 import { BotaoTermo } from '../components/ui/BotaoTermo.jsx';
-import { BotaoGuardar } from '../components/ui/BotaoGuardar.jsx';
 import { BlocoErro, BlocoVazio, Linhas } from '../components/ui/Estados.jsx';
 import { NavPerguntas } from '../components/ficha/NavPerguntas.jsx';
 import { PorQueApareceu } from '../components/ficha/PorQueApareceu.jsx';
@@ -18,9 +17,12 @@ import { PainelNoticias } from '../components/ficha/PainelNoticias.jsx';
 import { PainelNegociacao } from '../components/ficha/PainelNegociacao.jsx';
 import { Fundamentos } from '../components/ficha/Fundamentos.jsx';
 import { BlocoObjeto3D } from '../components/modelos3d/BlocoObjeto3D.jsx';
+import { SeloRevisao } from '../components/ui/SeloRevisao.jsx';
+import { variacaoDiaConfiavel, variacaoDiaSuspeita } from '../lib/crivel.js';
 import { textoTipoAcao } from '../lib/fichaIndicadores.js';
 import { BRILHO_DA_PERGUNTA, PERGUNTAS, chavesDaPergunta, perguntaDaUrl } from '../lib/perguntasFicha.js';
 import { brl, pct } from '../lib/formato.js';
+import { rolarParaBaixoDe, trocarComTransicao } from '../lib/movimento.js';
 import { corDoSetor } from '../lib/setores.js';
 import { TEXTOS, porNivel } from '../lib/textos.js';
 import { valorOuNulo } from '../lib/valor.js';
@@ -86,6 +88,7 @@ export default function Ficha() {
   const [busca, setBusca] = useSearchParams();
   const { nivel } = usePreferencias();
   const painelRef = useRef(null);
+  const alinharPainel = useRef(false);
 
   const acoes = useAcoes();
   const resumo = useResumo(ticker);
@@ -101,7 +104,10 @@ export default function Ficha() {
   const chaves = chavesDaPergunta(id, nivel);
 
   const fechamento = valorOuNulo(resumo.data?.cotacao?.fechamento);
-  const variacao = valorOuNulo(resumo.data?.cotacao?.variacao_dia);
+  // Variação impossível no dia (grupamento não ajustado) não entra: no lugar dela, o selo "mudou de escala".
+  const variacaoRecebida = valorOuNulo(resumo.data?.cotacao?.variacao_dia);
+  const emRevisao = variacaoDiaSuspeita(variacaoRecebida);
+  const variacao = variacaoDiaConfiavel(variacaoRecebida);
   const direcao = variacao == null ? null : variacao > 0 ? 'alta' : variacao < 0 ? 'queda' : 'estavel';
   const numeroVariacao = direcao == null || direcao === 'estavel' ? null : pct(Math.abs(variacao), { sinal: false });
   const textoVariacao =
@@ -118,9 +124,18 @@ export default function Ficha() {
     document.title = TEXTOS.paginas.tituloDocumento(nome);
   }, [ticker, acao?.empresa]);
 
+  // depois de trocar a aba, e ainda dentro do quadro novo: só rola se o painel estiver escondido atrás da barra
+  useLayoutEffect(() => {
+    if (!alinharPainel.current) return;
+    alinharPainel.current = false;
+    const painel = painelRef.current;
+    rolarParaBaixoDe(painel, painel?.parentElement?.querySelector('.ficha-abas'));
+  }, [id]);
+
+  // a troca de aba faz o painel dar um crossfade curto (ver movimento.css, seção 21)
   const irPara = (novoId) => {
-    setBusca({ pergunta: novoId }, { replace: true });
-    painelRef.current?.scrollIntoView?.({ block: 'start' });
+    alinharPainel.current = true;
+    trocarComTransicao(() => setBusca({ pergunta: novoId }, { replace: true, preventScrollReset: true, flushSync: true }), 'suave');
   };
 
   const metadados = acao
@@ -166,9 +181,9 @@ export default function Ficha() {
                   {variacaoComNumeroEmMono(textoVariacao, numeroVariacao)}
                 </span>
               )}
+              {emRevisao && <SeloRevisao />}
             </p>
           )}
-          <BotaoGuardar ticker={ticker} />
         </div>
       </header>
     </>
@@ -178,7 +193,7 @@ export default function Ficha() {
     return (
       <article className="ficha pagina" style={{ '--cor-linha': corDoSetor(undefined) }}>
         <VoltarFicha />
-        <BlocoVazio titulo={TEXTOS.ficha.naoEncontrada} mensagem={TEXTOS.ficha.naoEncontradaTexto(ticker)} />
+        <BlocoVazio titulo={TEXTOS.ficha.naoEncontrada} mensagem={TEXTOS.ficha.naoEncontradaTexto(ticker)} nivel={1} />
       </article>
     );
   }

@@ -25,6 +25,30 @@ export function CardSkeleton({ altura = '9rem', rotulo = TEXTOS.estados.carregan
   );
 }
 
+/* Loader em loop: quando a forma do conteúdo não é conhecida. Três barras respirando. */
+export function Carregador({ rotulo = TEXTOS.estados.carregando, compacto = false }) {
+  return (
+    <div className="carregador" role="status" aria-live="polite">
+      <span className="carregador__barras" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
+      <span className={compacto ? 'sr-only' : 'carregador__rotulo'}>{rotulo}</span>
+    </div>
+  );
+}
+
+/* Skeleton de gráfico: a altura reservada é a do gráfico final, para não haver salto. */
+export function EsqueletoGrafico({ altura = '16rem', rotulo = TEXTOS.estados.carregando }) {
+  return (
+    <div role="status" aria-live="polite">
+      <span className="sr-only">{rotulo}</span>
+      <span className="esqueleto" style={{ height: altura }} aria-hidden="true" />
+    </div>
+  );
+}
+
 export function BlocoErro({ titulo = TEXTOS.estados.erroTitulo, mensagem, onTentarNovamente, nivel = 3, mascote = false }) {
   const Titulo = `h${nivel}`;
   return (
@@ -62,7 +86,10 @@ export function BlocoVazio({ titulo = TEXTOS.estados.vazio, mensagem, nivel = 3 
 export function CarregandoTela() {
   return (
     <div className="pagina" role="status" aria-live="polite" style={{ minHeight: '100dvh' }}>
-      <span className="sr-only">{TEXTOS.estados.carregando}</span>
+      <div className="carregando-linha">
+        <Mascote humor="pensativo" className="carregando-pavio" />
+        <p>{TEXTOS.estados.carregando}</p>
+      </div>
       <span className="esqueleto" style={{ height: '2.5rem', width: '18rem' }} aria-hidden="true" />
       <div style={{ marginTop: '2rem', display: 'grid', gap: '1.125rem' }} aria-hidden="true">
         <CardSkeleton altura="7rem" />

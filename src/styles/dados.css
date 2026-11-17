@@ -1,12 +1,13 @@
-/* De onde vêm os números?: resumo do topo em cartão de vidro (cor aço), origens e pacotes em linhas
-   separadas por fio, avisos da coleta na fórmula de atenção. Números, horários e datas em Atkinson Hyperlegible Mono. */
+/* De onde vêm os números?: cartão "Última atualização" em vidro (mancha pelo status), três mini cartões
+   de origem, e o bloco da equipe com quatro quadros (pacotes, avisos, fatos e etapas da coleta).
+   Números e datas em Atkinson Hyperlegible Mono. */
 
 .dados__titulo {
   font-size: var(--texto-3xl);
   font-weight: var(--peso-forte);
   letter-spacing: -0.02em;
   line-height: 1.08;
-  margin: 0 0 var(--espaco-5);
+  margin: 0 0 var(--espaco-4);
   text-wrap: balance;
 }
 
@@ -19,34 +20,57 @@
   font-weight: var(--peso-forte);
   letter-spacing: -0.02em;
   line-height: 1.2;
-  margin: var(--espaco-7) 0 var(--espaco-4);
+  margin: var(--espaco-6) 0 var(--espaco-3);
 }
 
 .dados__bloco {
   min-width: 0;
 }
 
-/* Topo: situação e fatos principais */
-.dados__resumo {
+.dados__icone {
+  color: var(--cor-acento);
+  flex: none;
+}
+
+/* Última atualização: vidro com a mancha da situação (data-brilho vem de situacaoPainel) */
+.dados__ultima {
   display: grid;
-  gap: var(--espaco-5);
-  padding: var(--espaco-6);
+  gap: var(--espaco-4);
+  padding: var(--espaco-5) var(--espaco-6);
   background: var(--vidro);
   border: 1px solid transparent;
   border-radius: var(--raio-cartao);
   box-shadow: var(--vidro-sombra);
 }
 
-.dados__resumo .pilula {
-  justify-self: start;
-  font-size: var(--texto-base);
-  padding: var(--espaco-2) var(--espaco-4);
+.dados__ultima-topo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.dados__pavio {
+  width: 3.5rem;
+  height: auto;
+  flex: none;
+}
+
+.dados__ultima-titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-forte);
+  line-height: 1.2;
+}
+
+.dados__frase {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-suave);
 }
 
 .dados__fatos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  gap: var(--espaco-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: var(--espaco-4) var(--espaco-5);
   margin: 0;
 }
 
@@ -66,88 +90,154 @@
   overflow-wrap: anywhere;
 }
 
-/* Origens e pacotes: linhas separadas por fio, sem caixinhas */
-.dados__grade {
+/* Status: palavra e ícone, a cor só reforça (o texto já diz concluída, parcial ou com falha) */
+.dados__fato .dados__status {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-family: inherit;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  letter-spacing: 0;
+}
+
+.dados__status svg {
+  flex: none;
+}
+
+.dados__status[data-tom='alta'] {
+  color: var(--cor-alta);
+}
+
+.dados__status[data-tom='acento'] {
+  color: var(--cor-atencao);
+}
+
+.dados__status[data-tom='queda'] {
+  color: var(--cor-queda);
+}
+
+/* Origens: três mini cartões de vidro, uma coluna no celular */
+.dados__origens {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--espaco-3);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.dados__cartao {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--espaco-1) var(--espaco-4);
+.dados__mini {
+  display: grid;
+  gap: var(--espaco-2);
+  align-content: start;
   min-width: 0;
-  padding: var(--espaco-4) 0;
-  border-top: 1px solid var(--cor-fio);
+  padding: var(--espaco-4) var(--espaco-5);
+  background: var(--vidro);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
 }
 
-.dados__cartao p {
+.dados__mini-icone {
+  display: inline-flex;
+  color: var(--cor-acento);
+}
+
+.dados__mini-titulo {
   margin: 0;
-  flex: 1 1 100%;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  line-height: 1.25;
+}
+
+.dados__mini p:last-child {
+  margin: 0;
+  font-size: var(--texto-sm);
   color: var(--cor-texto-suave);
 }
 
-.dados__cartao-titulo {
+/* Pacotes: uma coluna de linhas finas dentro do quadro */
+.dados__lista {
+  display: grid;
+  gap: var(--espaco-2);
+  list-style: none;
   margin: 0;
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-forte);
-  line-height: 1.25;
+  padding: 0;
+}
+
+/* Cada pacote é uma pastilha: nome à esquerda, quantidade à direita, na mesma linha */
+.dados__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  min-width: 0;
+  padding: var(--espaco-2) var(--espaco-3);
+  background: var(--vidro-base);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-2);
+}
+
+/* Ícone por estado: check (atualizado), traço (sem mudança) e alerta (sem número); o texto acessível diz o mesmo */
+.dados__item-icone {
+  flex: none;
+  color: var(--cor-alta);
+}
+
+.dados__item[data-selo='semMudanca'] .dados__item-icone {
+  color: var(--cor-texto-suave);
+}
+
+.dados__item[data-selo='ausente'] .dados__item-icone {
+  color: var(--cor-atencao);
+}
+
+.dados__item-corpo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dados__item-corpo p {
+  margin: 0;
+}
+
+.dados__item-nome {
+  font-size: var(--texto-base);
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
-.dados__icone {
-  color: var(--cor-acento);
-  flex: none;
+.dados__nota-item {
+  font-size: var(--texto-xs);
+  color: var(--cor-atencao);
 }
 
 .dados__quantidade {
+  flex: none;
   font-family: var(--fonte-numeros);
   font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-lg) * 0.92);
-  font-weight: 500;
+  font-size: var(--texto-sm);
   letter-spacing: -0.02em;
   color: var(--cor-texto);
   font-variant-numeric: tabular-nums slashed-zero;
-}
-
-/* Quantidade alinhada à direita, na mesma linha do nome */
-.dados__cartao .dados__quantidade {
-  flex: 0 0 auto;
-  margin-inline-start: auto;
+  white-space: nowrap;
 }
 
 .dados__arquivo,
 .dados__cru {
-  font-size: var(--texto-sm);
+  font-size: var(--texto-xs);
   color: var(--cor-texto-suave);
-  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
 .dados__cru {
   font-family: var(--fonte-numeros);
   font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-sm) * 0.92);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* Selos no pé da linha: ocupam a largura que sobra */
-.dados__selos {
-  display: flex;
-  flex: 1 1 100%;
-  flex-wrap: wrap;
-  gap: var(--espaco-2);
-}
-
-.dados__selos:empty {
-  display: none;
-}
-
-/* Avisos: resumo em lista curta, texto cru recolhido */
+/* Avisos: frases curtas, uma por linha */
 .dados__avisos,
 .dados__avisos-cru {
   list-style: none;
@@ -155,18 +245,13 @@
   padding: 0;
   max-width: 65ch;
   display: grid;
-  gap: var(--espaco-3);
+  gap: var(--espaco-2);
 }
 
-/* Aviso de coleta: fórmula de aviso (amarelo de atenção translúcido) */
 .dados__avisos li {
   display: flex;
   align-items: flex-start;
-  gap: var(--espaco-3);
-  padding: var(--espaco-4) var(--espaco-5);
-  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--cor-atencao) 32%, transparent);
-  border-radius: var(--raio-3);
+  gap: var(--espaco-2);
   color: var(--cor-texto);
 }
 
@@ -177,31 +262,88 @@
 
 .dados__avisos .dados__icone {
   margin-top: 0.15em;
+  color: var(--cor-atencao);
 }
 
-/* Avisos crus: cada aviso é um cartão com etiqueta da categoria e texto legível */
-.dados__avisos-cru {
+/* Cotinha ao lado dos avisos */
+.dados__avisos-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.dados__avisos-pavio {
+  flex: none;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+}
+
+/* Quadro "Como foi a coleta": horários em duas colunas, rótulo pequeno em cima e valor embaixo */
+.dados__coleta-fatos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+.dados__coleta-fatos > div {
+  min-width: 0;
+}
+
+.dados__coleta-fatos dt {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.dados__coleta-fatos dd {
+  margin: 0;
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+/* Quadro "Etapas da coleta": etiquetas em fileira */
+.dados__coleta-etapas {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dados__coleta-etapas li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--texto-xs);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pilula);
+  color: var(--cor-texto-suave);
+}
+
+.dados__coleta-etapas li[data-concluida='true'] svg {
+  color: var(--cor-alta);
+}
+
+/* Avisos crus com etiqueta de categoria (chip) e texto pequeno */
+.dados__avisos-cru {
+  gap: var(--espaco-3);
 }
 
 .dados__avisos-cru li {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--espaco-2) var(--espaco-3);
-  padding: var(--espaco-3) 0;
-  background: none;
-  border: 0;
-  border-top: 1px solid var(--cor-fio);
-  border-radius: 0;
+  gap: var(--espaco-1) var(--espaco-2);
   font-size: var(--texto-sm);
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--cor-texto);
 }
 
 .dados__etiqueta {
   flex-shrink: 0;
-  padding: 0.15em 0.6em;
+  padding: 0.1em 0.55em;
   border-radius: var(--raio-pilula);
   font-size: var(--texto-xs);
   font-weight: var(--peso-titulo);
@@ -256,77 +398,82 @@
   color: var(--cor-atencao);
 }
 
-.dados__detalhes {
-  margin-top: var(--espaco-4);
-  max-width: 65ch;
-}
-
-/* Summary com aparência de botão; o marcador nativo some e a seta gira ao abrir */
-.dados__detalhes > summary {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espaco-2);
-  min-height: 2.75rem;
-  padding: var(--espaco-2) var(--espaco-4);
-  color: var(--cor-texto);
-  border: 1px solid var(--cor-borda-forte);
-  border-radius: var(--raio-pilula);
-  cursor: pointer;
-  list-style: none;
-}
-
-.dados__detalhes > summary::-webkit-details-marker {
-  display: none;
-}
-
-.dados__detalhes > summary:hover {
-  background: var(--cor-superficie-2);
-}
-
-.dados__detalhes > summary svg {
-  flex-shrink: 0;
-  transition: transform 150ms var(--curva);
-}
-
-.dados__detalhes[open] > summary svg {
-  transform: rotate(180deg);
-}
-
-:root[data-movimento='reduzido'] .dados__detalhes > summary svg {
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dados__detalhes > summary svg {
-    transition: none;
-  }
-}
-
-.dados__detalhes > summary:focus-visible {
-  outline: 3px solid var(--cor-foco);
-  outline-offset: 2px;
-}
-
-.dados__detalhes > :not(summary) {
-  margin-top: var(--espaco-3);
-}
-
 .dados__nota {
+  margin: 0;
   color: var(--cor-texto-suave);
   font-size: var(--texto-sm);
 }
 
-/* Celular: o título e os fatos respiram menos, sem estourar a largura */
+/* Celular: o título e o cartão respiram menos, sem estourar a largura */
 @media (max-width: 479px) {
   .dados__titulo {
     font-size: var(--texto-2xl);
   }
 
-  .dados__resumo {
-    padding: var(--espaco-5);
+  .dados__ultima {
+    padding: var(--espaco-4);
   }
 
-  .dados__cartao {
-    padding: var(--espaco-3) 0;
+  .dados__coleta-fatos {
+    grid-template-columns: 1fr;
+  }
+
+  .dados__avisos-linha { align-items: flex-start; gap: var(--espaco-2); }
+  .dados__avisos-pavio { inline-size: 2.25rem; block-size: 2.25rem; }
+}
+
+/* Bloco da equipe (recolhido por padrão): quatro quadros de vidro, uma coluna no celular */
+.dados__equipe-texto {
+  margin: 0 0 var(--espaco-3);
+  color: var(--cor-texto-suave);
+}
+
+.dados__equipe-grade {
+  display: grid;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-3);
+}
+
+/* Quadro da equipe: o mesmo cartão de .dados__mini ("O que o site calcula"), sem brilho colorido */
+.dados__quadro {
+  display: grid;
+  align-content: start;
+  gap: var(--espaco-3);
+  min-width: 0;
+  padding: var(--espaco-4) var(--espaco-5);
+  background: var(--vidro);
+  border: 1px solid transparent;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--vidro-sombra);
+}
+
+.dados__quadro > .dados__subtitulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+}
+
+/* Pacotes em duas colunas dentro do quadro: a fileira de cima fica baixa, sem sobra ao lado dos avisos */
+.dados__quadro .dados__lista {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+}
+
+@media (min-width: 56rem) {
+  /* Terços: pacotes (2) + avisos (1) em cima; fatos (1) + etapas (2) embaixo. Alturas parecidas, sem sobra. */
+  .dados__equipe-grade {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dados__equipe-grade > :nth-child(1),
+  .dados__equipe-grade > :nth-child(4) {
+    grid-column: span 2;
+  }
+
+  /* Se um quadro sumir e sobrar número ímpar, o último ocupa a fileira toda */
+  .dados__equipe-grade > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .dados__coleta-fatos > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }

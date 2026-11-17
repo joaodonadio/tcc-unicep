@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   centesimosDoTom,
-  fechamentoAnterior,
   fracaoDe,
   linhaDoTempo,
   partesDoTom,
@@ -48,16 +47,6 @@ describe('partesDoTom', () => {
   });
 });
 
-describe('fechamentoAnterior', () => {
-  it('desfaz a variação do dia', () => {
-    expect(fechamentoAnterior(5.0333, 0.0026)).toBeCloseTo(5.0333 / 1.0026, 10);
-  });
-  it('sem valor, sem variação ou variação de −100%: null', () => {
-    expect(fechamentoAnterior(null, 0.01)).toBeNull();
-    expect(fechamentoAnterior(5, null)).toBeNull();
-    expect(fechamentoAnterior(5, -1)).toBeNull();
-  });
-});
 
 describe('fracaoDe e tetoVezes', () => {
   it('fração do módulo sobre o teto, presa em 1', () => {

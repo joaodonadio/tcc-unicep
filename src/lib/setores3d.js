@@ -93,6 +93,63 @@ export function proximoIndice(atual, passo, n) {
 }
 
 /**
+ * Pose do Cotinha ao lado da vitrine, pelo sinal do setor da frente (função pura, sem three).
+ * bracos: ângulos (rad) do braço esquerdo e do direito; encolhe: fração do corpo que some em altura;
+ * inclina: rad de curvar o Cotinha para a frente; pulo: se a troca para este setor dá um pulinho.
+ */
+export const POSE_PAVIO_NEUTRA = Object.freeze({ bracos: [-0.35, 0.35], encolhe: 0, inclina: 0, pulo: false });
+const POSES_PAVIO = {
+  alta: { bracos: [-2.6, 2.6], encolhe: 0, inclina: 0, pulo: true },
+  queda: { bracos: [-0.15, 0.15], encolhe: 0.12, inclina: 0.25, pulo: false },
+};
+/** Pose para o sinal ('alta' | 'queda' | 'estavel'); sem dado ou desconhecido, neutra. */
+export function poseDoPavio(sinal) {
+  return Object.hasOwn(POSES_PAVIO, sinal) ? POSES_PAVIO[sinal] : POSE_PAVIO_NEUTRA;
+}
+
+/** Pulinho do Cotinha: duração (s) e altura (unidades da cena). */
+export const DURACAO_PULO = 0.5;
+export const ALTURA_PULO = 0.14;
+/** Altura do pulinho t segundos depois de começar (parábola); 0 antes de começar e depois de acabar. */
+export function alturaDoPulo(t) {
+  if (!(t > 0) || t >= DURACAO_PULO) return 0;
+  const u = t / DURACAO_PULO;
+  return 4 * ALTURA_PULO * u * (1 - u);
+}
+
+/** Antecipação (agacha), salto e aterrissagem (amassa), em segundos; o salto é DURACAO_PULO. */
+export const DURACAO_ANTECIPA = 0.08;
+export const DURACAO_POUSO = 0.1;
+const AGACHA = 0.1;
+const ESTICA = 0.06;
+const AMASSA = 0.08;
+/**
+ * Forma do pulinho t segundos depois de começar: altura (unidades da cena) e escala Y do corpo (1 = normal).
+ * Agacha antes de sair, estica no início do salto, volta ao normal no ar e amassa ao pousar. Fora, neutro.
+ */
+export function formaDoPulo(t) {
+  if (!(t > 0)) return { altura: 0, escalaY: 1 };
+  if (t < DURACAO_ANTECIPA) {
+    const u = t / DURACAO_ANTECIPA;
+    return { altura: 0, escalaY: 1 - AGACHA * (1 - Math.cos(Math.PI * u)) * 0.5 };
+  }
+  const ar = t - DURACAO_ANTECIPA;
+  if (ar < DURACAO_PULO) {
+    const u = ar / DURACAO_PULO;
+    const escalaY =
+      u < 0.2
+        ? 1 - AGACHA + (AGACHA + ESTICA) * (u / 0.2)
+        : 1 + ESTICA * (1 - (u - 0.2) / 0.8);
+    return { altura: alturaDoPulo(ar), escalaY };
+  }
+  const pouso = ar - DURACAO_PULO;
+  if (pouso < DURACAO_POUSO) {
+    return { altura: 0, escalaY: 1 - AMASSA * Math.sin((Math.PI * pouso) / DURACAO_POUSO) };
+  }
+  return { altura: 0, escalaY: 1 };
+}
+
+/**
  * Um pedestal por setor, na ordem recebida (a da lista).
  * media, subiram e n vêm do setor; ausente vira null, nunca 0.
  * sinal: 'alta' | 'queda' | 'estavel' (sem dado vira 'estavel', com vazio true).

@@ -1,4 +1,5 @@
 import { GraficoInterativo } from '../graficos/GraficoInterativo.jsx';
+import { EsqueletoGrafico } from '../ui/Estados.jsx';
 import { mesAno } from '../../lib/datas.js';
 import { usePreferencias } from '../../context/contextos.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
@@ -13,7 +14,7 @@ const rotuloDoMes = (iso) => mesAno(iso.slice(0, 7));
 export function GraficoPagamentos({ datas, valores, carregando = false, erro = false }) {
   const { nivel } = usePreferencias();
   if (erro) return <p className="proventos-status">{TEXTOS.dia.proventosErro}</p>;
-  if (carregando) return <p className="proventos-status">{TEXTOS.dia.proventosCarregando}</p>;
+  if (carregando) return <EsqueletoGrafico altura="12rem" rotulo={TEXTOS.dia.proventosCarregando} />;
 
   const semPagamentos = valores.every((v) => v === 0);
 
@@ -21,6 +22,7 @@ export function GraficoPagamentos({ datas, valores, carregando = false, erro = f
     <div className="proventos-grafico">
       <GraficoInterativo
         modo="barras"
+        altura={192}
         series={[{ id: 'pagamentos', rotulo: TEXTOS.proventos.graficoRotulo, valores, cor: 'var(--cor-serie-1)' }]}
         datas={datas}
         formatar={(v) => String(v)}

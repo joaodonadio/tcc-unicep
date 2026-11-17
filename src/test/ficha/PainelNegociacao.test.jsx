@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react';
 import { PainelNegociacao } from '../../components/ficha/PainelNegociacao.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { numeroCompacto } from '../../lib/formato.js';
-import { TEXTOS } from '../../lib/textos.js';
+import { porNivel, TEXTOS } from '../../lib/textos.js';
 
 const estado = vi.hoisted(() => ({ resumo: null }));
 
@@ -61,5 +61,20 @@ describe('PainelNegociacao: como foi a negociação', () => {
     expect(screen.getByText(N.volumeAusente)).toBeInTheDocument();
     expect(screen.getByText(N.semOscilacao)).toBeInTheDocument();
     expect(screen.queryByText('0')).not.toBeInTheDocument();
+  });
+
+  it('número retido pela API (como na RAIZ4) mostra a nota de segurança', () => {
+    estado.resumo = {
+      volume: { total: { valor: 10300000, status: 'ok' }, mediana_20: { valor: null, status: 'historico_insuficiente' } },
+      volatilidade_20d: { valor: null, status: 'historico_insuficiente' },
+    };
+    renderizar(<PainelNegociacao ticker="RAIZ4" />);
+    expect(screen.getByText(porNivel(N.retido, 'simples'))).toBeInTheDocument();
+  });
+
+  it('com todos os números publicados, a nota não aparece', () => {
+    estado.resumo = { volume: VOLUME, volatilidade_20d: { valor: 0.0156, status: 'ok', posicao_pct: { valor: 0.5, status: 'ok' } } };
+    renderizar(<PainelNegociacao ticker="ABEV3" />);
+    expect(screen.queryByText(porNivel(N.retido, 'simples'))).not.toBeInTheDocument();
   });
 });

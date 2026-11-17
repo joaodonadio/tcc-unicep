@@ -1,15 +1,14 @@
-import { Building2, Landmark, Newspaper } from 'lucide-react';
-import { BotaoTermo } from '../ui/BotaoTermo.jsx';
+import { Cpu, Database, Download } from 'lucide-react';
 import { usePreferencias } from '../../context/contextos.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 
 const ORIGENS = [
-  { chave: 'b3', Icone: Building2, termo: 'b3' },
-  { chave: 'bancoCentral', Icone: Landmark },
-  { chave: 'finbert', Icone: Newspaper },
+  { chave: 'coleta', Icone: Download, brilho: 'dado' },
+  { chave: 'processamento', Icone: Cpu, brilho: 'aco' },
+  { chave: 'api', Icone: Database, brilho: 'lavanda' },
 ];
 
-/** De onde vem cada coisa: três cartões, um por fonte. */
+/** Por onde os dados passam: coleta, processamento e a API, que é a única fonte do site. */
 export default function OrigensDados({ nivelSecao = 2 }) {
   const { nivel } = usePreferencias();
   const Sub = `h${nivelSecao}`;
@@ -21,16 +20,18 @@ export default function OrigensDados({ nivelSecao = 2 }) {
       <Sub id="dados-origens" className="dados__subtitulo">
         {dados.secoes.origens}
       </Sub>
-      <ul className="dados__grade">
+      <ul className="dados__origens entra-cartoes">
         {ORIGENS.map((item) => {
-          const { chave, termo } = item;
+          const { chave, brilho } = item;
           const Icone = item.Icone;
           const origem = dados.origens[chave];
           return (
-            <li className="dados__cartao" key={chave}>
-              <Icone aria-hidden="true" size={22} className="dados__icone" />
-              <Cabeca className="dados__cartao-titulo">
-                {termo ? <BotaoTermo chave={termo}>{origem.titulo}</BotaoTermo> : origem.titulo}
+            <li className="dados__mini" data-brilho={brilho} key={chave}>
+              <span className="dados__mini-icone">
+                <Icone aria-hidden="true" size={20} />
+              </span>
+              <Cabeca className="dados__mini-titulo">
+                {origem.titulo}
               </Cabeca>
               <p>{porNivel(origem.texto, nivel)}</p>
             </li>

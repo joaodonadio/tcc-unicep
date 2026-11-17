@@ -69,4 +69,35 @@ describe('normalizarHistorico', () => {
       dias: [{ data_referencia: '2026-10-22' }],
     });
   });
+
+  it('formato do pacote sem dados: campos {valor, status} indisponíveis viram null, dia null vira lista vazia', () => {
+    const resp = {
+      registros: [
+        {
+          dia: null,
+          resumo: {
+            n_dias: 0,
+            taxa_acerto: { valor: null, status: 'indisponivel' },
+            acaso_media: { valor: null, status: 'indisponivel' },
+            acaso_faixa: null,
+            nota: 'ainda sem pregões',
+          },
+        },
+      ],
+    };
+    expect(normalizarHistorico(resp)).toEqual({
+      resumo: { nDias: 0, taxaAcerto: null, acasoMedia: null, acasoFaixa: null, nota: 'ainda sem pregões' },
+      dias: [],
+    });
+  });
+
+  it('campo {valor, status: ok} vira o número', () => {
+    const resp = {
+      resumo: { n_dias: 5, taxa_acerto: { valor: 0.55, status: 'ok' }, acaso_media: { valor: 0.5, status: 'ok' } },
+      dias: [],
+    };
+    const r = normalizarHistorico(resp);
+    expect(r.resumo.taxaAcerto).toBe(0.55);
+    expect(r.resumo.acasoMedia).toBe(0.5);
+  });
 });

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useMetaPublicacao } from '../../hooks/useMetaPublicacao.js';
 import { dataBR, dataHoraBR } from '../../lib/datas.js';
 import { AVISO_FIXO, TEXTOS } from '../../lib/textos.js';
+import Logo from '../ui/Logo.jsx';
 
 /**
  * RF-0.4 — rodapé permanente.
@@ -16,6 +17,12 @@ export function Rodape() {
   return (
     <footer className="rodape">
       <div className="pagina">
+        <div className="rodape-marca">
+          <Link to="/" aria-label={`${TEXTOS.marca.nome}: ${TEXTOS.cabecalho.paginas.hoje}`}>
+            <Logo />
+          </Link>
+          <p>{TEXTOS.rodape.assinatura}</p>
+        </div>
         <p className="aviso">{AVISO_FIXO}</p>
         <p>{TEXTOS.rodape.projeto}</p>
         {pregao && publicado && <p>{TEXTOS.rodape.dados(pregao, publicado)}</p>}

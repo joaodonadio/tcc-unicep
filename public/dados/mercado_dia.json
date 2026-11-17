@@ -50,6 +50,11 @@
         "status": "ok"
       },
       "cdi_data": "2026-10-21",
+      "selic_meta": {
+        "valor": 0.1375,
+        "status": "ok"
+      },
+      "selic_data": "2026-10-22",
       "ipca_12m": {
         "valor": 0.04576119675071877,
         "status": "ok"

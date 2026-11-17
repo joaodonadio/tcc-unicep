@@ -1,15 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import {
   acumuladoNaJanela,
+  agruparIndices,
+  periodosComNumero,
+  resumoDeSerie,
+  valorDoCard,
   alinharSeries,
-  buscarLinhas,
   completarIndicadores,
-  destaquePorSetor,
-  linhasDeVolume,
   periodosDaSerie,
   celulaHoje,
-  geometriaBarra,
   sinalDoTexto,
+  taxaCdiDoDia,
+  cdiAoAno,
+  selicDoPacote,
+  selicPeloCdi,
+  selicPelaSerieCdi,
+  textoPontos,
   tomDoSaldo,
   ultimoValor,
 } from '../../lib/mercadoTela.js';
@@ -106,13 +112,6 @@ describe('celulas e barras', () => {
     expect(celulaHoje({ valor: '—', delta: '—', sinal: 'flat' }).texto).toBe('—');
   });
 
-  it('a barra sai do meio para o lado do sinal, com largura proporcional até 50', () => {
-    expect(geometriaBarra(-2, 4)).toEqual({ lado: 'queda', largura: 25 });
-    expect(geometriaBarra(4, 4)).toEqual({ lado: 'alta', largura: 50 });
-    expect(geometriaBarra(0, 4)).toEqual({ lado: null, largura: 0 });
-    expect(geometriaBarra(null, 4)).toEqual({ lado: null, largura: 0 });
-  });
-
   it('sinal do texto e tom do saldo', () => {
     expect(sinalDoTexto('+1,0%')).toBe('up');
     expect(sinalDoTexto('−1,0%')).toBe('down');
@@ -174,32 +173,181 @@ describe('completarIndicadores', () => {
   });
 });
 
-describe('volume por ação', () => {
-  const resumos = [
-    { ticker: 'AAA3', volume: { total: { valor: 10, status: 'ok' } }, cotacao: {} },
-    { ticker: 'BBB3', volume: { total: { valor: 50, status: 'ok' } }, cotacao: {} },
-    { ticker: 'CCC3', volume: { total: { valor: 30, status: 'ok' } }, cotacao: {} },
-    { ticker: 'DDD3', cotacao: {} },
-  ];
-  const acoes = [
-    { ticker: 'AAA3', empresa: 'Alfa Ação', setor: 'Financeiro' },
-    { ticker: 'BBB3', empresa: 'Beta', setor: 'Financeiro' },
-    { ticker: 'CCC3', empresa: 'Gama', setor: 'Saúde' },
-    { ticker: 'DDD3', empresa: 'Delta', setor: 'Saúde' },
-  ];
+describe('cartões de índice', () => {
+  const ibov = { label: 'Ibovespa (pontos)', valor: '165.529', delta: '-1,4%', sinal: 'down', periodos: [
+    { rotulo: '1 mês', valor_texto: '−11,6%', sinal: 'down' },
+    { rotulo: '6 meses', valor_texto: null, sinal: 'flat' },
+    { rotulo: '1 ano', valor_texto: '+3,2%', sinal: 'up' },
+  ] };
+  const idiv = { label: 'IDIV', valor: '−0,9%', delta: 'variação do dia', sinal: 'flat', periodos: [
+    { rotulo: '1 mês', valor_texto: 'Indisponível', sinal: 'flat' },
+    { rotulo: '6 meses', valor_texto: 'Indisponível', sinal: 'flat' },
+    { rotulo: '1 ano', valor_texto: 'Indisponível', sinal: 'flat' },
+  ] };
 
-  it('ordena pelo maior volume e deixa sem volume no fim', () => {
-    expect(linhasDeVolume(resumos, acoes).map((l) => l.ticker)).toEqual(['BBB3', 'CCC3', 'AAA3', 'DDD3']);
+  it('agrupa os índices em Bolsa, Juros e inflação e Câmbio e petróleo, sem grupo vazio', () => {
+    const grupos = agruparIndices([ibov, idiv, { label: 'Dólar (R$)', valor: '5,03', delta: '+0,3%', sinal: 'up' }]);
+    expect(grupos.map((g) => g.titulo)).toEqual(['Bolsa', 'Câmbio e petróleo']);
+    expect(grupos[0].itens.map((i) => i.label)).toEqual(['Ibovespa (pontos)', 'IDIV']);
   });
 
-  it('o destaque de cada setor é o de maior volume, ordenado por volume', () => {
-    expect(destaquePorSetor(linhasDeVolume(resumos, acoes)).map((l) => l.ticker)).toEqual(['BBB3', 'CCC3']);
+  it('mostra só os períodos com número, sem "Indisponível" e sem 0', () => {
+    expect(periodosComNumero(ibov)).toEqual([
+      { rotulo: '1 mês', texto: '−11,6%', sinal: 'down', calculado: false },
+      { rotulo: '1 ano', texto: '+3,2%', sinal: 'up', calculado: false },
+    ]);
+    expect(periodosComNumero(idiv)).toEqual([]);
+    expect(periodosComNumero({ label: 'Brent' })).toEqual([]);
   });
 
-  it('a busca ignora acento e caixa, em ticker e empresa', () => {
-    const linhas = linhasDeVolume(resumos, acoes);
-    expect(buscarLinhas(linhas, 'ACAO').map((l) => l.ticker)).toEqual(['AAA3']);
-    expect(buscarLinhas(linhas, 'bbb').map((l) => l.ticker)).toEqual(['BBB3']);
-    expect(buscarLinhas(linhas, '')).toHaveLength(4);
+  it('valor de hoje com a unidade e variação do dia em pílula quando o pacote traz o nível', () => {
+    expect(valorDoCard(ibov)).toMatchObject({ grande: '165.529 pontos', dia: { texto: '-1,4%', sinal: 'down' }, sinalGrande: 'flat' });
+    const dolar = { label: 'Dólar (R$)', valor: '5,03', delta: '+0,3%', sinal: 'up' };
+    expect(valorDoCard(dolar).grande).toBe('R$ 5,03');
+  });
+
+  it('quando só há variação como valor (IDIV), o valor grande é ela, sem pílula, com a legenda do delta', () => {
+    expect(valorDoCard(idiv)).toEqual({
+      grande: '−0,9%',
+      legenda: 'variação do dia',
+      dia: null,
+      sinalGrande: 'down',
+      calculado: false,
+    });
+  });
+
+  it('IPCA com legenda "até" separa o valor da data', () => {
+    const ipca = { label: 'IPCA 12M', valor: '4,58% até set/2026', delta: 'inflação acumulada em 12 meses', sinal: 'flat' };
+    expect(valorDoCard(ipca)).toMatchObject({ grande: '4,58%', legenda: 'até set/2026' });
+  });
+
+  it('valor ausente vira grande null, nunca 0', () => {
+    expect(valorDoCard({ label: 'SMLL', valor: '—', delta: '—', sinal: 'flat' })).toMatchObject({ grande: null, legenda: null });
+  });
+});
+
+describe('série do dólar e do CDI', () => {
+  it('resumoDeSerie usa o primeiro e o último ponto com valor, e a variação entre eles', () => {
+    const r = resumoDeSerie({ datas: ['2026-10-01', '2026-10-02', '2026-10-05'], valores: [null, 5, 5.5] });
+    expect(r.inicio).toEqual({ data: '2026-10-02', valor: 5 });
+    expect(r.fim).toEqual({ data: '2026-10-05', valor: 5.5 });
+    expect(r.variacao).toBeCloseTo(0.1, 10);
+  });
+
+  it('série vazia ou sem valor não tem resumo', () => {
+    expect(resumoDeSerie(null)).toBeNull();
+    expect(resumoDeSerie({ datas: ['2026-10-01'], valores: [null] })).toBeNull();
+  });
+});
+
+describe('cdiAoAno', () => {
+  it('converte a taxa do dia para o ano em 252 dias úteis, com a data em dia e mês', () => {
+    const r = cdiAoAno({ cdi_dia: { valor: 0.00050788, status: 'ok' }, cdi_data: '2026-10-21' });
+    expect(r.texto).toBe('13,65%');
+    expect(r.valor).toBeCloseTo(0.1365, 4);
+    expect(r.data).toBe('21/10');
+  });
+
+  it('sem a taxa do dia devolve null (nunca 0), e sem data a data fica null', () => {
+    expect(cdiAoAno({})).toBeNull();
+    expect(cdiAoAno(null)).toBeNull();
+    expect(cdiAoAno({ cdi_dia: { valor: null, status: 'erro' } })).toBeNull();
+    expect(cdiAoAno({ cdi_dia: { valor: 0.0005, status: 'ok' } }).data).toBeNull();
+  });
+});
+
+describe('selicPeloCdi', () => {
+  it('soma 0,10 ponto ao CDI ao ano e arredonda ao múltiplo de 0,25', () => {
+    const r = selicPeloCdi({ cdi_dia: { valor: 0.00050788, status: 'ok' }, cdi_data: '2026-10-21' });
+    expect(r.texto).toBe('13,75%');
+    expect(r.valor).toBeCloseTo(0.1375, 6);
+    expect(r.cdi.texto).toBe('13,65%');
+    expect(r.data).toBe('21/10');
+  });
+
+  it('sem CDI devolve null', () => {
+    expect(selicPeloCdi({})).toBeNull();
+    expect(selicPeloCdi(null)).toBeNull();
+  });
+});
+
+describe('selicDoPacote', () => {
+  it('lê a meta publicada (fração ao ano) e a data dela', () => {
+    expect(selicDoPacote({ selic_meta: { valor: 0.1375, status: 'ok' }, selic_data: '2026-11-12' })).toEqual({
+      status: 'ok',
+      valor: 0.1375,
+      data: '2026-11-12',
+    });
+  });
+
+  it('desatualizada (status diferente de ok): indisponível, sem valor nem data', () => {
+    expect(selicDoPacote({ selic_meta: { valor: null, status: 'indisponivel' }, selic_data: null })).toEqual({
+      status: 'indisponivel',
+      valor: null,
+      data: null,
+    });
+  });
+
+  it('registro antigo sem o campo: sem dado, nunca 0', () => {
+    expect(selicDoPacote({ cdi_dia: { valor: 0.0005, status: 'ok' } })).toEqual({ status: 'sem_dado', valor: null, data: null });
+    expect(selicDoPacote(undefined)).toEqual({ status: 'sem_dado', valor: null, data: null });
+  });
+});
+
+describe('selicPelaSerieCdi', () => {
+  // índice que rende o CDI de uma taxa ao ano, um dia útil por ponto
+  const indice = (taxasAno) => {
+    const valores = [100];
+    for (const a of taxasAno) valores.push(valores.at(-1) * (1 + a) ** (1 / 252));
+    return valores;
+  };
+  const datas = (n) => Array.from({ length: n }, (_, i) => `2026-01-${String(i + 1).padStart(2, '0')}`);
+
+  it('converte o juro de cada dia em Selic e marca a data de cada mudança', () => {
+    const taxas = [0.149, 0.149, 0.149, 0.149, 0.1465, 0.1465, 0.1465, 0.1465];
+    const r = selicPelaSerieCdi({ datas: datas(9), valores: { indice_retorno_total: indice(taxas) } });
+    expect(r.valores).toEqual([0.15, 0.15, 0.15, 0.15, 0.1475, 0.1475, 0.1475, 0.1475]);
+    expect(r.datas[0]).toBe('2026-01-01');
+    expect(r.mudancas).toEqual([{ data: '2026-01-05', de: 0.15, para: 0.1475 }]);
+  });
+
+  it('um dia isolado com juro dobrado (feriado) não vira mudança', () => {
+    const taxas = [0.149, 0.149, 0.149, 0.32, 0.149, 0.149, 0.149];
+    const r = selicPelaSerieCdi({ datas: datas(8), valores: { indice_retorno_total: indice(taxas) } });
+    expect(new Set(r.valores)).toEqual(new Set([0.15]));
+    expect(r.mudancas).toEqual([]);
+  });
+
+  it('sem série ou com menos de dois dias de juro, null', () => {
+    expect(selicPelaSerieCdi(null)).toBeNull();
+    expect(selicPelaSerieCdi({ datas: datas(2), valores: { indice_retorno_total: [100, 100.05] } })).toBeNull();
+    expect(selicPelaSerieCdi({ datas: datas(3), valores: { indice_retorno_total: [100, null, 100.1] } })).toBeNull();
+  });
+});
+
+describe('textoPontos', () => {
+  it('diferença em pontos, com sinal, singular abaixo de 2', () => {
+    expect(textoPontos(-0.0125)).toBe('−1,25 ponto');
+    expect(textoPontos(0.025)).toBe('+2,50 pontos');
+    expect(textoPontos(null)).toBe('');
+  });
+});
+
+describe('taxaCdiDoDia', () => {
+  it('a fração do dia com quatro casas e o dia e mês da taxa', () => {
+    expect(taxaCdiDoDia({ cdi_dia: { valor: 0.00050788, status: 'ok' }, cdi_data: '2026-10-21' })).toEqual({
+      texto: '0,0508%',
+      data: '21/10',
+    });
+  });
+
+  it('sem o valor ok, null: a linha não aparece', () => {
+    expect(taxaCdiDoDia({ cdi_dia: { valor: null, status: 'indisponivel' }, cdi_data: '2026-10-21' })).toBeNull();
+    expect(taxaCdiDoDia({ cdi_data: '2026-10-21' })).toBeNull();
+    expect(taxaCdiDoDia(undefined)).toBeNull();
+  });
+
+  it('sem a data, o texto da taxa fica e a data vira null', () => {
+    expect(taxaCdiDoDia({ cdi_dia: { valor: 0.0005, status: 'ok' } })).toEqual({ texto: '0,0500%', data: null });
   });
 });

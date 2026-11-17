@@ -44,25 +44,11 @@ describe('agruparPorSetor', () => {
     expect(grupos[2].cairam).toBe(1);
   });
 
-  it('usa os dados do setor no dia quando houver', () => {
-    const grupos = agruparPorSetor(
-      [acao('AAA1', 'Setor A', -0.02), acao('BBB1', 'Setor B', 0.01)],
-      [{ setor: 'Setor A', variacao: 5, subiram: 3, caíram: 1 }],
-    );
-
-    expect(grupos[0].setor).toBe('Setor A');
-    expect(grupos[0].variacao_media).toBeCloseTo(0.05);
-    expect(grupos[0].subiram).toBe(3);
-    expect(grupos[0].cairam).toBe(1);
-  });
-
-  it('usa a média dos membros quando o setor não está em setoresDoDia', () => {
-    const grupos = agruparPorSetor(
-      [acao('AAA1', 'Setor A', 0.02), acao('AAA2', 'Setor A', null)],
-      [{ setor: 'Outro', variacao: 9, subiram: 1, caíram: 0 }],
-    );
+  it('a média e a contagem vêm só dos membros que têm variação', () => {
+    const grupos = agruparPorSetor([acao('AAA1', 'Setor A', 0.02), acao('AAA2', 'Setor A', null)]);
 
     expect(grupos[0].variacao_media).toBeCloseTo(0.02);
+    expect(grupos[0].total).toBe(1);
   });
 
   it('setor sem nenhuma variação fica com média null, e null vai por último', () => {
@@ -93,5 +79,16 @@ describe('agruparPorSetor', () => {
     ]);
 
     expect(grupos[0].acoes.map((a) => a.ticker)).toEqual(['DDD1', 'AAA1', 'BBB1', 'CCC1']);
+  });
+
+  it('variação suspeita (grupamento não ajustado) fica fora da média e do ranking', () => {
+    const grupos = agruparPorSetor([
+      acao('RAIZ4', 'Setor A', 89.33),
+      acao('BBB1', 'Setor A', 0.01),
+      acao('CCC1', 'Setor A', 0.03),
+    ]);
+
+    expect(grupos[0].variacao_media).toBeCloseTo(0.02);
+    expect(grupos[0].acoes.map((a) => a.ticker)).toEqual(['CCC1', 'BBB1', 'RAIZ4']);
   });
 });

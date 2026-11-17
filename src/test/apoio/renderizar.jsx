@@ -2,7 +2,6 @@ import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { PreferenciasProvider } from '../../context/PreferenciasProvider.jsx';
-import { ListaProvider } from '../../context/ListaProvider.jsx';
 
 /**
  * Renderiza com todos os providers da árvore. Cada chamada tem um QueryClient novo,
@@ -14,9 +13,7 @@ export function renderizar(ui, { rota = '/', ...opcoes } = {}) {
   const Envoltorio = ({ children }) => (
     <QueryClientProvider client={clienteQuery}>
       <PreferenciasProvider>
-        <ListaProvider>
-          <MemoryRouter initialEntries={[rota]}>{children}</MemoryRouter>
-        </ListaProvider>
+        <MemoryRouter initialEntries={[rota]}>{children}</MemoryRouter>
       </PreferenciasProvider>
     </QueryClientProvider>
   );

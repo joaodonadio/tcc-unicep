@@ -6,7 +6,7 @@ import { ErroRota } from './components/layout/ErroRota.jsx';
 
 /**
  * SPA com uma página por tema (ARQUITETURA-INTERFACE.md §4.1): Hoje (/), Mercado,
- * Ações, Proventos, Notícias, O modelo e Sobre os dados, além da ficha da ação
+ * Ações, Setores, Proventos, Notícias, O modelo e Sobre os dados, além da ficha da ação
  * (/acao/:ticker). A rota antiga /sugestoes vai para Ações; qualquer outro caminho
  * cai em Hoje.
  *

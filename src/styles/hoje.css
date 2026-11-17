@@ -7,7 +7,7 @@
   --vidro-base-hover: var(--vidro-base-translucido-hover);
 }
 
-/* O "Primeira vez aqui?" fica fora de .hoje, mas usa o mesmo vidro */
+/* O passeio rápido (ComoUsar) fica fora de .hoje, mas usa o mesmo vidro */
 .como-usar {
   --vidro-base: var(--vidro-base-translucido);
   --vidro-base-hover: var(--vidro-base-translucido-hover);
@@ -26,16 +26,21 @@
 @media (prefers-reduced-transparency: reduce) {
   .hoje,
   .como-usar {
-    --vidro-base: #141416;
-    --vidro-base-hover: #19191c;
+    --vidro-base: var(--vidro-base-opaco);
+    --vidro-base-hover: var(--vidro-base-opaco-hover);
   }
 
   .hoje .cartao,
   .hoje-numero,
   .hoje-bloco,
+  .hoje-fato,
   .como-usar {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+
+  .hoje-fato {
+    background: var(--vidro-base);
   }
 }
 
@@ -56,41 +61,54 @@
   line-height: 1.5;
 }
 
-/* Botão secundário: sub-superfície (não é cartão) */
-.hoje-ouvir {
-  display: inline-flex;
+/* Cotinha ao lado de uma frase (abertura, tom das notícias, proventos, vazio) */
+.hoje-resumo-linha,
+.hoje-tom-sintese-linha,
+.hoje-proximos-linha,
+.hoje-vazio-linha {
+  display: flex;
   align-items: center;
-  gap: var(--espaco-2);
+  gap: var(--espaco-3);
+}
+
+.hoje-resumo-linha .hoje-resumo,
+.hoje-tom-sintese-linha .hoje-tom-sintese,
+.hoje-vazio-linha .hoje-vazio {
+  margin: 0;
+  min-width: 0;
+}
+
+.hoje-pavio {
+  --pavio-tam: 3rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+  /* o corpo começa a 29% do quadro do desenho: puxa para a borda do corpo alinhar com o texto de cima */
+  margin-inline-start: calc(var(--pavio-tam) * -0.29);
+  margin-inline-end: calc(var(--pavio-tam) * -0.2);
+}
+
+.hoje-tom-sintese-linha {
   margin-top: var(--espaco-4);
-  min-height: 2.75rem;
-  padding: 0 var(--espaco-4);
-  border: 1px solid var(--sub-borda);
-  border-radius: var(--raio-pilula);
-  background: var(--sub-fundo);
-  box-shadow: var(--sub-luz);
-  color: var(--cor-texto);
-  font: inherit;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  cursor: pointer;
 }
 
-.hoje-ouvir[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--cor-acento) 42%, transparent);
-  color: var(--cor-acento);
-  background: color-mix(in srgb, var(--cor-acento) 9%, transparent);
+/* ao lado do resumo do dia o Cotinha é a reação ao pregão: maior, para a expressão ser lida */
+.hoje-resumo-linha .hoje-pavio {
+  --pavio-tam: 4rem;
 }
 
-.hoje-ouvir:hover {
-  border-color: var(--cor-borda-hover);
-  background: var(--sub-fundo-hover);
+/* Cotinha guardando a moeda: maior, para a moedinha e o brilho aparecerem */
+.hoje-proximos-linha .hoje-pavio {
+  --pavio-tam: 5rem;
+  /* a moeda ocupa a borda direita do quadro: respiro para não encostar na linha do tempo */
+  margin-inline-end: var(--espaco-5);
 }
 
-.hoje-ouvir:active {
-  background: var(--sub-fundo);
+.hoje-proximos-linha .hoje-tempo {
+  flex: 1;
+  min-width: 0;
 }
 
-.hoje-ouvir:focus-visible,
 .hoje-ver:focus-visible,
 .hoje-link:focus-visible {
   outline: 3px solid var(--cor-foco);
@@ -134,13 +152,14 @@
 /*
  * Os números do dia: cada indicador é um cartão de vidro próprio (receita em base.css).
  * A grade só organiza: 1 ou 2 colunas no celular, 2 no tablet, 3 no desktop (cinco indicadores; o de altas e quedas é largo e fecha a segunda linha).
- * Cada cartão tem a própria altura: abrir os detalhes de um não estica os vizinhos da fileira.
+ * Os cartões da mesma fileira têm a mesma altura (stretch): abrir os detalhes de um estica o vizinho junto, sem buraco.
+ * O mini gráfico fica no pé do cartão (margin-top: auto, mais abaixo).
  */
 .hoje-numeros {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
   gap: var(--espaco-4);
-  align-items: start;
+  align-items: stretch;
 }
 
 /* Cartão do indicador: título e botão em cima, número, variação e mini gráfico no pé; os detalhes abrem embaixo */
@@ -217,6 +236,15 @@
   color: var(--cor-texto-suave);
 }
 
+/* Período do número (ex.: "Nos últimos 12 meses"): visível na face, logo abaixo do valor, no mesmo tom da nota */
+.hoje-numero-periodo {
+  display: block;
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+  color: var(--cor-texto-suave);
+}
+
 /* Variação do KPI, embaixo do número: tamanho da legenda (sem o recuo de 0,92em) e peso 600 para leitura de idosos */
 .hoje-numero-nota .hoje-var[data-sinal] {
   font-size: var(--texto-sm);
@@ -228,35 +256,10 @@
   min-height: 1lh;
 }
 
-/* Mini gráfico: preso no pé do cartão */
+/* Mini gráfico: preso no pé do cartão; cresce com ele quando o vizinho da fileira abre, sem deixar vão */
 .hoje-numero .mini-grafico {
+  flex-grow: 1;
   margin-top: auto;
-}
-
-/* Dólar sem série: inclinação de dois pontos no pé, com "Antes R$ x" e "Hoje" embaixo */
-.hoje-inclinacao {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-1);
-  margin-top: auto;
-}
-
-.hoje-numero .hoje-inclinacao .mini-grafico {
-  margin-top: 0;
-}
-
-.hoje-inclinacao-rotulos {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--espaco-2);
-  font-size: var(--texto-xs);
-  line-height: 1.3;
-  color: var(--cor-texto-suave);
-}
-
-.hoje-inclinacao-rotulos .num {
-  font-size: 1em;
-  color: var(--cor-texto);
 }
 
 /* Altas e quedas: cartão largo (a matriz de pontos precisa de largura). Até 2 colunas, a linha toda */
@@ -416,13 +419,15 @@
 
 /* Os dois cartões da linha têm a mesma altura (grid estica). Dentro deles, o conteúdo
    ocupa a altura: o link do pé fica alinhado e o gráfico vem com a altura de 260px. */
-.hoje-duas > .hoje-bloco {
+.hoje-duas > .hoje-bloco,
+.hoje-trios > .hoje-bloco {
   display: flex;
   flex-direction: column;
 }
 
-/* Linhas compactas no topo; o link de cada cartão da linha fica no pé, alinhado entre os dois */
-.hoje-duas > .hoje-bloco > .hoje-ver {
+/* Linhas compactas no topo; o link de cada cartão da linha fica no pé, alinhado entre os cartões */
+.hoje-duas > .hoje-bloco > .hoje-ver,
+.hoje-trios > .hoje-bloco > .hoje-ver {
   margin-top: auto;
   padding-top: var(--espaco-2);
 }
@@ -478,20 +483,14 @@
   color: var(--cor-texto);
 }
 
-.hoje-texto,
-.hoje-nota,
 .hoje-vazio {
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.hoje-nota,
-.hoje-vazio {
   color: var(--cor-texto-suave);
   font-size: var(--texto-sm);
 }
 
-/* Lista vazia: o Pavio dormindo ao lado da frase */
+/* Lista vazia: o Cotinha dormindo ao lado da frase */
 .hoje-vazio-linha {
   display: flex;
   align-items: center;
@@ -499,16 +498,10 @@
 }
 
 .hoje-mascote {
+  flex: none;
   inline-size: 2.5rem;
   block-size: 2.5rem;
-}
-
-.hoje-texto {
-  margin-top: var(--espaco-3);
-}
-
-.hoje-nota {
-  margin-top: var(--espaco-1);
+  margin-inline-start: calc(2.5rem * -0.29);
 }
 
 /* Listas de linhas: fio fino entre elas, valor alinhado à direita */
@@ -549,66 +542,12 @@
   font-size: 0.92em;
 }
 
-.hoje-linha-empresa {
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-sm);
-  overflow-wrap: anywhere;
-  min-width: 0;
-}
-
 .hoje-linha-valor {
   margin-left: auto;
   font-weight: var(--peso-medio);
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
-}
-
-/* Destaques: a mesma grade em todas as linhas (rótulo | ticker e empresa | valor à direita) */
-.hoje-linha--grade {
-  display: grid;
-  grid-template-columns: 6.25rem minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: var(--espaco-1) var(--espaco-3);
-}
-
-.hoje-linha--grade .hoje-linha-rotulo {
-  min-width: 0;
-}
-
-.hoje-linha-quem {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--espaco-2);
-  min-width: 0;
-}
-
-.hoje-linha--grade .hoje-linha-valor {
-  margin-left: 0;
-  justify-self: end;
-}
-
-/* Cartão estreito: o rótulo vai para a linha de cima e o ticker fica com a empresa embaixo dele,
-   sem espremer o nome da empresa numa coluna fina. */
-@container (max-width: 22rem) {
-  .hoje-linha--grade {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .hoje-linha--grade .hoje-linha-rotulo {
-    grid-column: 1 / -1;
-  }
-
-  .hoje-linha--grade .hoje-linha-quem {
-    flex-direction: column;
-    gap: 0;
-  }
-}
-
-/* Linha sem rótulo (grupo "Muita gente negociando"): o ticker começa na borda, sem coluna vazia */
-.hoje-linha--grade.hoje-linha--sem-rotulo {
-  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 /* Subtítulo do grupo de volume: uma vez, antes das linhas dele */
@@ -805,6 +744,17 @@
   grid-column: 2;
 }
 
+/* nota de evento (ex.: eleição) embaixo, na largura toda: fora da coluna do eixo */
+.hoje-ibov-grafico .hoje-numero-nota {
+  grid-column: 1 / -1;
+  margin-top: var(--espaco-2);
+}
+
+/* o cursor vira mira: passar sobre a área mostra a data e o valor do dia */
+.hoje-ibov-grafico .mini-grafico {
+  cursor: crosshair;
+}
+
 /* Destaques: rótulo | ticker | barra | valor numa linha só */
 .hoje-destaque {
   display: grid;
@@ -952,36 +902,6 @@
   color: var(--cor-texto);
 }
 
-/* Ações guardadas: ticker | mini linha | variação */
-.hoje-guardada {
-  display: grid;
-  grid-template-columns: minmax(4.5rem, auto) minmax(3rem, 1fr) minmax(4.5rem, auto);
-  align-items: center;
-  gap: var(--espaco-3);
-  padding: var(--espaco-2) 0;
-  border-top: 1px solid var(--cor-fio);
-}
-
-.hoje-guardada:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.hoje-guardada .mini-grafico {
-  min-width: 0;
-}
-
-.hoje-guardada-valor {
-  justify-self: end;
-  white-space: nowrap;
-}
-
-.hoje-guardada-sem {
-  justify-self: end;
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-sm);
-}
-
 /*
  * Top 5 para estudar hoje: cartão de vidro com mancha de destaque (data-brilho="acento" no JSX).
  * A partir de 900px: lista à esquerda, que estica até a altura do palco, e o palco ao lado, separados por um fio.
@@ -1021,6 +941,19 @@
   color: var(--cor-acento);
 }
 
+/* selo "em avaliação": o Top 5 vem do modelo experimental */
+.top5-selo {
+  margin: 0 0 var(--espaco-3);
+  color: var(--cor-acento);
+}
+
+/* avisos do modelo no painel "Como escolhemos" */
+.top5-avisos {
+  margin: var(--espaco-3) 0 0;
+  padding-left: var(--espaco-5);
+  font-size: var(--texto-sm);
+}
+
 .top5-apoio {
   margin: 0;
   max-width: 60ch;
@@ -1040,27 +973,21 @@
   gap: var(--espaco-4);
 }
 
-/* Faixa de pílulas (até 899px): rola na horizontal, encaixa em cada pílula e esconde a barra.
-   A margem negativa compensa o recuo, para o anel de foco não ser cortado */
+/* Até 899px as cinco ações ficam todas à vista, em grade: 3 + 2 no celular, 5 lado a lado no tablet */
 .top5-lista {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--espaco-2);
-  margin: -6px;
-  padding: 6px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
-.top5-lista::-webkit-scrollbar {
-  display: none;
-}
-
 .top5-lista > li {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
+  display: grid;
+  grid-column: span 2;
+  min-width: 0;
 }
 
 /* Item: sub-superfície; o escolhido ganha o véu de hover e a aresta branca translúcida */
@@ -1106,11 +1033,10 @@
   box-sizing: border-box;
   margin: 0;
   border: 1px solid var(--cor-acento-borda);
-  border-radius: var(--raio-pilula);
+  border-radius: var(--raio-3);
   background: var(--sub-fundo-hover);
   opacity: 0;
   pointer-events: none;
-  scroll-snap-align: none;
 }
 
 .top5-lista[data-indicador='ligado'] > .top5-indicador {
@@ -1215,6 +1141,57 @@
   border-top: 1px solid var(--cor-fio);
 }
 
+/* Cartão compacto da grade: posição ao lado, código em cima e variação embaixo */
+@media (max-width: 899px) {
+  .top5-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0 var(--espaco-1);
+    width: 100%;
+    padding: var(--espaco-2) var(--espaco-1);
+    border-radius: var(--raio-3);
+  }
+
+  .top5-pos {
+    grid-row: 1 / span 2;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--texto-xs);
+  }
+
+  .top5-ticker {
+    font-size: var(--texto-sm);
+  }
+
+  .top5-item > :nth-child(3) {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .top5-item .hoje-var,
+  .top5-item .hoje-var[data-sinal] {
+    padding: 0;
+    background: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .top5-lista:has(> li:nth-child(6):last-child) > li:nth-last-child(-n + 2) {
+    grid-column: span 3;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .top5-lista {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .top5-lista > li {
+    grid-column: auto;
+  }
+}
+
 @media (min-width: 900px) {
   .top5-grade {
     grid-template-columns: minmax(15rem, 2fr) minmax(0, 3fr);
@@ -1224,21 +1201,13 @@
 
   /* a lista ocupa a altura do palco: cada cartão é uma linha de mesma altura */
   .top5-lista {
-    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 1fr;
     gap: var(--espaco-3);
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    scroll-snap-type: none;
   }
 
   .top5-lista > li {
-    display: grid;
-  }
-
-  .top5-lista > .top5-indicador {
-    border-radius: var(--raio-3);
+    grid-column: auto;
   }
 
   /* Cartão: posição | código e empresa | variação no topo; o motivo principal no pé (o cartão estica com o palco) */
@@ -1461,7 +1430,7 @@
   font-weight: var(--peso-medio);
 }
 
-/* Pavio ao lado da frase-resumo, centrado nela */
+/* Cotinha ao lado da frase-resumo, centrada nela */
 .top5-resumo-linha {
   display: flex;
   align-items: center;
@@ -1477,18 +1446,13 @@
   block-size: 2.75rem;
 }
 
-/* Espera do Top 5: o Pavio pensando, com a frase de carregamento ao lado */
+/* Espera do Top 5: o loader centralizado, com a altura da lista reservada abaixo */
 .top5-carregando {
   display: flex;
   align-items: center;
-  gap: var(--espaco-3);
+  justify-content: center;
+  min-height: 2.5rem;
   margin-bottom: var(--espaco-4);
-}
-
-.top5-carregando p {
-  margin: 0;
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-sm);
 }
 
 /* Pontos das regras: cada um é uma linha de sub-superfície que abre a explicação logo abaixo */
@@ -1621,7 +1585,14 @@
 .top5-objeto {
   display: flex;
   flex: 1 1 auto;
-  min-height: 12rem;
+  /* mesma altura em todos os objetos, com ou sem desenho: a página não mexe ao trocar de aba */
+  min-height: 29.25rem;
+}
+
+/* legenda de uma ou duas linhas ocupa o mesmo espaço */
+.top5-objeto .modelo3d-rodape {
+  min-block-size: 4rem;
+  align-content: flex-start;
 }
 
 /* No Top 5 o objeto ocupa a largura do painel: frase, quadro e rodapé empilhados (vence o grid de modelos3d.css) */
@@ -1660,8 +1631,16 @@
 }
 
 @media (max-width: 599px) {
+  .top5-objeto {
+    min-height: 26rem;
+  }
+
   .top5-objeto .modelo3d-palco {
     block-size: 15rem;
+  }
+
+  .top5-objeto .modelo3d-frase {
+    min-block-size: 3lh;
   }
 }
 
@@ -1696,4 +1675,146 @@
   .top5-abas-painel > .top5-aba-indicador {
     border-radius: var(--raio-3);
   }
+}
+
+/* Resumo do pregão: frase-guia e fileira de fatos em sub-superfícies */
+.hoje-resumo-linha .hoje-lead {
+  margin: 0;
+  min-width: 0;
+}
+
+.hoje-lead {
+  max-width: 60ch;
+  font-size: var(--texto-lg);
+  line-height: 1.5;
+  color: var(--cor-texto);
+}
+
+.hoje-lead-var[data-sinal='up'] {
+  color: var(--cor-alta);
+}
+
+.hoje-lead-var[data-sinal='down'] {
+  color: var(--cor-queda);
+}
+
+.hoje-lead-var[data-sinal='flat'] {
+  color: var(--cor-estavel);
+}
+
+.hoje-fatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--espaco-3);
+  /* sem recuo: as placas alinham com o título e ocupam a largura toda */
+  margin: var(--espaco-5) 0 0;
+  padding: 0;
+}
+
+.hoje-fato {
+  display: grid;
+  align-content: start;
+  gap: var(--espaco-2);
+  min-width: 0;
+  margin: 0;
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--vidro-base-translucido);
+  -webkit-backdrop-filter: var(--vidro-desfoque);
+  backdrop-filter: var(--vidro-desfoque);
+  border: 1px solid var(--cor-borda);
+  box-shadow: var(--sub-luz);
+  border-radius: var(--raio-3);
+}
+
+.hoje-fato dt {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* palavras na Next; só os números (span.num) vão na Mono */
+.hoje-fato dd {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.hoje-fato dd .num {
+  font-family: var(--fonte-numeros);
+}
+
+.hoje-fato-par {
+  white-space: nowrap;
+}
+
+.hoje-fato-ponto {
+  color: var(--cor-texto-suave);
+}
+
+.hoje-fato-par [data-parte='alta'] {
+  color: var(--cor-alta);
+}
+
+.hoje-fato-par [data-parte='queda'] {
+  color: var(--cor-queda);
+}
+
+.hoje-fato-par [data-parte='estavel'] {
+  color: var(--cor-estavel);
+}
+
+.hoje-fato-empresa {
+  margin: 0;
+  font-size: var(--texto-sm);
+  font-weight: 400;
+  color: var(--cor-texto-suave);
+}
+
+/* Régua fina de proporção: só cor, sem texto (o texto do fato já traz os números) */
+.hoje-fato-regua {
+  display: flex;
+  block-size: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--sub-fundo-hover);
+}
+
+.hoje-fato-regua > span {
+  flex-basis: 0;
+  min-inline-size: 0;
+}
+
+.hoje-fato-regua > [data-parte='alta'] {
+  background: var(--cor-alta);
+}
+
+.hoje-fato-regua > [data-parte='estavel'] {
+  background: var(--cor-estavel);
+}
+
+.hoje-fato-regua > [data-parte='queda'] {
+  background: var(--cor-queda);
+}
+
+@media (max-width: 640px) {
+  .hoje-fatos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular: com número ímpar de fatos, o primeiro ocupa a linha toda e nada fica solto no fim */
+@media (max-width: 640px) {
+  .hoje-fato:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Tablet: cinco fatos em duas fileiras completas (2 + 3); quatro em 2 + 2 */
+@media (min-width: 641px) and (max-width: 960px) {
+  .hoje-fatos { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .hoje-fato { grid-column: span 2; }
+  .hoje-fato:first-child:nth-last-child(5),
+  .hoje-fato:first-child:nth-last-child(5) + .hoje-fato,
+  .hoje-fato:first-child:nth-last-child(4),
+  .hoje-fato:first-child:nth-last-child(4) ~ .hoje-fato { grid-column: span 3; }
 }

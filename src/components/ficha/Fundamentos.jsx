@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useProventos } from '../../hooks/useDados.js';
 import { BotaoTermo } from '../ui/BotaoTermo.jsx';
-import { Linhas } from '../ui/Estados.jsx';
+import { Carregador, Linhas } from '../ui/Estados.jsx';
 import { dataBR } from '../../lib/datas.js';
 import { EXPLICACOES } from '../../lib/explicacoes.js';
 import { montarIndicadoresFicha } from '../../lib/fichaIndicadores.js';
@@ -85,7 +85,7 @@ export function Fundamentos({ ticker, resumo, carregando }) {
 
       <ul className="ficha-datas" aria-label={F.datas}>
         <li>{textoBalanco(resumo?.balanco_referencia)}</li>
-        <li>{textoProximo(proventos)}</li>
+        <li>{proventos.isPending ? <Carregador compacto rotulo={F.proventoCarregando} /> : textoProximo(proventos)}</li>
       </ul>
     </section>
   );

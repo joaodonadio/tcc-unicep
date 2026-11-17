@@ -48,7 +48,6 @@ describe('PainelHoje', () => {
     expect(await screen.findByRole('heading', { level: 2, name: porNivel(TEXTOS.hoje.destaquesTitulo, 'simples') })).toBeInTheDocument();
     expect(await screen.findByRole('heading', { level: 2, name: porNivel(TEXTOS.hoje.proventosTitulo, 'simples') })).toBeInTheDocument();
     expect(await screen.findByRole('heading', { level: 2, name: porNivel(TEXTOS.hoje.noticiasTitulo, 'simples') })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { level: 2, name: porNivel(TEXTOS.hoje.minhaListaTitulo, 'simples') })).toBeInTheDocument();
   });
 
   it('leva às páginas completas pelos links "Ver"', async () => {
@@ -59,9 +58,5 @@ describe('PainelHoje', () => {
     expect(await screen.findByRole('link', { name: TEXTOS.hoje.verAcoes })).toHaveAttribute('href', '/acoes');
     expect(await screen.findByRole('link', { name: TEXTOS.hoje.verProventos })).toHaveAttribute('href', '/proventos');
     expect(await screen.findByRole('link', { name: TEXTOS.hoje.verNoticias })).toHaveAttribute('href', '/noticias');
-    expect(await screen.findByRole('link', { name: TEXTOS.hoje.verMinhaLista })).toHaveAttribute(
-      'href',
-      '/acoes?filtro=minha',
-    );
   });
 });

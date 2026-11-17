@@ -1,5 +1,7 @@
 import { TEXTOS } from '../../lib/textos.js';
 import { comOpacidade, resolverCor, temaGraficos } from '../../lib/temaGraficos.js';
+import { itensMarcaEvento } from '../../lib/eventosMercado.js';
+import { DURACAO_LINHA_NOVA, DURACAO_REESCALA, animacaoGrafico, transicaoBalao } from '../../lib/animacaoGraficos.js';
 
 /** Monta as opções do ECharts a partir das props do GraficoInterativo (função pura, sem DOM além dos tokens CSS). */
 
@@ -62,6 +64,8 @@ export function montarOpcao({
   rotulosX,
   corPorSinal,
   animar,
+  trocaSuave = false,
+  eventos = [],
 }) {
   const tema = temaGraficos();
   const horizontal = modo === 'barrasHorizontais';
@@ -136,13 +140,14 @@ export function montarOpcao({
           },
         };
       }
-      if (linhaZero && idx === 0) {
+      // linha de zero e marcas de evento dividem o markLine da primeira série
+      if (idx === 0 && (linhaZero || eventos.length)) {
         item.markLine = {
           silent: true,
           symbol: 'none',
           label: { show: false },
           lineStyle: { color: tema.borda, type: 'solid', width: 1 },
-          data: [{ yAxis: 0 }],
+          data: [...(linhaZero ? [{ yAxis: 0 }] : []), ...itensMarcaEvento(eventos, tema.suave)],
         };
       }
       return item;
@@ -187,7 +192,8 @@ export function montarOpcao({
     const topo = escapar(nomeEixo(rotulosEixo[lista0[0].dataIndex]));
     const linhas = lista0
       .map((p) => {
-        const s = lista[p.seriesIndex] ?? lista[0];
+        // com trocaSuave o índice da série pode não seguir a ordem da lista: o id é o que vale
+        const s = lista.find((item) => String(item.id) === p.seriesId) ?? lista[p.seriesIndex] ?? lista[0];
         const v = p.data !== null && typeof p.data === 'object' ? p.data.value : p.data;
         const cor = typeof p.color === 'string' ? p.color : resolverCor(s.cor);
         return linhaTooltip(tema, cor, s.rotulo, fmtValor(v), lista.length > 1);
@@ -198,6 +204,7 @@ export function montarOpcao({
 
   const tooltip = {
     ...tooltipBase(tema, formatter),
+    ...transicaoBalao(animar),
     axisPointer:
       modo === 'linha'
         ? { type: 'line', lineStyle: { color: comOpacidade(tema.suave, 0.45), width: 1, type: 'solid' } }
@@ -205,8 +212,7 @@ export function montarOpcao({
   };
 
   return {
-    animation: animar,
-    animationDuration: 500,
+    ...(trocaSuave ? animacaoGrafico(animar, DURACAO_LINHA_NOVA, DURACAO_REESCALA) : animacaoGrafico(animar)),
     textStyle: { fontFamily: tema.fonteTexto },
     grid: horizontal
       ? { left: 8, right: 56, top: 8, bottom: 8, containLabel: true }

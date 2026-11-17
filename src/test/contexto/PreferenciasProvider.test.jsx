@@ -28,16 +28,13 @@ function mudarSistema(reduz) {
   act(() => ouvintes.forEach((fn) => fn({ matches: reduz })));
 }
 
-/** Mostra o movimento efetivo e oferece os três botões de preferência. */
+/** Mostra o movimento escolhido (ou o inicial do sistema) e o efetivo, e oferece os dois botões. */
 function Sonda() {
   const { movimento, movimentoReduzido, definirMovimento } = usePreferencias();
   return (
     <div>
-      <p aria-label="Movimento salvo">{movimento}</p>
+      <p aria-label="Movimento">{movimento}</p>
       <p aria-label="Movimento efetivo">{movimentoReduzido ? 'reduzido' : 'livre'}</p>
-      <button type="button" onClick={() => definirMovimento('sistema')}>
-        pedir sistema
-      </button>
       <button type="button" onClick={() => definirMovimento('ligadas')}>
         pedir ligadas
       </button>
@@ -56,6 +53,7 @@ const montar = () =>
   );
 
 const efetivo = () => screen.getByLabelText('Movimento efetivo').textContent;
+const movimentoMostrado = () => screen.getByLabelText('Movimento').textContent;
 const salvo = () => JSON.parse(localStorage.getItem(CHAVE));
 
 beforeEach(() => {
@@ -68,25 +66,27 @@ afterEach(() => {
 });
 
 describe('PreferenciasProvider: Animações', () => {
-  it('o padrão segue o sistema: com movimento reduzido no sistema, o site fica parado', () => {
+  it('sem escolha, o inicial é desligadas quando o sistema pede menos movimento', () => {
     mockarSistema(true);
     montar();
-    expect(screen.getByLabelText('Movimento salvo')).toHaveTextContent('sistema');
+    expect(movimentoMostrado()).toBe('desligadas');
     expect(efetivo()).toBe('reduzido');
     expect(document.documentElement.dataset.movimento).toBe('reduzido');
   });
 
-  it('o padrão segue o sistema: sem pedido de menos movimento, o site fica livre', () => {
+  it('sem escolha, o inicial é ligadas quando o sistema não pede menos movimento', () => {
     mockarSistema(false);
     montar();
+    expect(movimentoMostrado()).toBe('ligadas');
     expect(efetivo()).toBe('livre');
     expect(document.documentElement.dataset.movimento).toBe('livre');
   });
 
-  it('a mudança do sistema com o site aberto vale no modo sistema', () => {
+  it('sem escolha, a mudança do sistema com o site aberto vale', () => {
     mockarSistema(false);
     montar();
     mudarSistema(true);
+    expect(movimentoMostrado()).toBe('desligadas');
     expect(efetivo()).toBe('reduzido');
     expect(document.documentElement.dataset.movimento).toBe('reduzido');
   });
@@ -117,15 +117,39 @@ describe('PreferenciasProvider: Animações', () => {
     unmount();
 
     montar();
-    expect(screen.getByLabelText('Movimento salvo')).toHaveTextContent('desligadas');
+    expect(movimentoMostrado()).toBe('desligadas');
     expect(efetivo()).toBe('reduzido');
   });
 
-  it('um valor inválido salvo volta para o padrão sistema', () => {
+  it('a escolha salva prevalece sobre a preferência do sistema', () => {
+    localStorage.setItem(CHAVE, JSON.stringify({ nivel: 'simples', zoom: 1, movimento: 'ligadas' }));
+    mockarSistema(true);
+    montar();
+    expect(movimentoMostrado()).toBe('ligadas');
+    expect(efetivo()).toBe('livre');
+  });
+
+  it('a preferência antiga "sistema" é migrada para o cálculo do sistema (reduzido)', () => {
+    localStorage.setItem(CHAVE, JSON.stringify({ nivel: 'simples', zoom: 1, movimento: 'sistema' }));
+    mockarSistema(true);
+    montar();
+    expect(movimentoMostrado()).toBe('desligadas');
+    expect(efetivo()).toBe('reduzido');
+  });
+
+  it('a preferência antiga "sistema" é migrada para o cálculo do sistema (livre)', () => {
+    localStorage.setItem(CHAVE, JSON.stringify({ nivel: 'simples', zoom: 1, movimento: 'sistema' }));
+    mockarSistema(false);
+    montar();
+    expect(movimentoMostrado()).toBe('ligadas');
+    expect(efetivo()).toBe('livre');
+  });
+
+  it('um valor inválido salvo conta como "nunca escolheu" e segue o sistema', () => {
     localStorage.setItem(CHAVE, JSON.stringify({ nivel: 'tecnico', movimento: 'turbo' }));
     mockarSistema(false);
     montar();
-    expect(screen.getByLabelText('Movimento salvo')).toHaveTextContent('sistema');
+    expect(movimentoMostrado()).toBe('ligadas');
     expect(efetivo()).toBe('livre');
   });
 
@@ -138,9 +162,10 @@ describe('PreferenciasProvider: Animações', () => {
 });
 
 describe('PreferenciasProvider: sem matchMedia (ambiente de teste)', () => {
-  it('não quebra e considera o movimento livre no padrão', () => {
+  it('não quebra e considera o movimento livre no inicial', () => {
     delete window.matchMedia;
     montar();
+    expect(movimentoMostrado()).toBe('ligadas');
     expect(efetivo()).toBe('livre');
   });
 });

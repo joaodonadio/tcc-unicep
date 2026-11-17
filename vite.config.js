@@ -2,6 +2,8 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { proventosAgregados } from './scripts/proventosAgregados.mjs';
+import { dolarHistorico } from './scripts/dolarHistorico.mjs';
+import { seriesSemana } from './scripts/seriesSemana.mjs';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -21,7 +23,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), proventosAgregados(env)],
+    plugins: [react(), proventosAgregados(env), dolarHistorico(env), seriesSemana(env)],
     resolve: {
       alias: { '@': path.resolve(process.cwd(), 'src') },
     },

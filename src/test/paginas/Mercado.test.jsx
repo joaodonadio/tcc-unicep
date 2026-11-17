@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import Mercado from '../../pages/Mercado.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
@@ -10,15 +10,14 @@ describe('Mercado', () => {
     instalarFetchDados();
   });
 
-  it('mostra o título da página, não tem mais a aba Setores e leva à página de setores pela aba Destaques', async () => {
+  it('mostra o título da página, os índices, o dólar e os juros, sem abas nem destaques', async () => {
     const { container } = renderizar(<Mercado />);
 
     expect(screen.getByRole('heading', { level: 1, name: TEXTOS.mercado.titulo })).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: /setores/i })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('tab', { name: TEXTOS.mercado.abas.destaques }));
-    expect(await screen.findByRole('link', { name: TEXTOS.setores.verTodos })).toHaveAttribute('href', '/setores');
-
+    expect(await screen.findByRole('heading', { level: 2, name: TEXTOS.mercado.indicesTitulo })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: TEXTOS.mercado.juros.tituloSerie.simples }, { timeout: 4000 })).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ver todos os setores')).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 });

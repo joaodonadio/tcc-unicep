@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ChartCandlestick, Ellipsis, House, LayoutGrid, List, TrendingUp } from 'lucide-react';
+import { ChartCandlestick, Ellipsis, House, LayoutGrid, TrendingUp } from 'lucide-react';
 import { useMetaPublicacao } from '../../hooks/useMetaPublicacao.js';
-import { useMinhaLista } from '../../context/contextos.js';
+import { usePresenca } from '../../hooks/usePresenca.js';
 import { dataBR } from '../../lib/datas.js';
 import { TEXTO_EXECUCAO, TEXTOS } from '../../lib/textos.js';
 import ControlesLeitura from './ControlesLeitura.jsx';
-import Mascote from '../ui/Mascote.jsx';
+import Logo from '../ui/Logo.jsx';
 
 /**
  * Páginas do menu, na ordem em que aparecem. Hoje é a rota "/", então usa end para não ficar ativa nas outras.
@@ -26,12 +26,13 @@ const PAGINAS = [
 
 const EXTRAS = PAGINAS.filter((pagina) => pagina.extra);
 
-/** Cabeçalho fixo: marca, páginas, minha lista e leitura. O aviso de atualização só aparece quando algo falhou. */
+/** Cabeçalho fixo: marca, páginas e leitura. O aviso de atualização só aparece quando algo falhou. */
 export default function Cabecalho() {
   const { data: analise } = useMetaPublicacao();
-  const { total } = useMinhaLista();
   const { pathname } = useLocation();
   const [maisAberto, setMaisAberto] = useState(false);
+  // o menu fica montado até a saída terminar (usePresenca)
+  const menuPresente = usePresenca(maisAberto);
   const refMais = useRef(null);
   const refBotaoMais = useRef(null);
 
@@ -65,16 +66,15 @@ export default function Cabecalho() {
   return (
     <header className="cabecalho">
       <div className="cabecalho__linha pagina">
-        <Link className="cabecalho__marca" to="/">
-          <Mascote humor="neutro" acao="ocioso" className="cabecalho__mascote" />
-          {TEXTOS.cabecalho.identificacao}
+        <Link className="cabecalho__marca" to="/" viewTransition>
+          <Logo />
         </Link>
 
         <nav className="cabecalho__nav" aria-label={TEXTOS.cabecalho.navegacao}>
           <ul>
             {PAGINAS.map(({ id, caminho, end, extra, Icone }) => (
               <li key={id} data-extra={extra ? 'true' : undefined}>
-                <NavLink className="cabecalho__ancora" to={caminho} end={end}>
+                <NavLink className="cabecalho__ancora" to={caminho} end={end} viewTransition>
                   {Icone && (
                     <Icone className="cabecalho__icone" aria-hidden="true" focusable="false" />
                   )}
@@ -95,11 +95,16 @@ export default function Cabecalho() {
                 <Ellipsis className="cabecalho__icone" aria-hidden="true" focusable="false" />
                 {TEXTOS.cabecalho.mais}
               </button>
-              {maisAberto && (
-                <ul id="menu-mais" className="cabecalho__menu-mais">
+              {menuPresente && (
+                <ul
+                  id="menu-mais"
+                  className="cabecalho__menu-mais"
+                  data-estado={maisAberto ? 'entrando' : 'saindo'}
+                  inert={maisAberto ? undefined : ''}
+                >
                   {EXTRAS.map(({ id, caminho }) => (
                     <li key={id}>
-                      <NavLink className="cabecalho__ancora" to={caminho}>
+                      <NavLink className="cabecalho__ancora" to={caminho} viewTransition>
                         {TEXTOS.cabecalho.paginas[id]}
                       </NavLink>
                     </li>
@@ -111,27 +116,20 @@ export default function Cabecalho() {
         </nav>
 
         <div className="cabecalho__acoes">
-          {statusTexto && (
-            <p className="pilula cabecalho__alerta" data-tom="acento" role="status">
-              {statusTexto}
-            </p>
-          )}
-          <Link
-            className="cabecalho__lista"
-            to={{ pathname: '/acoes', search: '?filtro=minha' }}
-            aria-label={TEXTOS.cabecalho.contadorLista(total)}
-            title={TEXTOS.cabecalho.contadorLista(total)}
-          >
-            <List size={20} aria-hidden="true" focusable="false" />
-            {total > 0 && (
-              <span className="cabecalho__selo" aria-hidden="true">
-                {total}
-              </span>
-            )}
-          </Link>
           <ControlesLeitura />
         </div>
       </div>
+      {/* aviso de atualização numa faixa própria: não disputa espaço com o menu nem com Leitura */}
+      {statusTexto && (
+        <div className="cabecalho__aviso" role="status">
+          <p className="pagina">
+            <span>{statusTexto}</span>{' '}
+            <Link to="/dados" viewTransition>
+              {TEXTOS.cabecalho.avisoDetalhes}
+            </Link>
+          </p>
+        </div>
+      )}
     </header>
   );
 }

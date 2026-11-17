@@ -1,67 +1,4 @@
-/* Página Setores: abas de período, ranking divergente, cartões por setor e o mapa do pregão */
-
-/* ---------- Topo: o que é um setor, com ícones de exemplo ---------- */
-
-.setores-explica {
-  margin-bottom: var(--espaco-6);
-}
-
-.setores-explica-frase {
-  margin: 0 0 var(--espaco-4);
-  max-width: 60ch;
-  font-size: var(--texto-lg);
-  color: var(--cor-texto);
-}
-
-.setores-exemplos {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
-  gap: var(--espaco-3);
-}
-
-/* Exemplo: cartão de vidro neutro (sem mancha, porque é só identificação) */
-.setores-exemplo {
-  display: flex;
-  align-items: center;
-  gap: var(--espaco-3);
-  padding: var(--espaco-4);
-  background: var(--vidro);
-  border: 1px solid transparent;
-  border-radius: var(--raio-cartao);
-  box-shadow: var(--vidro-sombra);
-  animation: setor-entra 0.35s var(--curva) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
-}
-
-.setores-exemplo-nome {
-  display: grid;
-  min-width: 0;
-}
-
-.setores-exemplo-setor {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-titulo);
-  color: var(--cor-texto);
-}
-
-.setores-exemplo-dica {
-  font-size: var(--texto-sm);
-  color: var(--cor-texto-suave);
-}
-
-@keyframes setor-entra {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
+/* Página Setores: abas de período, ranking divergente e cartões compactos por setor */
 
 /* ---------- Abas de período ---------- */
 
@@ -77,9 +14,14 @@
 }
 
 /* Trilho em pílula com sub-superfície; a opção ativa é branca sólida */
+/* uma coluna por período, qualquer que seja a quantidade; largura do conteúdo, como o seletor do Mercado */
 .setores-abas {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  width: fit-content;
+  max-width: 100%;
   gap: var(--espaco-1);
   padding: var(--espaco-1);
   border: 1px solid var(--sub-borda);
@@ -89,8 +31,10 @@
 }
 
 .setores-aba {
+  position: relative;
+  z-index: 1;
   min-height: 2.75rem;
-  padding: var(--espaco-2) 0.25rem;
+  padding: var(--espaco-2) var(--espaco-4);
   border: 0;
   border-radius: var(--raio-pilula);
   background: transparent;
@@ -105,6 +49,31 @@
     color var(--duracao) var(--curva);
 }
 
+/* Marcador da aba ativa: um fundo só que desliza até a aba escolhida (useIndicador). Sem medida, fica oculto
+   e a aba ativa segue com o próprio fundo branco. */
+.setores-aba-indicador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--duracao-entrada) var(--curva),
+    width var(--duracao-entrada) var(--curva);
+}
+
+.setores-abas[data-indicador='ligado'] > .setores-aba-indicador {
+  opacity: 1;
+}
+
+.setores-abas[data-indicador='ligado'] .setores-aba[aria-selected='true'] {
+  background: transparent;
+}
+
 .setores-aba:hover {
   background: var(--sub-fundo-hover);
 }
@@ -115,9 +84,19 @@
   font-weight: var(--peso-forte);
 }
 
+/* reserva a largura do rótulo em negrito: a aba não cresce ao ser escolhida */
+.setores-aba::after {
+  content: attr(data-rotulo);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: var(--peso-forte);
+}
+
 .setores-aba:focus-visible,
 .setor-linha:focus-visible,
-.setor-tickers a:focus-visible {
+.setor-ponto:focus-visible {
   outline: 2px solid var(--cor-acento);
   outline-offset: 2px;
 }
@@ -207,7 +186,7 @@
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
   color: var(--cor-texto);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
 .setor-linha-frase {
@@ -291,24 +270,59 @@
   }
 }
 
-/* ---------- Cartões por setor ---------- */
+/* ---------- Mosaico dos setores: destaque e fileiras completas, sem buraco ---------- */
 
-.setores-grade {
+/* A cor da variação vem do data-sinal: alta verde, queda rosa, o resto estável (--cor-sinal não é global) */
+.setores-pagina [data-sinal] {
+  --cor-sinal: var(--cor-estavel);
+}
+
+.setores-pagina [data-sinal='alta'] {
+  --cor-sinal: var(--cor-alta);
+}
+
+.setores-pagina [data-sinal='queda'] {
+  --cor-sinal: var(--cor-queda);
+}
+
+.setores-mosaico {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
   gap: var(--espaco-4);
 }
 
-.setores-grade > li {
+.setores-mosaico > li {
+  min-width: 0;
+}
+
+/* Grade de esqueletos de cartão enquanto os setores carregam */
+.setores-esqueleto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-3);
+}
+
+/* Uma fileira é uma linha de grid com tantas colunas quantos cartões ela tem (--colunas) */
+.setores-fileira {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--colunas, 1), minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.setores-fileira > li {
   display: flex;
   min-width: 0;
 }
 
-/* Cartão de setor: vidro neutro (.cartao), sem mancha de cor */
+/* Cartão de setor: vidro neutro (.cartao); a cor vem só da mancha pela direção, do número e dos pontos */
 .setor-cartao {
+  position: relative;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -318,13 +332,35 @@
   scroll-margin-top: 5rem;
 }
 
-/* Resultado do período e o que vem depois (contagem, botão) vão para o fim: alinham entre cartões da linha */
-.setor-cartao > .setor-bloco:has(> .setor-valor) {
-  margin-top: auto;
+/* Compacto: manchas menores, como o DESIGN.md permite para cartões pequenos */
+.setor-cartao--compacto {
+  --poca-1-tam: 16rem 13rem;
+  --poca-2-tam: 14rem 11rem;
+  padding: var(--espaco-5);
+}
+
+/* Destaque: o que mais subiu e o que mais caiu, com mais espaço */
+.setor-cartao--destaque {
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+}
+
+.setor-cartao--destaque .setor-cabeca {
+  padding-right: 5.5rem;
+}
+
+.setor-canto {
+  position: absolute;
+  top: var(--espaco-4);
+  right: var(--espaco-5);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto-suave);
 }
 
 .setor-cabeca {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--espaco-3);
 }
@@ -335,252 +371,288 @@
 }
 
 .setor-selo-grande .icone-setor {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-/* Título de cartão: Atkinson Hyperlegible Next 700, com a frase de apoio logo abaixo */
+/* Nome do setor: Atkinson Hyperlegible Next 700 */
+/* O nome nunca quebra no meio da palavra: sem espaço, a contagem desce */
 .setor-nome {
   margin: 0;
+  flex: 1 1 7.5rem;
+  min-width: min-content;
+  overflow-wrap: normal;
   font-family: var(--fonte-titulo);
-  font-size: var(--texto-xl);
+  font-size: var(--texto-lg);
   font-weight: var(--peso-titulo);
   letter-spacing: -0.02em;
   line-height: 1.2;
   color: var(--cor-texto);
 }
 
-.setor-descricao {
-  margin: 0;
-  font-size: var(--texto-sm);
-  line-height: 1.5;
-  color: var(--cor-texto-suave);
+.setor-cartao--destaque .setor-nome {
+  font-size: var(--texto-xl);
 }
 
-.setor-bloco {
-  display: grid;
-  gap: var(--espaco-1);
-}
-
-/* Rótulo pequeno de seção: frase normal, peso 600, sem caixa alta */
-.setor-rotulo {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  color: var(--cor-texto-suave);
-}
-
-.setor-tickers {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espaco-2);
-}
-
-/* Código de ação em chip: Atkinson Hyperlegible Mono, véu de acento e alvo de toque de 44px */
-.setor-tickers a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0 var(--espaco-3);
-  border-radius: var(--raio-pilula);
-  background: var(--cor-acento-suave);
-  color: var(--cor-acento);
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-sm) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+/* Nome que leva às ações do setor: sublinhado no toque e no foco */
+.setor-nome-link {
+  color: inherit;
   text-decoration: none;
 }
 
-/* Número-destaque do cartão: Atkinson Hyperlegible Mono 500, entre 2rem e 2.75rem, linha 1 */
+.setor-nome-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.setor-nome-link:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 3px;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+/* O que o setor faz, em destaque: uma frase curta */
+.setor-linha-faz {
+  margin: 0;
+  max-width: 42ch;
+  font-size: var(--texto-base);
+  line-height: 1.45;
+  color: var(--cor-texto-suave);
+}
+
+/* Variação média do período: o número grande, em Mono, com sinal e cor (o sinal já vem no texto) */
 .setor-valor {
+  margin: 0;
   font-family: var(--fonte-numeros);
   font-stretch: var(--numeros-largura);
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
+.setor-valor--grande {
+  font-size: 2.75rem;
+}
+
 .setor-valor[data-sinal] {
   color: var(--cor-sinal);
 }
 
-.setor-empilhada {
-  display: flex;
-  height: 0.6rem;
-  overflow: hidden;
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
-}
-
-.setor-empilhada > span {
-  display: block;
-  height: 100%;
-}
-
-.setor-empilhada > span[data-sinal='alta'] {
-  background: var(--cor-alta);
-}
-
-.setor-empilhada > span[data-sinal='queda'] {
-  background: var(--cor-queda);
-}
-
+/* Contagem curta "4↑ 3↓": números em Mono; no cabeçalho do compacto, no canto direito */
 .setor-contagem {
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espaco-1) var(--espaco-3);
+  flex: none;
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
   font-size: var(--texto-sm);
-  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums slashed-zero;
+  white-space: nowrap;
+}
+
+.setor-cabeca .setor-contagem {
+  margin-left: auto;
 }
 
 .setor-contagem > [data-sinal] {
   color: var(--cor-sinal);
 }
 
-.setor-tecnico {
-  margin: 0;
+/* Sem dado é palavra, não número: fica na fonte de texto */
+.setor-contagem--vazia {
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  color: var(--cor-texto-suave);
+}
+
+/* Ações do setor como pontos (compacto) ou pílulas com o ticker (destaque); o pé do cartão fica com elas */
+.setor-pontos {
+  list-style: none;
+  margin: auto 0 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--espaco-1) var(--espaco-3);
-  font-size: var(--texto-sm);
-}
-
-.setor-expandir {
-  margin-top: 0;
-  justify-self: start;
-}
-
-/* ---------- Lista de ações dentro do cartão: área com rolagem própria ---------- */
-
-.setor-acoes-caixa {
-  position: relative;
-  max-height: 28rem;
-  overflow-y: auto;
-}
-
-/* Véu de saída no fim da rolagem: funde com o vidro do cartão */
-.setor-acoes-caixa:not([hidden])::after {
-  content: '';
-  position: sticky;
-  bottom: 0;
-  display: block;
-  height: 2.5rem;
-  margin-top: -2.5rem;
-  background: linear-gradient(to bottom, transparent, var(--vidro-base));
-  pointer-events: none;
-}
-
-.setor-acoes {
-  list-style: none;
-  margin: 0;
-  padding: var(--espaco-3) 0 var(--espaco-2);
-  border-top: 1px solid var(--cor-fio, var(--cor-borda));
-  display: grid;
   gap: var(--espaco-2);
 }
 
-.setor-acoes[hidden] {
-  display: none;
+.setor-ponto {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-1);
+  box-sizing: border-box;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1.5px solid transparent;
+  border-radius: 50%;
+  background: var(--cor-estavel);
+  text-decoration: none;
 }
 
-/* Ticker com alvo de toque de 44px; coluna de número larga o bastante para Atkinson Hyperlegible Mono */
-.setor-acao-linha {
-  display: grid;
-  grid-template-columns: 5rem minmax(0, 1fr) 5rem;
-  align-items: center;
-  gap: var(--espaco-3);
+/* Alvo de toque maior que o ponto, sem mudar o desenho */
+.setor-ponto::after {
+  content: '';
+  position: absolute;
+  inset: -0.35rem;
+}
+
+.setor-ponto[data-estado='alta'] {
+  background: var(--cor-alta);
+}
+
+/* Queda é losango, para não depender só da cor */
+.setor-ponto[data-estado='queda'] {
+  background: var(--cor-queda);
+  border-radius: 2px;
+  rotate: 45deg;
+}
+
+.setor-ponto[data-estado='sem'] {
+  background: var(--cor-superficie-2);
+  border-color: var(--cor-estavel);
+}
+
+/* Em revisão: contorno tracejado, sem preenchimento (o selo explica) */
+.setor-ponto[data-estado='revisao'] {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--cor-estavel);
+}
+
+.setor-pontos--pilulas {
+  gap: var(--espaco-2);
+}
+
+.setor-pontos--pilulas .setor-ponto {
+  width: auto;
+  height: auto;
+  min-height: 2.25rem;
+  padding: 0 var(--espaco-3);
+  border-radius: var(--raio-pilula);
+  rotate: none;
+  background: var(--cor-superficie-2);
+  box-shadow: inset 0 0 0 1px var(--cor-borda);
+  color: var(--cor-texto);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.setor-pontos--pilulas .setor-ponto[data-estado='alta'] {
+  background: var(--cor-alta-suave);
+  box-shadow: inset 0 0 0 1px var(--cor-alta-borda);
+  color: var(--cor-alta);
+}
+
+.setor-pontos--pilulas .setor-ponto[data-estado='queda'] {
+  background: var(--cor-queda-suave);
+  box-shadow: inset 0 0 0 1px var(--cor-queda-borda);
+  color: var(--cor-queda);
+}
+
+.setor-pontos--pilulas .setor-ponto[data-estado='revisao'] {
+  box-shadow: none;
+  color: var(--cor-texto-suave);
+}
+
+.setor-ponto-seta {
+  font-size: calc(var(--texto-sm) * 0.9);
+}
+
+.setor-ponto:focus-visible {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 2px;
+}
+
+/* Rótulo pequeno (modo técnico) */
+.setor-rotulo {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+}
+
+/* Tom das notícias do dia: faixa à parte, separada do resto do cartão */
+.setor-tom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-top: auto;
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-fio);
   font-size: var(--texto-sm);
 }
 
-.setor-acao-linha > a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-sm) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+.setor-tom-cabeca,
+.setor-tom-resumo {
+  margin: 0;
 }
 
-.setor-acao-linha .setor-numero {
-  text-align: right;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-sm) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums slashed-zero;
+.setor-tom-resumo {
+  font-weight: var(--peso-medio);
 }
 
-.setor-numero[data-sinal] {
-  color: var(--cor-sinal);
-}
-
-.setor-periodos {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--texto-xs);
-  font-variant-numeric: tabular-nums;
-}
-
-.setor-periodos th {
-  font-weight: var(--peso-normal);
-  color: var(--cor-texto-suave);
-  text-align: left;
-  padding-bottom: var(--espaco-1);
-}
-
-.setor-periodos td {
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums slashed-zero;
-}
-
-.setor-periodos td[data-sinal] {
-  color: var(--cor-sinal);
-}
-
-/* Barrinha simples (lista de ações do cartão) */
-.setor-trilho {
-  display: block;
-  height: 0.5rem;
+/* Barra de três fatias, com largura pela contagem (flex-grow); a legenda em texto traz a informação */
+.setor-tom-barra {
+  display: flex;
+  block-size: 0.5rem;
+  gap: var(--espaco-1);
+  overflow: hidden;
   border-radius: var(--raio-pilula);
   background: var(--cor-superficie-2);
-  overflow: hidden;
 }
 
-.setor-barra {
-  display: block;
-  height: 100%;
+.setor-tom-barra span {
+  flex-basis: 0;
+  min-width: 0;
   border-radius: var(--raio-pilula);
-  background: var(--cor-sinal, var(--cor-estavel));
-  transition: width 0.3s ease;
 }
 
-.setor-acao-linha .setor-trilho {
-  height: 0.4rem;
+.setor-tom-barra [data-contagem='positivas'] {
+  background: var(--cor-alta);
 }
 
-[data-sinal='alta'] {
-  --cor-sinal: var(--cor-alta);
+.setor-tom-barra [data-contagem='neutras'] {
+  background: var(--cor-texto-suave);
 }
 
-[data-sinal='queda'] {
-  --cor-sinal: var(--cor-queda);
+.setor-tom-barra [data-contagem='negativas'] {
+  background: var(--cor-queda);
 }
 
-[data-sinal='estavel'] {
-  --cor-sinal: var(--cor-estavel);
+/* Legenda compacta: ícone, número e palavra; quebra linha em telas de 320px */
+.setor-tom-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-1) var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+
+.setor-tom-legenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.setor-tom-legenda li[data-contagem='positivas'] {
+  color: var(--cor-alta);
+}
+
+.setor-tom-legenda li[data-contagem='neutras'] {
+  color: var(--cor-texto-suave);
+}
+
+.setor-tom-legenda li[data-contagem='negativas'] {
+  color: var(--cor-queda);
 }
 
 /* ---------- Ranking, resumo e vazio ---------- */
@@ -596,35 +668,21 @@
   color: var(--cor-texto-suave);
 }
 
-/* ---------- Mapa do pregão ---------- */
-
-.setores-mapa {
-  margin-top: var(--espaco-7);
-}
-
 :root[data-movimento='reduzido'] {
-  .setor-barra,
-  .setor-barra-div,
-  .setores-exemplo {
+  .setor-barra-div {
     animation: none;
   }
 
-  .setor-barra,
   .setores-aba,
   .setor-linha {
     transition: none;
   }
 }
 
-/* Link da aba Destaques do Mercado para a página Setores */
-.mercado-ver-setores {
-  margin-bottom: var(--espaco-4);
-}
-
-/* ---------- Dispersão da variação por setor (modo técnico) ---------- */
+/* ---------- Velas por setor (modo técnico) ---------- */
 
 /* Cartão de vidro com mancha de dado técnico (data-brilho="dado" no JSX) */
-.setores-dispersao {
+.setores-velas {
   margin-bottom: var(--espaco-6);
   padding: var(--espaco-6);
   background: var(--vidro);
@@ -633,7 +691,7 @@
   box-shadow: var(--vidro-sombra);
 }
 
-.setores-dispersao-legenda {
+.setores-velas-legenda {
   display: flex;
   flex-wrap: wrap;
   gap: var(--espaco-2) var(--espaco-4);
@@ -644,39 +702,39 @@
   font-size: var(--texto-sm);
 }
 
-.setores-dispersao-legenda li {
+.setores-velas-legenda li {
   display: flex;
   align-items: center;
   gap: var(--espaco-2);
 }
 
-.dispersao-amostra {
+.velas-amostra {
   display: inline-block;
   flex: none;
 }
 
-.dispersao-caixa {
-  width: 1.25rem;
-  height: 0.75rem;
-  border: 2px solid var(--cor-acento);
-  border-radius: 3px;
-  background: var(--cor-acento-suave);
+.velas-corpo {
+  width: 0.75rem;
+  height: 1rem;
+  border: 2px solid var(--cor-alta);
+  border-radius: 2px;
+  background: var(--cor-alta-suave);
 }
 
-.dispersao-mediana {
+.velas-pavio {
   width: 2px;
   height: 1rem;
-  background: var(--cor-acento);
+  background: var(--cor-texto-suave);
 }
 
-.dispersao-atipico {
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 2px solid var(--cor-acento);
-  border-radius: 50%;
+/* Velas: o gráfico nunca passa da largura da página (celular girando); a altura vem do componente (deitado, a soma das linhas) */
+.setores-velas .chart-stage {
+  max-width: 100%;
+  max-height: none;
+  overflow: hidden;
 }
 
-.setores-dispersao-nota {
+.setores-velas-nota {
   margin: var(--espaco-3) 0 0;
   color: var(--cor-texto-suave);
   font-size: var(--texto-sm);
@@ -692,27 +750,86 @@
 @media (max-width: 720px) {
   .setor-cartao,
   .setores-ranking.cartao,
-  .setores-dispersao {
+  .setores-velas {
     padding: var(--espaco-5) var(--espaco-4);
   }
 
-  .setores-dispersao {
+  .setores-velas {
     padding: var(--espaco-5) var(--espaco-4);
   }
 }
 
-/* Nomes longos quebram e a barra encolhe; a linha nunca passa da largura do cartão */
+/* Celular: nome e valor na mesma linha; a barra desce e usa a largura toda */
 @media (max-width: 479px) {
   .setor-linha {
-    grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--espaco-2);
   }
 
   .setor-linha-barra {
-    grid-template-columns: minmax(0, 1fr) 4.5rem;
-    gap: var(--espaco-2);
+    display: contents;
   }
 
-  .setor-acao-linha {
-    grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
+  .setor-linha-cabeca {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .setor-linha-valor {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .setor-trilho-div {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* selo "mudou de escala" do tamanho da palavra, não da largura do cartão */
+.setor-cartao .selo-revisao {
+  align-self: flex-start;
+  justify-self: start;
+  width: fit-content;
+}
+
+/* As cinco opções cabem sem rolagem; Último pregão pode ir em duas linhas */
+@media (max-width: 640px) {
+  .setores-abas {
+    grid-auto-columns: auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .setores-aba {
+    white-space: nowrap;
+    padding-inline: var(--espaco-2);
+    font-size: var(--texto-xs);
+  }
+
+  .setores-aba:nth-child(2) {
+    white-space: normal;
+    line-height: 1.15;
+  }
+}
+
+/* Celular estreito: 3 + 2 em duas linhas (o primeiro filho é o marcador) */
+@media (max-width: 400px) {
+  .setores-abas {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    border-radius: var(--raio-cartao);
+  }
+
+  .setores-aba {
+    grid-column: span 2;
+  }
+
+  .setores-aba:nth-child(2) {
+    white-space: nowrap;
+  }
+
+  .setores-aba:nth-last-child(-n + 2) {
+    grid-column: span 3;
   }
 }

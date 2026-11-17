@@ -60,6 +60,8 @@ html {
 }
 
 body {
+  /* nada passa da largura da tela (o Android afastava o zoom ao girar) */
+  overflow-x: clip;
   min-height: 100vh;
   min-height: 100dvh;
   isolation: isolate;
@@ -165,14 +167,15 @@ ol[role='list'] {
   padding: 0;
 }
 
+/* Seleção e cursor de digitação na cor do Cotinha: o detalhe da marca até no que o navegador desenha */
 ::selection {
-  background: rgb(244 244 245 / 0.9);
-  color: var(--cor-acento-texto);
+  background: var(--cor-mascote);
+  color: var(--cor-mascote-olho);
 }
 
 input,
 textarea {
-  caret-color: var(--cor-acento);
+  caret-color: var(--cor-mascote);
 }
 
 /* Foco: anel branco com um halo escuro por fora, visível em qualquer fundo. */

@@ -1,50 +1,55 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import SecaoMercado from '../../components/mercado/SecaoMercado.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS } from '../../lib/textos.js';
 
-describe('SecaoMercado: Ibovespa, dólar e Brent', () => {
+/** Cartão (li) do índice pelo nome visível. */
+const cartao = (nome) =>
+  waitFor(() => {
+    const achado = screen.getAllByText(nome).map((e) => e.closest('.mercado-indice')).find(Boolean);
+    if (!achado) throw new Error(`cartão de ${nome} ainda não chegou`);
+    return achado;
+  });
+
+describe('SecaoMercado: períodos dos índices', () => {
   beforeEach(() => {
     instalarFetchDados();
   });
 
-  it('preenche 1 mês, 6 meses e 1 ano do Ibovespa com a rentabilidade do resumo', async () => {
+  it('o Ibovespa mostra 1 mês, 6 meses e 1 ano com a rentabilidade do resumo', async () => {
     renderizar(<SecaoMercado />);
 
-    const tabela = await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo });
-    const linha = within(tabela).getByRole('rowheader', { name: /^Ibovespa/ }).closest('tr');
-    const celulas = within(linha).getAllByRole('cell').map((c) => c.textContent);
-
-    // Hoje, 1 mês, 6 meses, 1 ano (ABEV3 traz o Ibovespa com estes valores)
-    expect(celulas[1]).toContain('+8,9%');
-    expect(celulas[2]).toContain('+6,7%');
-    expect(celulas[3]).toContain('+43,5%');
+    const ibov = await cartao('Ibovespa');
+    const periodos = within(ibov).getAllByText(/^[+−-]/).map((c) => c.textContent);
+    // ABEV3 traz o Ibovespa com estes valores: 1 mês, 6 meses e 1 ano
+    expect(periodos).toEqual(expect.arrayContaining(['+8,9%', '+6,7%', '+43,5%']));
+    expect(within(ibov).getByText('1 mês')).toBeInTheDocument();
+    expect(within(ibov).getByText('6 meses')).toBeInTheDocument();
+    expect(within(ibov).getByText('1 ano')).toBeInTheDocument();
   });
 
-  it('dólar e Brent seguem indisponíveis nos três períodos', async () => {
+  it('Brent, sem período no pacote, mostra só o valor do dia (sem "Indisponível" nem 0)', async () => {
     renderizar(<SecaoMercado />);
 
-    const tabela = await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo });
-    for (const nome of [/^Dólar/, /^Petróleo Brent/]) {
-      const linha = within(tabela).getByRole('rowheader', { name: nome }).closest('tr');
-      const periodos = within(linha).getAllByRole('cell').slice(1);
-      expect(periodos).toHaveLength(3);
-      for (const celula of periodos) {
-        expect(celula.textContent).toContain(TEXTOS.mercado.indisponivel);
-      }
-    }
+    const brent = await cartao('Petróleo Brent');
+    expect(within(brent).getByText(TEXTOS.mercado.semSoDia)).toBeInTheDocument();
+    expect(brent.textContent).not.toMatch(/Indisponível/);
+    expect(brent.querySelector('.mercado-indice__periodos')).toBeNull();
   });
 
-  it('mostra a frase do pregão no topo, só com fatos', async () => {
+  it('o dólar sem histórico não mostra período inventado: só o valor do dia', async () => {
+    renderizar(<SecaoMercado />);
+
+    const dolar = await cartao('Dólar');
+    expect(within(dolar).getByText(TEXTOS.mercado.semSoDia)).toBeInTheDocument();
+    expect(dolar.querySelector('.mercado-indice__periodos')).toBeNull();
+  });
+
+  it('a frase do pregão aparece no topo, só com fatos', async () => {
     renderizar(<SecaoMercado />);
 
     expect(await screen.findByText(/^\d+ ações? acompanhadas?\. Dia (volátil|estável)\.$/)).toBeInTheDocument();
-  });
-
-  it('dólar e Brent sem série: a nota explica os períodos sem número', async () => {
-    renderizar(<SecaoMercado />);
-    expect(await screen.findByText(TEXTOS.mercado.semHistoricoNota('dólar e Brent'))).toBeInTheDocument();
   });
 });

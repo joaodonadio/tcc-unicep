@@ -86,7 +86,7 @@
   letter-spacing: -0.02em;
   line-height: 1.2;
   color: var(--cor-texto);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
 .setores3d-legenda-medida {

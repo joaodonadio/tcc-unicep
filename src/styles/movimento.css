@@ -65,13 +65,6 @@
     scale var(--mov-toque) var(--mov-curva);
 }
 
-/* cartão (.destaque é um .cartao de vidro): a aresta e a sombra acendem, sem borda cheia por cima */
-.destaque {
-  transition:
-    translate var(--mov-curta) var(--mov-curva),
-    box-shadow var(--mov-curta) var(--mov-curva);
-}
-
 /* círculo da posição: fica branco no escolhido, com a cor do número trocando junto */
 .top5-pos {
   transition:
@@ -109,8 +102,7 @@
     text-decoration-color var(--mov-curta) var(--mov-curva);
 }
 
-.top5-ficha svg,
-.destaque__ficha svg {
+.top5-ficha svg {
   transition: translate var(--mov-curta) var(--mov-curva);
 }
 
@@ -118,18 +110,10 @@
   border-color: var(--cor-borda-hover);
 }
 
-.destaque:hover {
-  --vidro-base: var(--vidro-base-hover);
-  --aresta-topo: 0.32;
-  box-shadow: var(--vidro-sombra-hover);
-}
-
 :root:not([data-movimento='reduzido']) {
   /* o ícone de "Ver a ficha" desliza 3px quando o link (ou o cartão inteiro) é tocado */
   .top5-ficha:hover svg,
-  .top5-ficha:focus-visible svg,
-  .destaque:hover .destaque__ficha svg,
-  .destaque:focus-within .destaque__ficha svg {
+  .top5-ficha:focus-visible svg {
     translate: 3px 0;
   }
 
@@ -233,7 +217,8 @@
   :is(
     .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
     .hoje-numeros > :not([aria-hidden='true']),
-    .hoje-topo > :is(.hoje-resumo, .hoje-ouvir),
+    .hoje-topo > .hoje-resumo-linha,
+    .hoje-topo > .hoje-fatos,
     .top5 > :is(.top5-grade, .top5-vazio)
   ) {
   animation: chegar 220ms var(--mov-curva) backwards;
@@ -296,10 +281,8 @@
   .top5-motivo-seta,
   .top5-indicador,
   .top5-aba-indicador,
-  .destaque,
   .top5-aba,
-  .top5-ficha svg,
-  .destaque__ficha svg {
+  .top5-ficha svg {
     transition: none;
   }
 }
@@ -313,7 +296,8 @@
     .modelo3d-palco canvas,
     .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
     .hoje-numeros > :not([aria-hidden='true']),
-    .hoje-topo > .hoje-resumo,
+    .hoje-topo > .hoje-resumo-linha,
+    .hoje-topo > .hoje-fatos,
     .top5 > :is(.top5-grade, .top5-vazio)
   ) {
   transition: opacity 150ms linear;
@@ -327,9 +311,558 @@
       .modelo3d-palco canvas,
       .hoje-bloco > :not(.hoje-bloco-topo, .detalhes-painel, .hoje-ver, [aria-hidden='true']),
       .hoje-numeros > :not([aria-hidden='true']),
-      .hoje-topo > .hoje-resumo,
+      .hoje-topo > .hoje-resumo-linha,
+      .hoje-topo > .hoje-fatos,
       .top5 > :is(.top5-grade, .top5-vazio)
     ) {
     opacity: 0;
+  }
+}
+
+/* ---------- 10. Troca de período: transições de vista (lib/movimento.js, trocarComTransicao) ----------
+   Cada cartão e cada linha do ranking do Setores tem nome próprio: o navegador desliza cada um até a nova
+   posição. O cartão que muda de tipo (destaque, compacto) só faz o morph. Sem a API, a troca é direta.
+   Os pseudo-elementos ::view-transition-* ficam na própria raiz: o seletor vem colado em :root, sem espaço. */
+.setor-cartao {
+  view-transition-class: vt-cartao;
+}
+
+.setores-lista > li {
+  view-transition-class: vt-linha;
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-group(.vt-cartao),
+:root:not([data-movimento='reduzido'])::view-transition-group(.vt-linha) {
+  animation-duration: var(--duracao-entrada);
+  animation-timing-function: var(--curva);
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-old(.vt-cartao) {
+  animation: vt-recolhe var(--duracao-saida) var(--curva) both;
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-new(.vt-cartao) {
+  animation: vt-reaparece 380ms var(--curva) both;
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-old(.vt-linha),
+:root:not([data-movimento='reduzido'])::view-transition-new(.vt-linha) {
+  animation-duration: var(--duracao-saida);
+}
+
+@keyframes vt-recolhe {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes vt-reaparece {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* ---------- 11. Rotas: a troca de tela esmaece e o conteúdo sobe um pouco; o cabeçalho fica parado ----------
+   As rotas usam a transição de vista do react-router (viewTransition no Cabecalho.jsx). Onde há a API,
+   a animação de entrada da rota (.rota-entrada) sai, para não repetir o mesmo efeito. */
+.cabecalho {
+  view-transition-name: cabecalho;
+}
+
+@keyframes rota-sai {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes rota-chega {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-old(root) {
+  animation: rota-sai var(--duracao-saida) var(--curva) both;
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-new(root) {
+  animation: rota-chega var(--duracao-entrada) var(--curva) both;
+}
+
+/* a rota trocada com transição de vista já é animada pelo root; a entrada própria sai só nessa troca */
+:root:not([data-movimento='reduzido']) .rota-com-vista {
+  animation: none;
+}
+
+/* ---------- 12. Ondinha nas bolinhas do setor ----------
+   --i é a posição do ponto no cartão (CartaoSetor.jsx); o atraso para em 8 passos.
+   Entrada: escala de 0,72 a 1 com fade. Hover ou foco no cartão: uma onda lenta que sobe 2px e volta, uma vez.
+   Ao trocar de período, bolinha vira losango aos poucos: cor, canto e giro têm transição.
+   As pílulas sobem 2px no hover. O losango usa a propriedade rotate, que não é mexida aqui. */
+@keyframes ponto-entra {
+  from {
+    opacity: 0;
+    scale: 0.72;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes ponto-onda {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -2px;
+  }
+}
+
+@keyframes ponto-esmaece {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .setor-ponto {
+  --onda-atraso: calc(min(var(--i, 0), 8) * var(--passo-suave));
+  animation: ponto-entra var(--duracao-suave) var(--curva-suave) backwards;
+  animation-delay: var(--onda-atraso);
+}
+
+/* a onda entra na mesma lista de animações: a entrada não recomeça quando o hover sai */
+:root:not([data-movimento='reduzido']) .setor-cartao:is(:hover, :focus-within) .setor-ponto {
+  animation: ponto-entra var(--duracao-suave) var(--curva-suave) backwards, ponto-onda 900ms ease-in-out;
+  animation-delay: var(--onda-atraso), var(--onda-atraso);
+}
+
+.setor-ponto {
+  transition:
+    background-color var(--duracao-suave) var(--curva-suave),
+    border-color var(--duracao-suave) var(--curva-suave),
+    border-radius var(--duracao-suave) var(--curva-suave),
+    rotate var(--duracao-suave) var(--curva-suave);
+}
+
+.setor-pontos--pilulas .setor-ponto {
+  transition:
+    background-color var(--duracao-suave) var(--curva-suave),
+    border-color var(--duracao-suave) var(--curva-suave),
+    translate var(--duracao-hover) var(--curva-suave),
+    filter var(--duracao-hover) var(--curva-suave);
+}
+
+@media (hover: hover) {
+  :root:not([data-movimento='reduzido']) .setor-pontos--pilulas .setor-ponto:hover {
+    translate: 0 -2px;
+    filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.35));
+  }
+}
+
+/* cartão inteiro: elevação leve no hover, sem mexer na cor do vidro */
+.setor-cartao {
+  transition:
+    translate var(--duracao-hover) var(--curva-suave),
+    box-shadow var(--duracao-hover) var(--curva-suave);
+}
+
+@media (hover: hover) {
+  :root:not([data-movimento='reduzido']) .setor-cartao:hover {
+    translate: 0 -2px;
+    box-shadow:
+      var(--vidro-sombra-hover),
+      0 12px 26px -18px rgb(0 0 0 / 0.75);
+  }
+}
+
+/* ---------- 13. Cascata de listas: a lista aparece em sequência, com teto de cerca de 300ms ----------
+   Uso: classe entra-lista no elemento pai. Os filhos até o 12º recebem --i pelo nth-child. */
+@keyframes lista-entra {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+:root:not([data-movimento='reduzido']) .entra-lista > * {
+  animation: lista-entra 180ms var(--curva) backwards;
+  animation-delay: calc(min(var(--i, 0), 11) * var(--passo-lista));
+}
+
+.entra-lista > :nth-child(1),
+.entra-cartoes > :nth-child(1),
+.entra-rolagem > :nth-child(1) { --i: 0; }
+.entra-lista > :nth-child(2),
+.entra-cartoes > :nth-child(2),
+.entra-rolagem > :nth-child(2) { --i: 1; }
+.entra-lista > :nth-child(3),
+.entra-cartoes > :nth-child(3),
+.entra-rolagem > :nth-child(3) { --i: 2; }
+.entra-lista > :nth-child(4),
+.entra-cartoes > :nth-child(4),
+.entra-rolagem > :nth-child(4) { --i: 3; }
+.entra-lista > :nth-child(5),
+.entra-cartoes > :nth-child(5),
+.entra-rolagem > :nth-child(5) { --i: 4; }
+.entra-lista > :nth-child(6),
+.entra-cartoes > :nth-child(6),
+.entra-rolagem > :nth-child(6) { --i: 5; }
+.entra-lista > :nth-child(7),
+.entra-cartoes > :nth-child(7),
+.entra-rolagem > :nth-child(7) { --i: 6; }
+.entra-lista > :nth-child(8),
+.entra-cartoes > :nth-child(8),
+.entra-rolagem > :nth-child(8) { --i: 7; }
+.entra-lista > :nth-child(9),
+.entra-cartoes > :nth-child(9),
+.entra-rolagem > :nth-child(9) { --i: 8; }
+.entra-lista > :nth-child(10),
+.entra-cartoes > :nth-child(10),
+.entra-rolagem > :nth-child(10) { --i: 9; }
+.entra-lista > :nth-child(11),
+.entra-cartoes > :nth-child(11),
+.entra-rolagem > :nth-child(11) { --i: 10; }
+.entra-lista > :nth-child(12),
+.entra-cartoes > :nth-child(12),
+.entra-rolagem > :nth-child(12) { --i: 11; }
+
+/* ---------- 14. Hover de blocos: resposta curta ---------- */
+.mapa-bloco a {
+  transition:
+    transform var(--duracao-toque) var(--curva),
+    background-color var(--duracao-toque) var(--curva);
+}
+
+@media (hover: hover) {
+  :root:not([data-movimento='reduzido']) .mapa-bloco a:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Cartões de números, índices e proventos: sobem 2px no hover, como o cartão de setor (seção 12) */
+.hoje-numero,
+.mercado-indice,
+.proventos-resumo-item {
+  transition:
+    translate var(--duracao-toque) var(--curva),
+    box-shadow var(--duracao-toque) var(--curva);
+}
+
+@media (hover: hover) {
+  :root:not([data-movimento='reduzido']) .hoje-numero:hover {
+    translate: 0 -2px;
+    box-shadow: var(--vidro-sombra-hover), 0 12px 26px -18px rgb(0 0 0 / 0.75);
+  }
+
+  :root:not([data-movimento='reduzido']) :is(.mercado-indice, .proventos-resumo-item):hover {
+    translate: 0 -2px;
+    box-shadow: var(--sub-luz), 0 12px 26px -18px rgb(0 0 0 / 0.75);
+  }
+}
+
+/* ---------- 15. Marcador do segmentado: a opção escolhida ganha um fundo que desliza (useIndicador) ----------
+   O marcador é o primeiro filho do .segmentado. Sem medida, fica oculto e a opção escolhida segue com o próprio
+   fundo (regra em componentes.css). A transição de vista usa o nome próprio do marcador de cada grupo. */
+.segmentado {
+  position: relative;
+}
+
+.segmentado .botao {
+  position: relative;
+  z-index: 1;
+}
+
+.segmentado > .segmentado-marcador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acento);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--duracao-entrada) var(--curva),
+    width var(--duracao-entrada) var(--curva);
+}
+
+.segmentado[data-indicador='ligado'] > .segmentado-marcador {
+  opacity: 1;
+}
+
+.segmentado[data-indicador='ligado'] .botao[aria-pressed='true'] {
+  background: transparent;
+}
+
+/* ---------- 16. Movimento reduzido: nada se desloca; só o fade curto de entrada fica ----------
+   Vale com a preferência do site (data-movimento) e, quando o site segue o sistema, com a do sistema. */
+:root[data-movimento='reduzido'] .setor-ponto,
+:root[data-movimento='reduzido'] .entra-lista > *,
+:root[data-movimento='reduzido'] :is(.entra-cartoes, .entra-rolagem) > * {
+  animation: ponto-esmaece 150ms linear backwards;
+  animation-delay: 0ms;
+}
+
+:root[data-movimento='reduzido'] .setor-cartao,
+:root[data-movimento='reduzido'] .setor-ponto,
+:root[data-movimento='reduzido'] .setor-pontos--pilulas .setor-ponto,
+:root[data-movimento='reduzido'] .mapa-bloco a,
+:root[data-movimento='reduzido'] .segmentado > .segmentado-marcador,
+:root[data-movimento='reduzido'] .setores-aba-indicador {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-movimento='livre']) .setor-ponto,
+  :root:not([data-movimento='livre']) .entra-lista > *,
+  :root:not([data-movimento='livre']) :is(.entra-cartoes, .entra-rolagem) > * {
+    animation: ponto-esmaece 150ms linear backwards;
+    animation-delay: 0ms;
+  }
+}
+
+/* ---------- 17. Painel do menu Mais: entra com escala de 0,97 e fade (sai do DOM sem animação de saída) ---------- */
+@keyframes painel-entra {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .cabecalho__menu-mais {
+  animation: painel-entra var(--duracao-entrada) var(--curva) backwards;
+  transform-origin: top right;
+}
+
+/* ---------- 18. Painéis com saída: Leitura, menu Mais e balão do termo ----------
+   Ficam no DOM até a saída acabar (usePresenca, 140ms); data-estado diz a fase. Entrada: escala de 0,97 e
+   fade. Saída: fade e escala de 0,97. Com inert, o painel que sai não recebe foco. */
+@keyframes painel-sai {
+  to {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .leitura__painel[data-estado='entrando'] {
+  animation: painel-entra var(--duracao-entrada) var(--curva) backwards;
+}
+
+:root:not([data-movimento='reduzido']) :is(.leitura__painel, .cabecalho__menu-mais, .termo-balao)[data-estado='saindo'] {
+  animation: painel-sai 140ms var(--curva) forwards;
+}
+
+/* ---------- 19. Hover e foco de links, botões e chips: 130ms ----------
+   Regra base de baixa especificidade (:where): qualquer componente que já tenha transição própria a sobrescreve. */
+:where(a, button, .botao, .chip) {
+  transition-property: color, background-color, border-color, box-shadow, translate, opacity;
+  transition-duration: 130ms;
+  transition-timing-function: var(--curva);
+}
+
+/* ---------- 20. Barras de Notícias: cada barra cresce da esquerda ----------
+   Usa clip-path (e não scaleX) para não esticar os números dentro dos segmentos. Os números aparecem em fade
+   depois que a barra passa deles. Cada linha tem --i (cascata de entra-lista). */
+@keyframes barra-cresce {
+  from {
+    clip-path: inset(0 100% 0 0 round 999px);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+}
+
+@keyframes numero-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .entra-lista > .noticias-barra-linha .noticias-barra-preenchida {
+  animation: barra-cresce 320ms var(--curva) backwards;
+  animation-delay: calc(min(var(--i, 0), 11) * var(--passo-lista));
+}
+
+:root:not([data-movimento='reduzido']) .entra-lista > .noticias-barra-linha .noticias-barra-preenchida .num {
+  animation: numero-entra 160ms linear backwards;
+  animation-delay: calc(min(var(--i, 0), 11) * var(--passo-lista) + 120ms);
+}
+
+/* ---------- 21. Abas: troca com crossfade curto; o resto da página fica parado ----------
+   As trocas de aba passam por trocarComTransicao(fn, 'suave'), que põe data-transicao na raiz. Aí a animação
+   de rota da seção 11 (que desliza a página) sai, e cada troca vira um fade de 220ms. Só o painel da ficha e
+   o objeto do Top 5 têm nome próprio: são os que mudam de conteúdo. O marcador das abas da ficha desliza. */
+.ficha-painel {
+  view-transition-name: ficha-painel;
+}
+
+/* a barra fixa tem nome próprio: sem ele, o painel seria desenhado por cima dela durante a troca */
+.ficha-abas {
+  view-transition-name: ficha-abas;
+}
+
+:root:not([data-movimento='reduzido'])::view-transition-group(ficha-abas) {
+  z-index: 2;
+}
+
+.top5-objeto {
+  view-transition-name: top5-objeto;
+}
+
+@keyframes aba-sai {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes aba-chega {
+  from {
+    opacity: 0;
+  }
+}
+
+:root:not([data-movimento='reduzido'])[data-transicao='suave']::view-transition-old(root),
+:root:not([data-movimento='reduzido'])::view-transition-old(ficha-painel),
+:root:not([data-movimento='reduzido'])::view-transition-old(top5-objeto) {
+  animation: aba-sai 220ms var(--curva) both;
+  /* a animação própria tira a mistura padrão: sem ela, o crossfade escurece no meio */
+  mix-blend-mode: plus-lighter;
+}
+
+:root:not([data-movimento='reduzido'])[data-transicao='suave']::view-transition-new(root),
+:root:not([data-movimento='reduzido'])::view-transition-new(ficha-painel),
+:root:not([data-movimento='reduzido'])::view-transition-new(top5-objeto) {
+  animation: aba-chega 220ms var(--curva) both;
+  mix-blend-mode: plus-lighter;
+}
+
+:root:not([data-movimento='reduzido']) .ficha-aba-marcador {
+  transition:
+    transform var(--duracao-entrada) var(--curva),
+    width var(--duracao-entrada) var(--curva),
+    height var(--duracao-entrada) var(--curva);
+}
+
+/* ---------- 22. Estados que aparecem, linhas de tabela, seta de link: transições curtas ---------- */
+/* Erro e bloco vazio: só fade (sem deslocamento), no mesmo estilo da seção 6 */
+@keyframes estado-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+:root:not([data-movimento='reduzido']) :is(.estado--erro, .estado--vazio) {
+  animation: estado-entra 220ms var(--mov-curva) backwards;
+}
+
+/* Linhas da tabela: o fundo muda em 120ms no hover (a seção 19 não cobre tr) */
+.tabela tbody tr {
+  transition: background-color var(--duracao-toque) var(--curva);
+}
+
+/* Seta de link externo: desliza 2px para cima e para a direita no hover e no foco */
+.noticias-item-icone {
+  transition: translate var(--mov-curta) var(--mov-curva);
+}
+
+:root:not([data-movimento='reduzido']) :is(.noticias-item:hover, .noticias-item:focus-visible) .noticias-item-icone {
+  translate: 2px -2px;
+}
+
+/* ---------- 23. Chegada dos cartões: a fileira aparece em cascata e cada cartão sobe ao rolar ----------
+   Um mecanismo só. entra-cartoes: rolagem e montagem. entra-rolagem: só a rolagem (fileiras que trocam de período:
+   a montagem não reinicia ao trocar). Cada filho recebe --i (seção 13). :not([aria-hidden]) vence a seção 6
+   (chegar) nos números do Hoje: mesma especificidade, e esta vem depois. Com a rolagem, a animação ligada à
+   rolagem vem primeiro e a de montagem depois, valendo para os cartões já visíveis ao abrir a tela; a montagem
+   não tem forwards. Sem animation-timeline, só a de montagem. */
+:root:not([data-movimento='reduzido']) .entra-cartoes > :not([aria-hidden='true']) {
+  animation: lista-entra 240ms var(--curva) backwards;
+  animation-delay: calc(min(var(--i, 0), 11) * var(--passo-lista));
+}
+
+@supports (animation-timeline: view()) {
+  :root:not([data-movimento='reduzido']) .entra-cartoes > :not([aria-hidden='true']) {
+    animation: surgir linear both, lista-entra 240ms var(--curva) backwards;
+    animation-timeline: view(), auto;
+    animation-range: entry calc(var(--i, 0) * 3%) entry calc(35% + var(--i, 0) * 3%), normal;
+    animation-delay: 0ms, calc(min(var(--i, 0), 11) * var(--passo-lista));
+  }
+
+  :root:not([data-movimento='reduzido']) .entra-rolagem > :not([aria-hidden='true']) {
+    animation: surgir linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--i, 0) * 3%) entry calc(35% + var(--i, 0) * 3%);
+  }
+}
+
+/* ---------- 24. Coisas que crescem uma vez ----------
+   Barras vão do início até o valor (barra-cresce, seção 20): com view() quando há suporte, para acontecer ao
+   chegar na tela. Marcadores andam com left, porque sem transform não dá para ir de 0 até uma porcentagem do
+   trilho; é um elemento pequeno e roda uma vez. */
+@keyframes marca-desliza {
+  from {
+    left: 0;
+  }
+}
+
+:root:not([data-movimento='reduzido']) .proventos-barra > span {
+  animation: barra-cresce 320ms var(--curva) backwards;
+}
+
+@supports (animation-timeline: view()) {
+  :root:not([data-movimento='reduzido']) .proventos-barra > span {
+    animation: barra-cresce 320ms var(--curva) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 50%;
+  }
+}
+
+/* Régua do modelo: o marcador de 50% desliza até a posição quando o bloco entra em vista (data-visto) */
+:root:not([data-movimento='reduzido']) .modelo-cartoes[data-visto='true'] .modelo-regua__marca {
+  animation: marca-desliza 500ms var(--curva) backwards;
+}
+
+/* Faixa de 6 meses: o marcador desliza do início até o valor quando o detalhe abre (fechado, o painel fica fora da vista) */
+:root:not([data-movimento='reduzido']) .hoje-numero[data-aberto='true'] .hoje-faixa__marca {
+  animation: marca-desliza 400ms var(--curva) backwards;
+}
+
+/* ---------- 25. Setores e Proventos: chegada mais lenta ----------
+   Longhands de propósito: o atalho animation zeraria o animation-timeline da seção 23. */
+.proventos-resumo-item {
+  transition:
+    translate var(--duracao-hover) var(--curva-suave),
+    box-shadow var(--duracao-hover) var(--curva-suave);
+}
+
+@supports (animation-timeline: view()) {
+  :root:not([data-movimento='reduzido']) .setores-fileira.entra-rolagem > :not([aria-hidden='true']) {
+    animation-timing-function: var(--curva-suave);
+    animation-range: entry calc(var(--i, 0) * 4%) entry calc(70% + var(--i, 0) * 4%);
+  }
+
+  :root:not([data-movimento='reduzido']) .proventos-resumo-grade.entra-cartoes > :not([aria-hidden='true']) {
+    animation-duration: auto, var(--duracao-suave);
+    animation-timing-function: var(--curva-suave), var(--curva-suave);
+    animation-delay: 0ms, calc(var(--i, 0) * 70ms);
+    animation-range: entry calc(var(--i, 0) * 4%) entry calc(70% + var(--i, 0) * 4%), normal;
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  :root:not([data-movimento='reduzido']) .proventos-resumo-grade.entra-cartoes > :not([aria-hidden='true']) {
+    animation-duration: var(--duracao-suave);
+    animation-timing-function: var(--curva-suave);
+    animation-delay: calc(var(--i, 0) * 70ms);
   }
 }

@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   alturaVisivel,
+  AMPLITUDE_MAXIMA,
+  MEDIDAS_PENDULO,
   amplitudePendulo,
   blocosBalanca,
   compararComSetor,
   contarMoedasPl,
   contarMoedasProvento,
   dadosDoResumo,
+  FRACAO_PERNA,
   fraseResposta,
   inclinacaoBalanca,
+  medidasPernas,
   pilhaCortada,
   temDado,
 } from '../../lib/modelos3d.js';
@@ -55,11 +59,17 @@ describe('balança', () => {
 });
 
 describe('pêndulo', () => {
-  it('amplitude é beta vezes a da bolsa, entre 0,06 e 1', () => {
+  it('amplitude é beta vezes a da bolsa, entre 0,06 e a máxima', () => {
     expect(amplitudePendulo(1)).toBeCloseTo(0.32);
     expect(amplitudePendulo(0.01)).toBe(0.06);
-    expect(amplitudePendulo(50)).toBe(1);
+    expect(amplitudePendulo(50)).toBe(AMPLITUDE_MAXIMA);
     expect(amplitudePendulo(null)).toBeNull();
+  });
+
+  it('o peso nunca passa da coluna, nem na soltura nem no maior beta', () => {
+    const { haste, raio, eixo, coluna, meiaColuna, soltura } = MEDIDAS_PENDULO;
+    const maior = Math.max(AMPLITUDE_MAXIMA, soltura);
+    expect(eixo + haste * Math.sin(maior) + raio).toBeLessThanOrEqual(coluna - meiaColuna);
   });
 });
 
@@ -138,5 +148,22 @@ describe('alturaVisivel', () => {
 
   it('proximidade ausente ou zero conta como 1', () => {
     expect(alturaVisivel({ altura: 10, largura: 4, proximidade: 0 }, 2)).toBe(10);
+  });
+});
+
+describe('pernas do porquinho', () => {
+  const caixa = { min: { x: -1, y: 0, z: -2 }, max: { x: 1, y: 2, z: 2 } };
+
+  it('dá quatro pernas, uma em cada canto, com a base abaixo do corpo', () => {
+    const { raio, miolo, centros } = medidasPernas(caixa);
+    expect(centros).toHaveLength(4);
+    expect(new Set(centros.map(([x, , z]) => `${Math.sign(x)}/${Math.sign(z)}`)).size).toBe(4);
+    expect(centros[0][1] - miolo / 2 - raio).toBeCloseTo(-2 * FRACAO_PERNA);
+  });
+
+  it('a perna entra no corpo, sem deixar fresta', () => {
+    const { raio, miolo, centros } = medidasPernas(caixa);
+    expect(centros[0][1] + miolo / 2 + raio).toBeGreaterThan(caixa.min.y);
+    expect(miolo).toBeGreaterThan(0);
   });
 });

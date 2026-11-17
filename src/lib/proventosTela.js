@@ -6,6 +6,7 @@
  */
 
 import { valorOuNulo } from './valor.js';
+import { DATA_A_DEFINIR, diasEntre } from './agenda.js';
 
 const DATA_ISO = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -72,4 +73,61 @@ export function maioresPagadoras(resumos, acoes, n = 10) {
     dy: r.dy,
     proporcao: maior > 0 ? r.dy / maior : 0,
   }));
+}
+
+/**
+ * Números da faixa de resumo. Cada bloco vem null quando falta o dado (nunca 0 inventado).
+ * Próximo pagamento: o primeiro evento com data igual ou posterior a `hoje`.
+ * Mês de pico: o mês com mais pagamentos entre os próximos; empate vale o mais cedo.
+ *
+ * @param {object[] | undefined} futuros eventos da agenda ({ticker, data_pagamento, valor_texto})
+ * @param {object[] | undefined} aDefinir eventos sem data de pagamento
+ * @param {string} hoje "AAAA-MM-DD"
+ * @param {{ ticker: string, dy: number }[]} ranking saída de maioresPagadoras
+ * @returns {{
+ *   proximo: { ticker: string, valor: string | null, data: string, dias: number | null } | null,
+ *   marcados: { total: number, aDefinir: number | null } | null,
+ *   mesPico: { mes: string, qtd: number } | null,
+ *   topo: { ticker: string, dy: number } | null,
+ * }}
+ */
+export function resumoProventos(futuros, aDefinir, hoje, ranking) {
+  const agenda = Array.isArray(futuros) ? futuros : null;
+  const valido = typeof hoje === 'string' && DATA_ISO.test(hoje);
+
+  const proximos = agenda && valido
+    ? agenda
+        .filter((ev) => typeof ev?.data_pagamento === 'string' && DATA_ISO.test(ev.data_pagamento))
+        .filter((ev) => ev.data_pagamento >= hoje && ev.data_pagamento !== DATA_A_DEFINIR)
+        .sort((a, b) => a.data_pagamento.localeCompare(b.data_pagamento) || String(a.ticker).localeCompare(String(b.ticker)))
+    : [];
+
+  const primeiro = proximos[0];
+  const proximo = primeiro
+    ? {
+        ticker: primeiro.ticker,
+        valor: primeiro.valor_texto || null,
+        data: primeiro.data_pagamento,
+        dias: diasEntre(hoje, primeiro.data_pagamento),
+      }
+    : null;
+
+  const marcados = agenda
+    ? { total: agenda.length, aDefinir: Array.isArray(aDefinir) ? aDefinir.length : null }
+    : null;
+
+  const contagem = new Map();
+  for (const ev of proximos) {
+    const mes = ev.data_pagamento.slice(0, 7);
+    contagem.set(mes, (contagem.get(mes) ?? 0) + 1);
+  }
+  let mesPico = null;
+  for (const [mes, qtd] of contagem) {
+    if (!mesPico || qtd > mesPico.qtd) mesPico = { mes, qtd };
+  }
+
+  const maiorDy = Array.isArray(ranking) ? ranking[0] : undefined;
+  const topo = maiorDy && typeof maiorDy.dy === 'number' ? { ticker: maiorDy.ticker, dy: maiorDy.dy } : null;
+
+  return { proximo, marcados, mesPico, topo };
 }

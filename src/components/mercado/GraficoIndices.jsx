@@ -1,9 +1,11 @@
-import { useId, useMemo, useState } from 'react';
+import { useId, useState } from 'react';
 import { GraficoInterativo } from '../graficos/GraficoInterativo.jsx';
+import Mascote from '../ui/Mascote.jsx';
 import { BlocoErro, Linhas } from '../ui/Estados.jsx';
 import { useSerie } from '../../hooks/useDados.js';
+import { useIndicador } from '../../hooks/useIndicador.js';
+import { trocarComTransicao } from '../../lib/movimento.js';
 import { usePreferencias } from '../../context/contextos.js';
-import { dataBR } from '../../lib/datas.js';
 import { pct } from '../../lib/formato.js';
 import {
   COMPARACOES,
@@ -11,16 +13,16 @@ import {
   acumuladoNaJanela,
   alinharSeries,
   cemViraram,
+  formatoDataDaJanela,
   ultimoValor,
 } from '../../lib/mercadoTela.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
+import { eventosNaJanela } from '../../lib/eventosMercado.js';
 
-/** Cores fixas: Ibovespa e CDI sempre; cada comparação tem a sua, marcada ou não. */
+/** Cores fixas: cada índice tem a sua, igual nos chips, na legenda e nas linhas. */
 const COR = {
-  ibov: 'var(--cor-serie-1)',
-  cdi: 'var(--cor-serie-2)',
-};
-const COR_COMPARACAO = {
+  IBOV: 'var(--cor-serie-1)',
+  CDI: 'var(--cor-serie-2)',
   IPCA: 'var(--cor-dado-3)',
   IDIV: 'var(--cor-dado-4)',
   SMLL: 'var(--cor-dado-6)',
@@ -28,7 +30,12 @@ const COR_COMPARACAO = {
   IVVB11: 'var(--cor-dado-5)',
 };
 
-const VAZIO = { datas: [], valores: [] };
+/** Todos os índices do gráfico, na ordem da legenda. Ibovespa e CDI começam ligados. */
+const INDICES = ['IBOV', 'CDI', ...COMPARACOES];
+const LIGADOS_INICIO = ['IBOV', 'CDI'];
+
+const ROTULO_FIXO = { IBOV: TEXTOS.dia.ibovespa, CDI: TEXTOS.mercado.cdi };
+const rotuloDe = (chave) => ROTULO_FIXO[chave] ?? TEXTOS.mercado.comparacao[chave];
 
 /** Maior rentabilidade primeiro; sem dado no fim. */
 const ordenarPorValor = (a, b) => {
@@ -56,77 +63,77 @@ function CartaoRendimento({ item, leitura }) {
 }
 
 /**
- * "Quanto rendeu cada índice": Ibovespa e CDI sempre, e as comparações que o leitor
- * marcar, todas ao mesmo tempo se quiser (só as marcadas são buscadas). Rentabilidade acumulada em % a partir do
- * primeiro dia da janela, com um cartão por série visível.
+ * "Quanto rendeu cada índice": os índices são chips liga/desliga (Ibovespa e CDI começam ligados).
+ * Só os ligados são buscados. Cada série é cortada da janela de 1 ano já baixada, em pregões, e
+ * rebaseada a 0% no primeiro ponto da janela escolhida. Com nenhum ligado, um estado vazio.
  */
 export function GraficoIndices() {
   const { nivel } = usePreferencias();
   const idRotulo = useId();
   const idDica = useId();
   const [periodo, setPeriodo] = useState('6m');
-  const [marcadas, setMarcadas] = useState(['IPCA']);
+  const [ligados, setLigados] = useState(LIGADOS_INICIO);
+  // o fundo da opção escolhida desliza até a nova (useIndicador); a troca de período usa transição de vista
+  const indicadorPeriodo = useIndicador(periodo);
   const pontos = PERIODOS.find((p) => p.chave === periodo).pontos;
 
-  const ibovQ = useSerie('IBOV', '1a');
-  const cdiQ = useSerie('CDI', '1a');
-  // uma consulta por índice da lista fixa (mesma ordem de hooks a cada render); só as marcadas buscam
-  const porIndice = {
-    IPCA: useSerie('IPCA', '1a', { enabled: marcadas.includes('IPCA') }),
-    IDIV: useSerie('IDIV', '1a', { enabled: marcadas.includes('IDIV') }),
-    SMLL: useSerie('SMLL', '1a', { enabled: marcadas.includes('SMLL') }),
-    IFIX: useSerie('IFIX', '1a', { enabled: marcadas.includes('IFIX') }),
-    IVVB11: useSerie('IVVB11', '1a', { enabled: marcadas.includes('IVVB11') }),
+  // uma consulta por índice da lista fixa (mesma ordem de hooks a cada render); só os ligados buscam
+  const consultas = {
+    IBOV: useSerie('IBOV', '1a', { enabled: ligados.includes('IBOV') }),
+    CDI: useSerie('CDI', '1a', { enabled: ligados.includes('CDI') }),
+    IPCA: useSerie('IPCA', '1a', { enabled: ligados.includes('IPCA') }),
+    IDIV: useSerie('IDIV', '1a', { enabled: ligados.includes('IDIV') }),
+    SMLL: useSerie('SMLL', '1a', { enabled: ligados.includes('SMLL') }),
+    IFIX: useSerie('IFIX', '1a', { enabled: ligados.includes('IFIX') }),
+    IVVB11: useSerie('IVVB11', '1a', { enabled: ligados.includes('IVVB11') }),
   };
-  const consultasComp = marcadas.map((t) => porIndice[t]);
 
-  const ibov = useMemo(() => acumuladoNaJanela(ibovQ.data, pontos), [ibovQ.data, pontos]);
-  const cdi = useMemo(() => acumuladoNaJanela(cdiQ.data, pontos), [cdiQ.data, pontos]);
-  // comparação que falhou sai do gráfico e vira nota abaixo dele; as outras seguem
-  const comparacoesOk = marcadas.filter((t) => !porIndice[t].isError);
-  const comparacoesFalha = marcadas.filter((t) => porIndice[t].isError);
-  const rotulosFalha = comparacoesFalha.map((t) => TEXTOS.mercado.comparacao[t]).join(', ');
-  const acumComp = comparacoesOk.map((t) => acumuladoNaJanela(porIndice[t].data, pontos));
+  const selecionados = INDICES.filter((c) => ligados.includes(c));
+  const falhas = selecionados.filter((c) => consultas[c].isError);
+  // Ibovespa e CDI com falha bloqueiam o gráfico; comparação com falha vira nota abaixo dele
+  const falhaBase = falhas.find((c) => !COMPARACOES.includes(c));
+  const comparacoesFalha = falhas.filter((c) => COMPARACOES.includes(c));
+  const carregando = selecionados.some((c) => consultas[c].isPending);
 
-  const itens = [
-    { id: 'ibov', rotulo: TEXTOS.dia.ibovespa, cor: COR.ibov, acumulado: ibov },
-    { id: 'cdi', rotulo: TEXTOS.mercado.cdi, cor: COR.cdi, acumulado: cdi },
-    ...comparacoesOk.map((t, i) => ({
-      id: 'comparacao-' + t,
-      rotulo: TEXTOS.mercado.comparacao[t],
-      cor: COR_COMPARACAO[t],
-      tracejada: true,
-      acumulado: acumComp[i],
-    })),
-  ];
-
-  const valores = alinharSeries(itens.map((i) => i.acumulado ?? VAZIO));
-  const datas = ibov?.datas ?? [];
+  const itens = selecionados
+    .filter((c) => !consultas[c].isError)
+    .map((c) => ({
+      id: c,
+      rotulo: rotuloDe(c),
+      cor: COR[c],
+      tracejada: COMPARACOES.includes(c),
+      acumulado: acumuladoNaJanela(consultas[c].data, pontos),
+    }));
+  // quem não tem janela suficiente sai do gráfico, mas segue no cartão como "sem dado"
+  const comDado = itens.filter((i) => i.acumulado);
+  const valores = alinharSeries(comDado.map((i) => i.acumulado));
+  const datas = comDado[0]?.acumulado.datas ?? [];
+  const eventosJanela = eventosNaJanela(datas);
+  const formatarData = formatoDataDaJanela(periodo);
   const rotuloPeriodo = TEXTOS.mercado.periodos[periodo];
   const leitura = porNivel(TEXTOS.mercado.leituraCem, nivel);
-  const cartoes = itens.map((i) => ({ id: i.id, rotulo: i.rotulo, cor: i.cor, valor: ultimoValor(i.acumulado) }));
-  cartoes.sort(ordenarPorValor);
+  const cartoes = itens
+    .map((i) => ({ id: i.id, rotulo: i.rotulo, cor: i.cor, valor: ultimoValor(i.acumulado) }))
+    .sort(ordenarPorValor);
 
-  const falha = [ibovQ, cdiQ].find((q) => q.isError);
-  const carregando = ibovQ.isPending || cdiQ.isPending || consultasComp.some((q) => q.isPending);
+  const tentarNovamente = () => selecionados.forEach((c) => consultas[c].refetch());
 
-  const tentarNovamente = () => {
-    ibovQ.refetch();
-    cdiQ.refetch();
-    consultasComp.forEach((q) => q.refetch());
-  };
-
-  const todas = marcadas.length === COMPARACOES.length;
   // mantém a ordem da lista para a legenda e as cores não pularem de lugar
   const alternar = (chave) =>
-    setMarcadas((atuais) =>
-      atuais.includes(chave) ? atuais.filter((x) => x !== chave) : COMPARACOES.filter((c) => c === chave || atuais.includes(c)),
+    setLigados((atuais) =>
+      atuais.includes(chave) ? atuais.filter((x) => x !== chave) : INDICES.filter((c) => c === chave || atuais.includes(c)),
     );
-  const alternarTodas = () => setMarcadas(todas ? [] : [...COMPARACOES]);
 
   let corpo;
-  if (falha) {
-    corpo = <BlocoErro mensagem={falha.error?.mensagemUsuario} onTentarNovamente={tentarNovamente} />;
+  if (selecionados.length === 0) {
+    corpo = (
+      <div className="mercado-vazio-grafico">
+        <Mascote humor="curioso" className="mercado-pavio" />
+        <p className="mercado-vazio">{TEXTOS.mercado.semSelecao}</p>
+      </div>
+    );
+  } else if (falhaBase) {
+    corpo = <BlocoErro mensagem={consultas[falhaBase].error?.mensagemUsuario} onTentarNovamente={tentarNovamente} />;
   } else if (carregando) {
     corpo = (
       <div role="status">
@@ -134,25 +141,36 @@ export function GraficoIndices() {
         <Linhas quantidade={4} />
       </div>
     );
-  } else if (!ibov) {
+  } else if (comDado.length === 0) {
     corpo = <p className="mercado-vazio">{TEXTOS.mercado.semSerie}</p>;
   } else {
     corpo = (
       <>
         <GraficoInterativo
-          series={itens.map((i, k) => ({ id: i.id, rotulo: i.rotulo, cor: i.cor, tracejada: i.tracejada, valores: valores[k] }))}
+          series={comDado.map((i, k) => ({ id: i.id, rotulo: i.rotulo, cor: i.cor, tracejada: i.tracejada, valores: valores[k] }))}
           datas={datas}
           formatar={(v) => pct(v)}
           linhaZero
+          trocaSuave
           carregando={carregando}
+          eventos={eventosJanela}
         />
         <div className="chart-foot">
-          <span>{dataBR(datas[0])}</span>
-          <span>{dataBR(datas[datas.length - 1])}</span>
+          <span>{formatarData(datas[0])}</span>
+          <span>{formatarData(datas[datas.length - 1])}</span>
         </div>
-        {comparacoesFalha.length > 0 && <p className="mercado-nota">{TEXTOS.mercado.comparacaoIndisponivel(rotulosFalha)}</p>}
+        {eventosJanela.map((e) => (
+          <p key={e.chave} className="mercado-nota">
+            {porNivel(TEXTOS.eventos[e.chave].nota, nivel)}
+          </p>
+        ))}
+        {comparacoesFalha.length > 0 && (
+          <p className="mercado-nota">
+            {TEXTOS.mercado.comparacaoIndisponivel(comparacoesFalha.map(rotuloDe).join(', '))}
+          </p>
+        )}
         <div className="mercado-resumo">
-          <h4 className="mercado-resumo__titulo">{TEXTOS.mercado.resumoTitulo(rotuloPeriodo)}</h4>
+          <h3 className="mercado-resumo__titulo">{TEXTOS.mercado.resumoTitulo(rotuloPeriodo)}</h3>
           <ul className="mercado-resumo-cards" aria-label={TEXTOS.mercado.resumoLista(rotuloPeriodo)}>
             {cartoes.map((c) => (
               <CartaoRendimento key={c.id} item={c} leitura={leitura} />
@@ -167,17 +185,29 @@ export function GraficoIndices() {
     <div className="mercado-grafico" data-brilho="dado">
       <div className="mercado-grafico__cabecalho">
         <div>
-          <h3 className="mercado-bloco-titulo">{TEXTOS.mercado.graficoTitulo}</h3>
+          <h2 className="mercado-bloco-titulo">{TEXTOS.mercado.graficoTitulo}</h2>
           <p className="mercado-nota">{TEXTOS.mercado.graficoTexto}</p>
         </div>
-        <div className="segmentado mercado-periodo" role="group" aria-label={TEXTOS.mercado.periodoGrupo}>
+        <div
+          ref={indicadorPeriodo.trilhoRef}
+          className="segmentado mercado-periodo"
+          role="group"
+          aria-label={TEXTOS.mercado.periodoGrupo}
+        >
+          <span
+            ref={indicadorPeriodo.indicadorRef}
+            className="segmentado-marcador"
+            aria-hidden="true"
+            style={{ viewTransitionName: 'mercado-periodo-marcador' }}
+          />
           {PERIODOS.map((p) => (
             <button
               key={p.chave}
               type="button"
               className="botao"
               aria-pressed={periodo === p.chave}
-              onClick={() => setPeriodo(p.chave)}
+              data-indicador-alvo={periodo === p.chave ? 'true' : undefined}
+              onClick={() => trocarComTransicao(() => setPeriodo(p.chave))}
             >
               {TEXTOS.mercado.periodos[p.chave]}
             </button>
@@ -191,44 +221,22 @@ export function GraficoIndices() {
         </span>
         <div role="group" aria-labelledby={idRotulo}>
           <ul className="mercado-chips">
-            <li>
-              <span className="mercado-chip mercado-chip--fixo">
-                <span className="mercado-chip__bolinha" style={{ background: COR.ibov }} aria-hidden="true" />
-                {TEXTOS.dia.ibovespa}
-                <span className="mercado-chip__tag">{TEXTOS.mercado.fixo}</span>
-              </span>
-            </li>
-            <li>
-              <span className="mercado-chip mercado-chip--fixo">
-                <span className="mercado-chip__bolinha" style={{ background: COR.cdi }} aria-hidden="true" />
-                {TEXTOS.mercado.cdi}
-                <span className="mercado-chip__tag">{TEXTOS.mercado.fixo}</span>
-              </span>
-            </li>
-            {COMPARACOES.map((chave) => {
-              const marcada = marcadas.includes(chave);
-              const cor = COR_COMPARACAO[chave];
-              return (
-                <li key={chave}>
-                  <button
-                    type="button"
-                    className="mercado-chip"
-                    aria-pressed={marcada}
-                    aria-describedby={idDica}
-                    title={TEXTOS.mercado.comparacaoLonga[chave]}
-                    onClick={() => alternar(chave)}
-                  >
-                    <span className="mercado-chip__bolinha" style={{ background: cor }} aria-hidden="true" />
-                    {TEXTOS.mercado.comparacao[chave]}
-                  </button>
-                </li>
-              );
-            })}
-            <li>
-              <button type="button" className="mercado-chip mercado-chip--todas" onClick={alternarTodas}>
-                {todas ? TEXTOS.mercado.desmarcarTodas : TEXTOS.mercado.marcarTodas}
-              </button>
-            </li>
+            {INDICES.map((chave) => (
+              <li key={chave}>
+                <button
+                  type="button"
+                  className="mercado-chip"
+                  style={{ '--chip-cor': COR[chave] }}
+                  aria-pressed={ligados.includes(chave)}
+                  aria-describedby={idDica}
+                  title={TEXTOS.mercado.comparacaoLonga[chave]}
+                  onClick={() => alternar(chave)}
+                >
+                  <span className="mercado-chip__bolinha" style={{ background: COR[chave] }} aria-hidden="true" />
+                  {rotuloDe(chave)}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
         <p id={idDica} className="mercado-nota mercado-series__dica">

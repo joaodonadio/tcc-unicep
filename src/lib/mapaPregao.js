@@ -5,12 +5,17 @@
  * nunca vira 0: null fica por último na ordenação e não entra na média.
  */
 
+import { variacaoDiaConfiavel, variacaoDiaSuspeita } from './crivel.js';
+
 export const SEM_SETOR = 'Sem setor informado';
 
 /** Abaixo deste módulo (fração) a variação é tratada como estável. */
 const LIMITE_ESTAVEL = 0.0005;
 
 const comoNumero = (v) => (Number.isFinite(v) ? v : null);
+
+/** Variação do dia de uma ação como número crível; suspeita (grupamento não ajustado) vira null, fora das contas. */
+const variacaoDe = (a) => variacaoDiaConfiavel(comoNumero(a?.variacao_dia));
 
 export function direcaoDe(v) {
   if (v == null || !Number.isFinite(v)) return null;
@@ -20,8 +25,8 @@ export function direcaoDe(v) {
 
 /** Variação decrescente, null por último, ticker crescente no empate. */
 function compararAcoes(a, b) {
-  const va = comoNumero(a.variacao_dia);
-  const vb = comoNumero(b.variacao_dia);
+  const va = variacaoDe(a);
+  const vb = variacaoDe(b);
   if (va == null && vb != null) return 1;
   if (va != null && vb == null) return -1;
   if (va != null && vb != null && va !== vb) return vb - va;
@@ -40,8 +45,8 @@ function compararGrupos(a, b) {
   return a.setor.localeCompare(b.setor, 'pt-BR');
 }
 
-/** Agrupa as ações (já filtradas) por setor; cabeçalho com dados do setor no dia quando houver. */
-export function agruparPorSetor(acoes = [], setoresDoDia = []) {
+/** Agrupa as ações (já filtradas) por setor; o cabeçalho traz a média e a contagem do grupo. */
+export function agruparPorSetor(acoes = []) {
   const porSetor = new Map();
   for (const acao of acoes) {
     const nome = acao.setor_nome ?? acao.setor ?? SEM_SETOR;
@@ -51,28 +56,19 @@ export function agruparPorSetor(acoes = [], setoresDoDia = []) {
 
   const grupos = [...porSetor].map(([setor, membros]) => {
     const acoesOrdenadas = [...membros].sort(compararAcoes);
-    const doDia = setoresDoDia.find((s) => s.setor === setor);
 
-    if (doDia) {
-      const variacao = comoNumero(doDia.variacao);
-      return {
-        setor,
-        variacao_media: variacao == null ? null : variacao / 100,
-        subiram: doDia.subiram,
-        cairam: doDia['caíram'],
-        acoes: acoesOrdenadas,
-      };
-    }
-
-    const variacoes = membros.map((m) => comoNumero(m.variacao_dia)).filter((v) => v != null);
+    // "x de total subiram": total só conta ações com variação crível; as suspeitas ficam de fora.
+    const variacoes = membros.map(variacaoDe).filter((v) => v != null);
     const media = variacoes.length
       ? variacoes.reduce((soma, v) => soma + v, 0) / variacoes.length
       : null;
     return {
       setor,
       variacao_media: media,
-      subiram: membros.filter((m) => direcaoDe(comoNumero(m.variacao_dia)) === 'up').length,
-      cairam: membros.filter((m) => direcaoDe(comoNumero(m.variacao_dia)) === 'down').length,
+      total: variacoes.length,
+      subiram: variacoes.filter((v) => direcaoDe(v) === 'up').length,
+      cairam: variacoes.filter((v) => direcaoDe(v) === 'down').length,
+      emRevisao: membros.filter((m) => variacaoDiaSuspeita(Number.isFinite(m.variacao_dia) ? m.variacao_dia : null)).length,
       acoes: acoesOrdenadas,
     };
   });

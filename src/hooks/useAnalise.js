@@ -1,29 +1,20 @@
 /**
- * Análise do dia e histórico de ticker, lidos dos pacotes via React Query.
+ * Análise do dia, lida dos pacotes via React Query.
  *
  * A montagem do agregado é pura (lib/analiseDoDia.js); aqui só se busca e se
- * memoriza. A API é somente leitura: feedback e decisão ficam como mutations
- * locais sem efeito no back.
+ * memoriza.
  */
 
 import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { montarAnaliseDoDia } from '../lib/analiseDoDia.js';
-import { cortarJanela, JANELAS } from '../lib/series.js';
 import {
   useAcoes,
   useExecucao,
   useMercado,
   useNoticias,
   useResumos,
-  useSerie,
 } from './useDados.js';
-
-const PERIODOS = {
-  '1M': { pontos: JANELAS['1m'], dias: 30 },
-  '6M': { pontos: JANELAS['6m'], dias: 180 },
-  '1A': { pontos: JANELAS['1a'], dias: 365 },
-};
 
 // Cache de módulo: a análise é montada uma vez por conjunto de pacotes e reaproveitada
 // pelos componentes que chamam useAnaliseDoDia, desde que as referências sejam as mesmas.
@@ -45,34 +36,44 @@ function analiseDoDiaCacheada(entradas) {
   return resultado;
 }
 
-/** Agregado da análise do dia, montado a partir dos cinco pacotes. */
+// lista vazia com referência fixa: o cache de análise compara referências
+const SEM_NOTICIAS = [];
+
+/**
+ * Agregado da análise do dia, montado a partir dos cinco pacotes. Falha em execução ou em
+ * notícias não derruba a tela: execução vira null e notícias, lista vazia. Ações, resumos e
+ * mercado continuam sendo erro.
+ */
 export function useAnaliseDoDia() {
   const acoes = useAcoes();
   const resumos = useResumos();
   const noticias = useNoticias();
   const mercado = useMercado();
   const execucao = useExecucao();
-  const consultas = [acoes, resumos, noticias, mercado, execucao];
+  const essenciais = [acoes, resumos, mercado];
+  const opcionais = [noticias, execucao];
+  const consultas = [...essenciais, ...opcionais];
 
-  const prontos = consultas.every((c) => c.data !== undefined);
+  const prontos =
+    essenciais.every((c) => c.data !== undefined) && opcionais.every((c) => c.data !== undefined || c.isError);
 
   const data = useMemo(() => {
     if (!prontos) return undefined;
     return analiseDoDiaCacheada({
       acoes: acoes.data,
       resumos: resumos.data,
-      noticias: noticias.data,
+      noticias: noticias.data ?? SEM_NOTICIAS,
       mercado: mercado.data,
-      execucao: execucao.data,
+      execucao: execucao.data ?? null,
     });
   }, [prontos, acoes.data, resumos.data, noticias.data, mercado.data, execucao.data]);
 
-  const isError = consultas.some((c) => c.isError);
+  const isError = essenciais.some((c) => c.isError);
   return {
     data,
     isPending: !isError && consultas.some((c) => c.isPending),
     isError,
-    error: consultas.find((c) => c.isError)?.error ?? null,
+    error: essenciais.find((c) => c.isError)?.error ?? null,
   };
 }
 
@@ -85,25 +86,4 @@ export function useRecarregarAnalise() {
         q.queryKey[0] === 'dados' &&
         ['acoes', 'resumo_acao', 'noticias_dia', 'mercado_dia', 'execucao/ultima'].includes(q.queryKey[1]),
     });
-}
-
-/**
- * Série de fechamento de um ticker recortada ao período (1M, 6M ou 1A).
- * Pregões sem fechamento saem da série; datas e valores seguem alinhados.
- */
-export function useHistorico(ticker, periodo) {
-  const consulta = useSerie(ticker, '1a');
-  const { pontos, dias } = PERIODOS[periodo] ?? {};
-
-  const data = useMemo(() => {
-    if (!consulta.data || !pontos) return undefined;
-    const { datas, valores } = cortarJanela(consulta.data, pontos);
-    const fechamento = valores.fechamento ?? [];
-    const pares = datas
-      .map((data, i) => ({ data, valor: fechamento[i] }))
-      .filter(({ valor }) => valor != null);
-    return { serie: pares.map((p) => p.valor), datas: pares.map((p) => p.data), dias };
-  }, [consulta.data, pontos, dias]);
-
-  return { ...consulta, data };
 }

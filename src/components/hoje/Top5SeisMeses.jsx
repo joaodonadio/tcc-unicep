@@ -3,8 +3,10 @@ import { useSerie } from '../../hooks/useDados.js';
 import { brl, pct } from '../../lib/formato.js';
 import { direcaoDe } from '../../lib/mapaPregao.js';
 import { TEXTOS } from '../../lib/textos.js';
+import { janelaComSalto, variacaoPeriodoSuspeita } from '../../lib/crivel.js';
 import { fechamentoSeisMeses } from '../../lib/top5Estudo.js';
 import { MiniGrafico } from '../graficos/MiniGrafico.jsx';
+import { SeloRevisao } from '../ui/SeloRevisao.jsx';
 
 const T = TEXTOS.top5Hoje;
 const ALTURA = 88;
@@ -19,7 +21,10 @@ const COR_NEUTRA = 'var(--cor-serie-1)';
 export function Top5SeisMeses({ ticker, alta6m }) {
   const consulta = useSerie(ticker, '1a');
   const janela = useMemo(() => fechamentoSeisMeses(consulta.data), [consulta.data]);
-  const direcao = direcaoDe(alta6m);
+  // salto de escala na janela ou período fora dos limites: o número vai para "mudou de escala"
+  const suspeita = (janela && janelaComSalto(janela.valores)) || variacaoPeriodoSuspeita(alta6m);
+  const numero = suspeita ? null : alta6m;
+  const direcao = direcaoDe(numero);
   const carregando = consulta.isPending && !consulta.isError;
   if (alta6m == null && !janela && !carregando) return null;
 
@@ -27,10 +32,14 @@ export function Top5SeisMeses({ ticker, alta6m }) {
     <div className="top5-seis">
       <p className="top5-seis-titulo">{T.seisMesesTitulo}</p>
       <div className="top5-seis-corpo">
-        {alta6m != null && (
-          <span className="hoje-janela-valor" data-sinal={direcao}>
-            {pct(alta6m)}
-          </span>
+        {suspeita ? (
+          <SeloRevisao compacto />
+        ) : (
+          numero != null && (
+            <span className="hoje-janela-valor" data-sinal={direcao}>
+              {pct(numero)}
+            </span>
+          )
         )}
         {carregando && <div className="esqueleto top5-seis-grafico" style={{ height: `${ALTURA / 16}rem` }} aria-hidden="true" />}
         {janela && (

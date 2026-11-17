@@ -171,6 +171,14 @@ export const EXPLICACOES = {
     tecnico: 'Tom médio = média de (probabilidade positiva − probabilidade negativa) de cada notícia.',
   },
 
+  tom_setor: {
+    titulo: 'Tom das notícias do dia',
+    simples:
+      'Mostra se as notícias de hoje sobre as empresas deste setor foram mais boas, neutras ou ruins. É um retrato das manchetes, não tem ligação direta com os outros números do cartão.',
+    tecnico:
+      'Contagem das manchetes do dia das empresas do setor, classificadas pelo FinBERT-PT-BR em positivas, neutras e negativas. Independe da variação e dos demais dados do cartão.',
+  },
+
   finbert: {
     titulo: 'FinBERT-PT-BR',
     simples:
@@ -306,7 +314,7 @@ export const EXPLICACOES = {
   selic: {
     titulo: 'Selic',
     simples: 'É a taxa básica de juros do Brasil, decidida pelo Banco Central. Quando ela sobe, deixar o dinheiro aplicado em renda fixa rende mais e pegar empréstimo fica mais caro.',
-    tecnico: 'Taxa básica de juros definida pelo Copom (meta, SGS 432). Referência para o CDI e para o custo de capital das empresas.',
+    tecnico: 'Taxa básica de juros definida pelo Copom. Referência para o CDI e para o custo de capital das empresas.',
   },
 
   mediana: {

@@ -1,0 +1,73 @@
+/* Marca CotAI: Cotinha + nome. Medidas em em, para a mesma logo servir no cabeçalho e no rodapé. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  font-family: var(--fonte-titulo);
+  font-weight: var(--peso-forte);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* O desenho do Cotinha tem folga transparente dos lados: a margem negativa aproxima o nome */
+.logo__pavio {
+  inline-size: 2em;
+  block-size: 2em;
+  margin-block: -0.35em;
+  margin-inline: -0.3em -0.2em;
+  flex: none;
+}
+
+.logo__nome {
+  letter-spacing: -0.035em;
+}
+
+/* "AI" na cor do mascote; o recuo à direita guarda lugar para o brilho */
+.logo__destaque {
+  position: relative;
+  padding-inline-end: 0.3em;
+  color: var(--cor-mascote);
+}
+
+.logo__brilho {
+  position: absolute;
+  inset-block-start: -0.14em;
+  inset-inline-end: 0.02em;
+  inline-size: 0.44em;
+  block-size: 0.44em;
+  fill: var(--cor-atencao);
+  transform-origin: 50% 50%;
+}
+
+/* Passar o mouse: o Cotinha pula e o brilho dá uma volta curta (só sem movimento reduzido) */
+:root:not([data-movimento='reduzido']) a:hover > .logo .mascote-corpo {
+  animation: pulo 560ms var(--curva);
+}
+
+:root:not([data-movimento='reduzido']) a:hover > .logo .logo__brilho {
+  animation: logo-cintila 640ms var(--curva);
+}
+
+@keyframes logo-cintila {
+  0% { rotate: 0deg; scale: 1; }
+  45% { rotate: 70deg; scale: 0.55; }
+  100% { rotate: 90deg; scale: 1; }
+}
+
+/* Assinatura do rodapé: logo maior e frase da marca embaixo */
+.rodape-marca {
+  display: grid;
+  justify-items: start;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-5);
+}
+
+.rodape-marca .logo {
+  font-size: var(--texto-xl);
+  color: var(--cor-texto);
+}
+
+.rodape-marca p {
+  margin: 0;
+  max-width: 46ch;
+}

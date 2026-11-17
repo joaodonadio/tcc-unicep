@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import ComoUsar from '../components/inicio/ComoUsar.jsx';
+import ComoUsar from '../components/hoje/ComoUsar.jsx';
 import PainelHoje from '../components/hoje/PainelHoje.jsx';
 import { useRolarParaAncora } from '../hooks/useRolarParaAncora.js';
 import { TEXTOS } from '../lib/textos.js';
@@ -15,6 +15,7 @@ export default function Hoje() {
 
   return (
     <div className="pagina">
+      <h1 className="sr-only">{TEXTOS.paginas.hoje}</h1>
       <ComoUsar />
       <PainelHoje />
     </div>

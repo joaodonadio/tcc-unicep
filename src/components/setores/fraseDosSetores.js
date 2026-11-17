@@ -9,9 +9,12 @@ export function fraseDosSetores(setores, periodo) {
   const cairam = comValor.filter((s) => s.media < 0).length;
   const maior = comValor[0];
   const menor = comValor.at(-1);
+  // "maior alta" só se o maior subiu, "maior queda" só se o menor caiu
   return [
     TEXTOS.setores.resumo(TEXTOS.setores.periodosExtenso[periodo], subiram, cairam),
-    TEXTOS.setores.resumoMaior(maior.setor, pct(maior.media)),
-    TEXTOS.setores.resumoMenor(menor.setor, pct(menor.media)),
-  ].join(' ');
+    maior.media > 0 && TEXTOS.setores.resumoMaior(maior.setor, pct(maior.media)),
+    menor.media < 0 && TEXTOS.setores.resumoMenor(menor.setor, pct(menor.media)),
+  ]
+    .filter(Boolean)
+    .join(' ');
 }

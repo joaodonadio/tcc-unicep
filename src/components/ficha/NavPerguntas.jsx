@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useIndicador } from '../../hooks/useIndicador.js';
 import { PERGUNTAS } from '../../lib/perguntasFicha.js';
 import { TEXTOS } from '../../lib/textos.js';
 
@@ -11,6 +12,8 @@ const TECLAS_ANTERIOR = ['ArrowLeft', 'ArrowUp'];
 export function NavPerguntas({ atual, aoEscolher }) {
   const botoes = useRef({});
   const ultimo = PERGUNTAS.length - 1;
+  // o marcador que desliza é o fundo da aba ativa (ver .ficha-aba-marcador)
+  const indicador = useIndicador(atual);
 
   const escolher = (id) => {
     aoEscolher(id);
@@ -29,7 +32,13 @@ export function NavPerguntas({ atual, aoEscolher }) {
   };
 
   return (
-    <div className="ficha-abas" role="tablist" aria-label={TEXTOS.ficha.perguntas_rotulo}>
+    <div
+      ref={indicador.trilhoRef}
+      className="ficha-abas"
+      role="tablist"
+      aria-label={TEXTOS.ficha.perguntas_rotulo}
+    >
+      <span ref={indicador.indicadorRef} className="ficha-aba-marcador" aria-hidden="true" />
       {PERGUNTAS.map((pergunta, indice) => {
         const selecionada = pergunta.id === atual;
         return (
@@ -45,6 +54,7 @@ export function NavPerguntas({ atual, aoEscolher }) {
             aria-selected={selecionada}
             tabIndex={selecionada ? 0 : -1}
             className="ficha-aba"
+            data-indicador-alvo={selecionada ? 'true' : undefined}
             onClick={() => escolher(pergunta.id)}
             onKeyDown={(e) => aoTecla(e, indice)}
           >

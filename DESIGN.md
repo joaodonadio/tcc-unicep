@@ -1,22 +1,22 @@
 ---
-name: Ações da B3
+name: CotAI
 description: O pregão da B3 explicado em placas de vidro escuro sobre uma malha de pontos, com a cor morando em manchas vivas de dois tons que dizem o assunto do cartão.
 colors:
-  fundo: "#0b0b0c"
-  vidro-base: "#141416"
-  vidro-base-hover: "#19191c"
-  poca-teal: "#14b8a6"
-  poca-azul: "#3158e8"
-  poca-carmim: "#c8284c"
-  poca-magenta: "#c73cbd"
-  poca-violeta: "#6c3cf2"
-  poca-verde: "#2fb855"
-  poca-oliva: "#8fa61c"
-  poca-ardosia: "#5a6f96"
+  fundo: "#242428"
+  vidro-base: "#19191c"
+  vidro-base-hover: "#1e1e22"
+  poca-teal: "#43a89c"
+  poca-azul: "#4e68cc"
+  poca-carmim: "#bd4a66"
+  poca-magenta: "#ad55a4"
+  poca-violeta: "#7558cc"
+  poca-verde: "#4faa66"
+  poca-oliva: "#8fa248"
+  poca-ardosia: "#5f7096"
   sub-fundo: "rgb(255 255 255 / 0.04)"
   sub-fundo-hover: "rgb(255 255 255 / 0.07)"
   sub-borda: "rgb(255 255 255 / 0.08)"
-  flutuante-fundo: "rgb(14 14 16 / 0.72)"
+  flutuante-fundo: "rgb(30 30 34 / 0.78)"
   flutuante-borda: "rgb(255 255 255 / 0.08)"
   fio: "rgb(255 255 255 / 0.07)"
   borda: "rgb(255 255 255 / 0.09)"
@@ -215,25 +215,25 @@ components:
     height: "2.5rem"
 ---
 
-# Design System: Ações da B3
+# Design System: CotAI
 
 ## Overview
 
 **Creative North Star: "Vidro sobre a Mesa de Operações"**
 
-O site é uma mesa escura, quase preta e neutra, coberta por uma malha de pontos apagados. Sobre ela, cada assunto é uma placa de vidro escuro quase opaco, e atrás de cada placa acendem duas manchas de luz colorida, vivas e difusas, em cantos opostos. A cor nunca está na interface: está no cartão, e diz do que ele trata (alta, queda, juros, série, destaque). Toda a navegação, o foco e a ação principal são monocromáticos, em branco.
+O site é uma mesa cinza-escura e neutra, coberta por uma malha de pontos apagados. Sobre ela, cada assunto é uma placa de vidro escuro quase opaco, e atrás de cada placa acendem duas manchas de luz colorida, vivas e difusas, em cantos opostos. A cor nunca está na interface: está no cartão, e diz do que ele trata (alta, queda, juros, série, destaque). Toda a navegação, o foco e a ação principal são monocromáticos, em branco.
 
 O sistema não saiu de uma rodada de conceitos. Foi conduzido por duas imagens de referência do usuário (uma grade de cartões escuros, cada um com uma mancha viva de dois tons, número grande e legenda; e uma interface de vidro quente) e pelo retorno dele durante a construção: tirar o âmbar, deixar as manchas mais vivas, consertar os cartões e a barra de navegação. O que ficou é o que o código mostra.
 
 A leitura vem antes do enfeite: público leigo e idoso, texto de 17px ajustável, número grande em fonte de painel de cotação, legenda curta embaixo. A cor de mancha é atmosfera e assunto; o sentido de alta e queda sempre vem também por sinal, palavra ou ícone.
 
 **Key Characteristics:**
-- Chão neutro quase preto, nunca preto puro, com malha de pontos fixa por trás de tudo.
-- Cartões de vidro escuro opaco com duas manchas vivas de tamanho fixo em cantos opostos, aresta de 1px que pega luz em cima, sem sombra projetada.
+- Chão neutro cinza-escuro (#242428), com os cartões um degrau mais escuros, nunca preto, com malha de pontos fixa por trás de tudo.
+- Cartões de vidro escuro opaco (na página Hoje, translúcido: ver a regra do desfoque) com duas manchas vivas de tamanho fixo em cantos opostos, aresta de 1px que pega luz em cima, sem sombra projetada.
 - Interface monocromática: branco para o ativo, o foco e a ação principal.
 - Par de cores da mancha com significado (direção do preço, assunto da pergunta).
 - Duas famílias de tipo: Atkinson Hyperlegible Next nos títulos e no texto, Atkinson Hyperlegible Mono só nos números de dado e códigos. Escolhidas pela legibilidade: letras e algarismos difíceis de confundir, o que ajuda quem está começando.
-- Vidro translúcido com desfoque reservado ao que flutua: barra do topo, barra inferior do celular, painéis e balões.
+- Vidro translúcido com desfoque reservado ao que flutua (barra do topo, barra inferior do celular, painéis e balões) e, como única exceção, aos cartões da página Hoje.
 
 ## Colors
 
@@ -243,7 +243,7 @@ Chão neutro e escuro, tinta branca e cor viva só nas manchas atrás do vidro e
 - **Branco de Comando** (acento): a única cor de interface. Botão principal, aba e opção ativa do segmentado, foco do teclado, selo de contagem, seleção de texto, sublinhado de link. Texto por cima em quase-preto (acento-texto). No hover vai a branco puro (acento-hover). Véu de 10% (acento-suave) para estados abertos discretos.
 
 ### Secondary
-As manchas (poca-*) são cores vivas e saturadas que, misturadas a 50% sobre a placa escura (`--brilho-forca: 50%`), viram luz colorida difusa. Nunca aparecem como fundo chapado, texto ou borda.
+As manchas (poca-*) são cores suaves, de saturação contida, que, misturadas a 48% sobre a placa escura (`--brilho-forca: 48%`; 34% nas telas com mancha mais discreta, como a Hoje), viram luz colorida difusa sem cansar o olho (decisão do usuário em 04/11/2026: fundo cinza-escuro e cores menos saturadas). Nunca aparecem como fundo chapado, texto ou borda.
 - **Teal de Recife** (poca-teal): segunda luz do destaque e do par de gráfico; primeira luz do par "aço".
 - **Azul Cobalto** (poca-azul): primeira luz do par "dado" (gráficos de série).
 - **Carmim** (poca-carmim): primeira luz do par "queda".
@@ -261,10 +261,10 @@ As manchas (poca-*) são cores vivas e saturadas que, misturadas a 50% sobre a p
 - **Cores de setor** (linha-financeiro a linha-outros): identidade de setor dentro dos dados (dispersão, marcadores, linhas), sempre com o nome do setor junto. O ouro do financeiro (linha-financeiro) é uma delas: cor de dado de setor, nunca cromo de interface.
 
 ### Neutral
-- **Mesa Quase-Preta** (fundo): o chão de toda página, sob a malha de pontos.
+- **Mesa Cinza-Escura** (fundo): o chão de toda página, sob a malha de pontos.
 - **Placa de Vidro** (vidro-base, vidro-base-hover): o corpo opaco de todo cartão.
 - **Sub-superfície** (sub-fundo, sub-fundo-hover, sub-borda): branco a 4% e 7% com aresta de 8%, para blocos dentro de cartões, botões secundários, abas, campos e selos.
-- **Vidro Flutuante** (flutuante-fundo, flutuante-borda): quase-preto a 72% com `blur(20px) saturate(140%)`.
+- **Vidro Flutuante** (flutuante-fundo, flutuante-borda): quase-preto a 78% com `blur(20px) saturate(140%)`.
 - **Fio e Contorno** (fio, borda, borda-hover): brancos de 7%, 9% e 18%.
 - **Tinta** (texto) e **Tinta Suave** (texto-suave); dentro de um cartão com mancha a tinta suave clareia para texto-suave-na-mancha, para manter 4,5:1 no centro da cor. **Prata da Barra** (placa-suave) para links inativos da navegação.
 
@@ -312,7 +312,7 @@ As manchas (poca-*) são cores vivas e saturadas que, misturadas a 50% sobre a p
 - **Grade dos números do dia:** uma ou duas colunas no celular, duas a partir de 640px, três a partir de 960px, com vão de 1rem a 1.5rem. A fonte dos números ocupa a linha inteira abaixo.
 - **Anatomia do cartão KPI:** título que reserva duas linhas, número preso logo abaixo (todos os números de uma fileira na mesma altura), variação do dia, micro-visual opcional (régua de proporção alta/estável/queda ou faixa de 6 meses com marcador), e a sobra de espaço vai para o pé do cartão. Altura mínima de 12.5rem (8.5rem no celular).
 - **Duas colunas:** gráfico e destaques lado a lado a partir de 1024px (1.6fr e 1fr).
-- **Navegação:** barra de ponta a ponta fixa no topo, em uma linha: marca à esquerda (o Pavio e o nome), páginas no centro, Minha lista e Leitura à direita. Entre 721px e 1279px as páginas extras vão para o menu Mais. Até 720px o topo rola com a página e a navegação vira uma barra inferior flutuante em pílula (até 28rem de largura), com ícone e rótulo, e o corpo ganha folga embaixo para ela não cobrir o fim.
+- **Navegação:** barra de ponta a ponta fixa no topo, em uma linha: marca à esquerda (o Cotinha e o nome), páginas no centro, Leitura à direita. Entre 721px e 1279px as páginas extras vão para o menu Mais. Até 720px o topo rola com a página e a navegação vira uma barra inferior flutuante em pílula (até 28rem de largura), com ícone e rótulo, e o corpo ganha folga embaixo para ela não cobrir o fim.
 - **Fundo:** a malha de pontos (26px entre centros, ponto de 1.15px, branco a 10%) é uma camada fixa atrás de todo o conteúdo.
 
 ## Elevation & Depth
@@ -330,7 +330,7 @@ Camadas: cabeçalho 40, painéis 50, barra inferior 60, balão 90, link de pular
 ### Named Rules
 **The Vidro Não Empilha Rule.** Dentro de um cartão de vidro nunca vai outro cartão de vidro. Bloco interno é sub-superfície: véu branco de 4%, aresta de 8%, sem mancha, sem sombra externa.
 
-**The Desfoque Só Flutua Rule.** `backdrop-filter` só no que flutua sobre o conteúdo. Cartões no fluxo da página são opacos.
+**The Desfoque Só Flutua Rule.** `backdrop-filter` só no que flutua sobre o conteúdo. Cartões no fluxo da página são opacos. Exceção: na página Hoje (e no bloco Como usar) o vidro é translúcido (`--vidro-base-translucido`) e desfoca a malha de pontos (`--vidro-desfoque`). Com `prefers-reduced-transparency`, volta à placa opaca.
 
 ## Shapes
 
@@ -368,9 +368,8 @@ Discretos e de toque largo; só a ação principal é cheia.
 - **Focus:** contorno branco de 3px com 2px de afastamento, sem halo.
 
 ### Navigation
-- **Computador:** barra translúcida de ponta a ponta, fixa no topo, com desfoque e um fio de 1px embaixo. Marca em Atkinson Hyperlegible Next 800 com um ponto de luz teal. Links em pílula de 2.5rem, Atkinson Hyperlegible Next 600 0.9375rem, em prata; hover com véu de 7% e texto branco; página atual com véu branco de 9%, aresta interna de 10% e texto branco, sem cor de destaque.
+- **Computador:** barra translúcida de ponta a ponta, fixa no topo, com desfoque e um fio de 1px embaixo. Marca em Atkinson Hyperlegible Next 800 com o Cotinha ao lado do nome. Links em pílula de 2.5rem, Atkinson Hyperlegible Next 600 0.9375rem, em prata; hover com véu de 7% e texto branco; página atual com véu branco de 9%, aresta interna de 10% e texto branco, sem cor de destaque.
 - **Celular (até 720px):** pílula flutuante de vidro na base da tela, com as quatro primeiras páginas e o menu Mais; cada item tem ícone e rótulo em caption; o ativo usa a mesma pílula de véu branco.
-- **Minha lista:** botão redondo de sub-superfície com selo branco de contagem.
 
 ### Cartão KPI (signature)
 O cartão dos números do dia é a assinatura do sistema: placa de vidro com o par de manchas da direção do preço, título em Atkinson Hyperlegible Next que reserva duas linhas, número enorme em Atkinson Hyperlegible Mono preso logo abaixo, variação com sinal em peso 600, e uma régua fina opcional (6px em três partes, ou trilho de 4px com marcador branco). A sobra de espaço fica no pé.
@@ -381,13 +380,33 @@ Canvas fixo atrás de tudo: pontos brancos a 10% que acendem até 60% perto do c
 ### Aviso e erro
 Mesma fórmula: véu de 8% da cor com aresta a 30-32%, 14px de canto, texto branco. Aviso em amarelo-limão, erro em rosa de queda.
 
-### Mascote (Pavio)
-Um candle com olhos: corpo na cor `--cor-mascote` (o verde-água do dado 6), sombra da lateral em `--cor-mascote-sombra`, olhos em `--cor-mascote-olho` (o fundo) e brilho branco. Componente `src/components/ui/Mascote.jsx`, animações em `src/styles/mascote.css`. Favicon em `public/favicon.svg`.
-- **Humores** (o olhar muda, a forma é a mesma): `neutro` é o logo; `contente` para motivos a favor e boas-vindas; `atento` para ponto de atenção e erro; `pensativo` para espera; `dormindo` para lista vazia.
-- **Ações** (loop, independentes do humor): `ocioso` no logo, que olha para um lado, para o outro e pensa num ciclo de 16s; `acenando` no card de primeira vez.
+### Marca (CotAI)
+Logo = Cotinha ocioso + nome em Atkinson Hyperlegible Next 700 com tracking -0.035em: "Cot" na cor do texto e "AI" em `--cor-mascote`, com o brilho de quatro pontas do Cotinha em `--cor-atencao` no alto do "I". Medidas em em, para servir em qualquer tamanho. No hover o Cotinha pula e o brilho gira um quarto de volta (só sem movimento reduzido). Componente `src/components/ui/Logo.jsx`, estilos em `src/styles/marca.css`; o nome vem de `TEXTOS.marca`. O rodapé repete a logo com uma frase. Seleção de texto e cursor de digitação usam `--cor-mascote`. Favicon: Cotinha com o brilho amarelo contornado.
+
+### Mascote (Cotinha)
+Um candle com olhos: corpo inteiro numa cor só, `--cor-mascote` (o verde-água do dado 6), sem lateral escura, olhos em `--cor-mascote-olho` (o fundo) e brilho branco. Componente `src/components/ui/Mascote.jsx`, animações em `src/styles/mascote.css`. Favicon em `public/favicon.svg`.
+- **Humores** (o olhar muda, a forma é a mesma): `neutro` é o logo; `contente` para motivos a favor e boas-vindas; `atento` para ponto de atenção e erro; `pensativo` para espera; `dormindo` para lista vazia. Novos: `animado` (olhos em arco, pulinho) para pagamento próximo; `preocupado` (pálpebra caída, corpo encolhido) para tom com mais negativas e variação negativa; `surpreso` (olhos redondos, boca em "o", susto) para variação de 2% ou mais; `curioso` (um olho maior, corpo inclinado 6°) para tom empatado.
+- **Onde aparecem:** abertura do Hoje (`humorDaVariacao` da variação do Ibovespa), tom das notícias (`humorDoTom`), proventos (`animado` com pagamento próximo, `dormindo` sem), fallback de carregamento (`pensativo`) e rodapé (`neutro` com `ocioso`).
+- **Ações** (loop, independentes do humor): `ocioso` no logo, que olha para um lado, para o outro e pensa num ciclo de 16s; `acenando` no card de primeira vez; `moeda`, em que uma moeda surge ao lado do corpo, sobe e some a cada ciclo de 4 s, com um brilhinho, usada no resumo de proventos da página Hoje (junto do humor `animado`).
 - **Vivo** (só no Top 5, ao lado da frase dos motivos): `contente` pula, olha para a frase e balança a cada 6 s; `atento` estica o pavio, se inclina para a frase e o pavio tremula a cada 5 s; `neutro` usa o ciclo do logo.
 - **Regras:** sempre ao lado de uma frase, nunca sozinho. Decorativo (`aria-hidden`) por padrão; só ganha rótulo quando a figura carrega sentido sozinha. No máximo um por bloco. Com movimento reduzido, fica parado (os pontos do pensamento e o z ficam à mostra).
-- **Reações de chegada** (`contente`, `atento`) tocam uma vez, ao aparecer. Passar o mouse na marca faz o Pavio pular, só sem movimento reduzido.
+- **Reações de chegada** (`contente`, `atento`, `animado`, `surpreso`) tocam uma vez, ao aparecer. Passar o mouse na marca faz o Cotinha pular, só sem movimento reduzido.
+
+### Movimento
+
+Trocas de aba e de nível usam `trocarComTransicao(fn, 'suave')`: só um fade de 220ms. Troca feita pela URL passa `flushSync: true` ao roteador, para o conteúdo novo entrar no quadro capturado. Listas que crescem por clique usam `useAlturaSuave`. A coreografia do porquinho fica em `src/lib/cofrinho3d.js`.
+A interface deve parecer fluida: nada pisca de um estado para outro. Tokens em `src/styles/tokens.css`: `--curva` (cubic-bezier(0.16, 1, 0.3, 1)), `--duracao-entrada` (340ms), `--duracao-saida` (160ms, a saída é mais rápida), `--duracao-toque` (120ms), `--passo-onda` (25ms) e `--passo-lista` (12ms).
+- **Entrada** 280-420ms com `--curva`; **saída** 120-180ms. Sem quique nem elástico.
+- **Só** transform, opacity e filter leve. Nunca animar width, height, top ou left (exceção: o marcador do seletor, que muda a largura ao deslizar).
+- **Estado padrão sempre visível:** se o JS ou a animação falhar, o conteúdo aparece como estaria.
+- **Troca de período** (Setores, Mercado, ficha): `trocarComTransicao` (`src/lib/movimento.js`) envolve a troca numa transição de vista. Cada cartão e cada linha do ranking tem nome próprio, então desliza até a nova posição; o cartão recolhe (escala 0,96, fade) e reaparece. O marcador da aba ativa desliza até a nova opção.
+- **Rotas:** transição de vista do react-router (`viewTransition`): a tela esmaece e sobe 8px; o cabeçalho fica parado.
+- **Ondinha nas bolinhas do setor:** entram em onda (escala 0,4 a 1); no hover ou foco do cartão, uma onda sobe 3px e volta. Pílulas sobem 2px no hover. O total fica perto de 400ms.
+- **Listas** (mapa de ações, próximos pagamentos, manchetes, ranking de proventos): cascata com a classe `entra-lista`, teto de cerca de 300ms.
+- **Números da ficha:** `NumeroAnimado` usa o `Contador` (adaptado do Counter do React Bits; aviso em `src/components/ui/LICENCA-REACT-BITS.md`): os dígitos rolam para cima e somem na borda. Sem movimento, o número aparece direto.
+- **Índices do Mercado:** ao ligar um índice, a linha nova se desenha em 900ms e as outras deslizam para a nova escala (`trocaSuave` em `GraficoInterativo`).
+- **Carregamento:** skeleton quando a forma do conteúdo é conhecida; `Carregador` (três barras em loop) quando não é. Os dois em `src/components/ui/Estados.jsx`.
+- **Movimento reduzido** (`data-movimento='reduzido'` ou o pedido do sistema): nada se desloca; só fades curtos de opacidade (150ms) e nenhuma transição de forma.
 
 ## Do's and Don'ts
 

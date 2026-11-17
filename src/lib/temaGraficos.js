@@ -9,8 +9,8 @@ const RESERVA = {
   '--cor-fio': 'rgb(255 255 255 / 0.07)',
   '--cor-borda': 'rgb(255 255 255 / 0.09)',
   '--cor-superficie': 'rgb(255 255 255 / 0.04)',
-  '--cor-superficie-2': 'rgb(255 255 255 / 0.08)',
-  '--cor-fundo': '#0b0b0c',
+  '--cor-superficie-2': 'rgb(255 255 255 / 0.07)',
+  '--cor-fundo': '#242428',
   '--cor-alta': '#7fd19a',
   '--cor-queda': '#f08a8a',
   '--cor-estavel': '#b4b4bb',
@@ -20,6 +20,7 @@ const RESERVA = {
   '--cor-dado-4': '#7d9be0',
   '--cor-dado-5': '#8a8a93',
   '--cor-dado-6': '#5fc9c0',
+  '--cor-dado-7': '#e09ad6',
   '--fonte-texto': "'Atkinson Hyperlegible Next Variable', system-ui, sans-serif",
   '--fonte-numeros': "'Atkinson Hyperlegible Mono Variable', ui-monospace, monospace",
 };

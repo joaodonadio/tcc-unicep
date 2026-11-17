@@ -1,10 +1,9 @@
-/* O mercado: índices, setores e alertas do pregão. Cada assunto num cartão de vidro, com muito respiro. */
+/* O mercado: índices, dólar e juros. Cada assunto num cartão de vidro, com muito respiro. */
 
 /* Cartões da seção: placa de vidro (receita do sistema). A mancha de cor vem do data-brilho no JSX. */
 .mercado-grafico,
-.mercado-tabela-indices,
-.mercado-destaque-setores,
-.mercado-busca-volume {
+.mercado-bloco,
+.mercado-serie {
   min-width: 0;
   padding: var(--espaco-6);
   background: var(--vidro);
@@ -113,18 +112,40 @@
   font-weight: var(--peso-medio);
   cursor: pointer;
   transition:
-    background-color var(--duracao) var(--curva),
-    border-color var(--duracao) var(--curva);
+    background-color var(--duracao-hover) var(--curva-suave),
+    border-color var(--duracao-hover) var(--curva-suave),
+    box-shadow var(--duracao-hover) var(--curva-suave),
+    translate var(--duracao-hover) var(--curva-suave),
+    scale var(--duracao-toque) var(--curva-suave);
 }
 
+/* --chip-cor é a cor da linha do índice no gráfico: o chip fala a mesma língua da série */
 .mercado-chip:hover {
-  background: var(--sub-fundo-hover);
-  border-color: var(--cor-borda-hover);
+  background: color-mix(in srgb, var(--chip-cor, var(--cor-acento)) 14%, transparent);
+  border-color: color-mix(in srgb, var(--chip-cor, var(--cor-acento)) 60%, transparent);
+  box-shadow: var(--sub-luz), 0 8px 18px -12px var(--chip-cor, var(--cor-acento));
 }
 
 .mercado-chip[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--cor-acento) 42%, transparent);
-  background: color-mix(in srgb, var(--cor-acento) 9%, transparent);
+  border-color: color-mix(in srgb, var(--chip-cor, var(--cor-acento)) 70%, transparent);
+  background: color-mix(in srgb, var(--chip-cor, var(--cor-acento)) 20%, transparent);
+}
+
+:root:not([data-movimento='reduzido']) .mercado-chip:hover {
+  translate: 0 -2px;
+}
+
+:root:not([data-movimento='reduzido']) .mercado-chip:active {
+  scale: 0.97;
+}
+
+.mercado-chip:hover .mercado-chip__bolinha,
+.mercado-chip[aria-pressed='true'] .mercado-chip__bolinha {
+  scale: 1.3;
+}
+
+.mercado-periodo .botao:not([aria-pressed='true']):hover {
+  background: color-mix(in srgb, var(--cor-dado-3) 18%, transparent);
 }
 
 .mercado-chip[aria-disabled='true'] {
@@ -138,21 +159,23 @@
   outline-offset: 2px;
 }
 
-.mercado-chip--fixo {
-  cursor: default;
-  background: var(--sub-fundo-hover);
-}
-
 .mercado-chip__bolinha {
   flex: 0 0 auto;
   width: 0.7rem;
   height: 0.7rem;
   border-radius: 50%;
+  transition: scale var(--duracao-hover) var(--curva-suave);
 }
 
-.mercado-chip__tag {
-  font-size: var(--texto-xs);
-  color: var(--cor-texto-suave);
+/* Estado vazio da seleção de índices: o Cotinha curioso ao lado da frase */
+.mercado-vazio-grafico {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.mercado-vazio-grafico .mercado-vazio {
+  margin: 0;
 }
 
 .mercado-series__dica {
@@ -176,9 +199,10 @@
   margin-bottom: var(--espaco-3);
 }
 
+/* flex com crescimento: cada fileira, inclusive a última, ocupa a largura toda, qualquer que seja a quantidade marcada */
 .mercado-resumo-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--espaco-3);
   margin: 0;
   padding: 0;
@@ -188,6 +212,7 @@
 /* Cada série é uma sub-superfície dentro do cartão (sem caixa de vidro dentro de vidro) */
 .mercado-rendimento {
   display: flex;
+  flex: 1 1 13rem;
   flex-direction: column;
   gap: var(--espaco-1);
   min-width: 0;
@@ -230,187 +255,73 @@
   color: var(--cor-texto-suave);
 }
 
-/* ---------- Abas: linha de abas com indicador claro na ativa; cada uma tem uma frase embaixo ---------- */
-.abas.mercado-abas {
-  margin-bottom: var(--espaco-5);
-  gap: var(--espaco-1);
-  padding-bottom: 0;
-  border-bottom: 1px solid var(--cor-fio);
-}
-
-.mercado-abas > .aba {
-  position: relative;
-  min-height: 2.75rem;
-  padding: var(--espaco-2) var(--espaco-4);
-  border: 0;
-  border-radius: var(--raio-3) var(--raio-3) 0 0;
-  background: transparent;
-  font-size: var(--texto-base);
-  color: var(--cor-texto-suave);
-}
-
-.mercado-abas > .aba:hover {
-  background: var(--sub-fundo);
-  color: var(--cor-texto);
-}
-
-.mercado-abas > .aba[aria-selected='true'] {
-  background: transparent;
-  color: var(--cor-acento);
-  font-weight: var(--peso-forte);
-}
-
-.mercado-abas > .aba[aria-selected='true']::after {
-  content: '';
-  position: absolute;
-  left: var(--espaco-3);
-  right: var(--espaco-3);
-  bottom: 0;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: var(--cor-acento);
-}
-
-.mercado-aba-descricao {
-  font-size: var(--texto-sm);
-  line-height: 1.5;
-  color: var(--cor-texto-suave);
-  max-width: 65ch;
-  margin-bottom: var(--espaco-1);
-}
-
-.mercado-painel {
-  display: grid;
-  gap: var(--espaco-5);
-  min-width: 0;
-}
-
-.mercado-painel > :first-child {
-  margin-top: 0;
-}
-
-.mercado-painel .mapa {
-  margin-top: 0;
-}
-
-/* Todos os cartões da aba ocupam a coluna de conteúdo inteira: mesma borda esquerda e direita */
-.mercado-tabela-indices {
-  min-width: 0;
-}
-
-.mercado-rolagem {
-  overflow-x: auto;
-}
-
-.mercado-tabela {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.mercado-tabela caption {
-  text-align: left;
-  font-size: var(--texto-xl);
-  font-weight: var(--peso-titulo);
-  letter-spacing: -0.02em;
-  padding: 0 0 var(--espaco-4);
-}
-
-/* Linhas separadas por fio, sem zebra: a leitura segue a linha, o número fica à direita */
-.mercado-tabela th,
-.mercado-tabela td {
-  padding: var(--espaco-4) var(--espaco-3) var(--espaco-4) 0;
-  border-bottom: 1px solid var(--cor-fio);
-  text-align: left;
-  vertical-align: middle;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-normal);
-}
-
-.mercado-tabela thead th {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  color: var(--cor-texto-suave);
-  white-space: nowrap;
-  padding-top: 0;
-}
-
-.mercado-tabela tbody tr:last-child th,
-.mercado-tabela tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.mercado-tabela tbody th {
-  min-width: 9rem;
-}
-
-/* Código de ação em tabela: Atkinson Hyperlegible Mono, com alvo de toque de 44px */
-.mercado-tabela tbody th a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-/* Número: Atkinson Hyperlegible Mono à direita, tabular */
-.mercado-tabela .num {
-  text-align: right;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums slashed-zero;
-  white-space: nowrap;
-}
-
-.mercado-tabela td .valor {
-  font-weight: var(--peso-medio);
-}
-
-.mercado-nivel {
-  display: block;
-  font-size: var(--texto-xs);
-  color: var(--cor-texto-suave);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---------- Movimentos fora do comum ---------- */
-.mercado-empresa {
-  flex: 1 1 auto;
-  font-size: var(--texto-sm);
-  color: var(--cor-texto-suave);
-}
-
-@media (max-width: 720px) {
-  .mercado-grafico,
-  .mercado-tabela-indices,
-  .mercado-destaque-setores,
-  .mercado-busca-volume {
-    padding: var(--espaco-5) var(--espaco-4);
-  }
-}
-
-/* No celular, o período ocupa a linha toda e cada opção divide a largura */
-@media (max-width: 520px) {
-  .mercado-periodo {
-    display: flex;
-    width: 100%;
-  }
-
-  .mercado-periodo .botao {
-    flex: 1 1 0;
-    padding-inline: var(--espaco-2);
-  }
-}
-
 /* ---------- Frase do pregão (topo da seção) ---------- */
 .mercado-resumo-dia {
   font-size: var(--texto-base);
   font-weight: var(--peso-medio);
   margin-bottom: var(--espaco-5);
   max-width: 65ch;
+}
+
+/* ---------- Cotinha ao lado de uma frase (abertura, dólar, juros, grupos): mesmo padrão do Hoje ---------- */
+.mercado-pavio {
+  --pavio-tam: 2.75rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+  /* o corpo começa a 29% do quadro do desenho: puxa para a borda do corpo alinhar com o texto de cima */
+  margin-inline-start: calc(var(--pavio-tam) * -0.29);
+  margin-inline-end: calc(var(--pavio-tam) * -0.2);
+}
+
+.mercado-resumo-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+}
+
+.mercado-resumo-linha .mercado-resumo-dia {
+  margin: 0;
+  min-width: 0;
+}
+
+.mercado-apoio {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.mercado-apoio .mercado-nota {
+  margin-bottom: 0;
+}
+
+/* Selo discreto ao lado do título: sub-superfície, sem caixa de destaque */
+.mercado-serie__cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-3);
+  margin-bottom: var(--espaco-1);
+}
+
+.mercado-serie__cabeca .mercado-bloco-titulo {
+  margin-bottom: 0;
+}
+
+.mercado-selo {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.mercado-serie__valor-legenda {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
 }
 
 /* ---------- Asterisco do que foi calculado pela série histórica ---------- */
@@ -425,411 +336,6 @@
   font-size: var(--texto-xs);
 }
 
-/* ---------- Destaques: o destaque de cada setor e a busca de volume ---------- */
-
-/* Ranking de setores: uma linha por setor, separada por fio, ordenada pelo volume do dia */
-.mercado-ranking {
-  list-style: none;
-  margin: var(--espaco-4) 0 0;
-  padding: 0;
-  display: grid;
-  gap: 0;
-}
-
-.mercado-ranking__item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--espaco-2) var(--espaco-3);
-  padding: var(--espaco-3) 0;
-  border-top: 1px solid var(--cor-fio);
-}
-
-.mercado-ranking__item:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.mercado-ranking__quem {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.mercado-ranking__setor {
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  color: var(--cor-texto-suave);
-}
-
-.mercado-ranking__acao {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--espaco-2);
-  min-width: 0;
-}
-
-/* Código de ação no ranking: Atkinson Hyperlegible Mono, alvo de toque de 44px */
-.mercado-ranking__ticker {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-base) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.mercado-ranking__volume {
-  grid-column: 2 / -1;
-  display: flex;
-  align-items: center;
-  gap: var(--espaco-3);
-  min-width: 0;
-}
-
-.mercado-ranking__numero {
-  flex: 0 0 auto;
-  min-width: 4.5rem;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-variant-numeric: tabular-nums slashed-zero;
-  font-size: calc(var(--texto-sm) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.mercado-ranking__barra {
-  flex: 1 1 auto;
-  min-width: 2rem;
-  height: 6px;
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
-  overflow: hidden;
-}
-
-.mercado-ranking__barra > span {
-  display: block;
-  height: 100%;
-  border-radius: var(--raio-pilula);
-  background: var(--cor-acento);
-}
-
-.mercado-ranking__vezes {
-  flex: 0 0 auto;
-  margin-left: auto;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-sm) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--cor-texto-suave);
-  font-variant-numeric: tabular-nums slashed-zero;
-  white-space: nowrap;
-}
-
-.mercado-ranking__vezes--forte {
-  color: var(--cor-acento);
-  font-weight: 600;
-}
-
-@media (max-width: 520px) {
-  .mercado-ranking__volume {
-    flex-wrap: wrap;
-    row-gap: var(--espaco-2);
-  }
-
-  .mercado-ranking__barra {
-    order: 3;
-    flex: 1 1 100%;
-  }
-}
-
-/* Variação do dia: número em Atkinson Hyperlegible Mono, tingido pelo sinal com véu de 13% (sem borda) */
-.mercado-pilula {
-  display: inline-block;
-  padding: 2px var(--espaco-3);
-  border-radius: var(--raio-pilula);
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-xs) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums slashed-zero;
-  white-space: nowrap;
-  background: var(--sub-fundo);
-  border: 1px solid var(--sub-borda);
-  color: var(--cor-texto-suave);
-}
-
-.mercado-pilula[data-sinal='up'] {
-  background: color-mix(in srgb, var(--cor-alta) 13%, transparent);
-  border-color: transparent;
-  color: var(--cor-alta);
-}
-
-.mercado-pilula[data-sinal='down'] {
-  background: color-mix(in srgb, var(--cor-queda) 13%, transparent);
-  border-color: transparent;
-  color: var(--cor-queda);
-}
-
-.mercado-busca-volume .lista-busca {
-  margin: var(--espaco-3) 0 var(--espaco-4);
-}
-
-/* Botão de ordenação na cabeçalho: alvo de toque de 44px, sem caixa */
-.mercado-ordem {
-  all: unset;
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  cursor: pointer;
-  text-transform: inherit;
-  letter-spacing: inherit;
-}
-
-.mercado-ordem:focus-visible {
-  outline: 2px solid var(--cor-foco, currentColor);
-  outline-offset: 2px;
-}
-
-.mercado-ordem::after {
-  content: ' \2193';
-}
-
-th[aria-sort='ascending'] .mercado-ordem::after {
-  content: ' \2191';
-}
-
-/* ---------- Como foi cada índice: nome e unidade, Hoje em destaque, pílulas por período ---------- */
-.mercado-tabela.mercado-indices tbody th,
-.mercado-tabela.mercado-indices tbody td {
-  padding-top: var(--espaco-5);
-  padding-bottom: var(--espaco-5);
-  vertical-align: middle;
-}
-
-.mercado-indice__nome {
-  font-weight: var(--peso-medio);
-  color: var(--cor-texto);
-}
-
-.mercado-indice__unidade {
-  font-weight: var(--peso-normal);
-  font-size: var(--texto-xs);
-  color: var(--cor-texto-suave);
-}
-
-.mercado-hoje__valor {
-  display: block;
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-size: calc(var(--texto-lg) * 0.92);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums slashed-zero;
-  line-height: 1.1;
-  color: var(--cor-texto);
-}
-
-.mercado-hoje .mercado-celula {
-  margin-top: 0.35rem;
-}
-
-.mercado-hoje__legenda {
-  display: block;
-  margin-top: 0.2rem;
-  font-family: var(--fonte-texto);
-  font-stretch: normal;
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-normal);
-  letter-spacing: normal;
-  font-variant-numeric: normal;
-  color: var(--cor-texto-suave);
-  white-space: normal;
-}
-
-/* Cabeçalho da tabela: palavras em Atkinson Hyperlegible Next, mesmo nas colunas numéricas (Hoje, 1 mês...) */
-.mercado-tabela.mercado-indices thead th {
-  font-family: var(--fonte-texto);
-  font-stretch: normal;
-  font-weight: var(--peso-medio);
-  letter-spacing: normal;
-  font-variant-numeric: normal;
-}
-
-/* Pílula de número: tingida pelo sinal; ausente é uma pílula apagada e tracejada */
-.mercado-celula {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  min-width: 5.5rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--raio-pilula);
-  font-family: var(--fonte-numeros);
-  font-stretch: var(--numeros-largura);
-  font-variant-numeric: tabular-nums slashed-zero;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  background: var(--sub-fundo);
-  color: var(--cor-texto-suave);
-}
-
-.mercado-celula[data-sinal='up'] {
-  background: color-mix(in srgb, var(--cor-alta) 13%, transparent);
-  color: var(--cor-alta);
-}
-
-.mercado-celula[data-sinal='down'] {
-  background: color-mix(in srgb, var(--cor-queda) 13%, transparent);
-  color: var(--cor-queda);
-}
-
-.mercado-celula[data-sinal='flat'] {
-  color: var(--cor-estavel);
-}
-
-.mercado-celula[data-estado='ausente'] {
-  min-width: 0;
-  background: transparent;
-  border: 1px dashed var(--cor-borda);
-  color: var(--cor-texto-suave);
-  font-family: var(--fonte-texto);
-  font-stretch: normal;
-  font-weight: var(--peso-normal);
-  letter-spacing: normal;
-  font-variant-numeric: normal;
-}
-
-/* Período sem número (o pacote manda travessão): traço simples, sem pílula */
-.mercado-traco {
-  font-family: var(--fonte-texto);
-  font-stretch: normal;
-  color: var(--cor-texto-suave);
-}
-
-/* Asterisco do cálculo pela série: sobrescrito claro dentro da pílula */
-.mercado-celula .mercado-asterisco {
-  margin-left: 1px;
-  font-size: 0.75em;
-  font-weight: var(--peso-titulo);
-  line-height: 0;
-  vertical-align: super;
-  color: var(--cor-acento);
-}
-
-/* Celular: cada índice vira um cartão interno, com os três períodos numa linha e o rótulo em cima */
-@media (max-width: 639px) {
-  .mercado-tabela.mercado-indices {
-    display: block;
-  }
-
-  .mercado-tabela.mercado-indices caption {
-    display: block;
-  }
-
-  .mercado-tabela.mercado-indices thead {
-    display: none;
-  }
-
-  .mercado-tabela.mercado-indices tbody {
-    display: grid;
-    gap: var(--espaco-3);
-  }
-
-  .mercado-tabela.mercado-indices tr {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--espaco-4) var(--espaco-3);
-    padding: var(--espaco-4);
-    background: var(--sub-fundo);
-    border: 1px solid var(--sub-borda);
-    border-radius: var(--raio-3);
-    box-shadow: var(--sub-luz);
-  }
-
-  .mercado-tabela.mercado-indices tbody th,
-  .mercado-tabela.mercado-indices tbody td {
-    padding: 0;
-    border: 0;
-  }
-
-  .mercado-tabela.mercado-indices th[scope='row'] {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  .mercado-tabela.mercado-indices td {
-    display: grid;
-    align-content: start;
-    justify-items: start;
-    gap: var(--espaco-1);
-    text-align: left;
-    white-space: normal;
-  }
-
-  .mercado-tabela.mercado-indices td.mercado-hoje {
-    grid-column: 1 / -1;
-  }
-
-  .mercado-tabela.mercado-indices td::before {
-    content: attr(data-rotulo);
-    font-family: var(--fonte-texto);
-    font-stretch: normal;
-    font-size: var(--texto-xs);
-    font-weight: var(--peso-medio);
-    letter-spacing: normal;
-    font-variant-numeric: normal;
-    color: var(--cor-texto-suave);
-  }
-
-  .mercado-tabela.mercado-indices .mercado-celula {
-    min-width: 0;
-    justify-content: flex-start;
-    padding: 0.25rem 0.55rem;
-    font-size: var(--texto-sm);
-    white-space: nowrap;
-  }
-
-  .mercado-tabela.mercado-indices .mercado-hoje__valor {
-    font-size: calc(var(--texto-xl) * 0.92);
-  }
-
-  .mercado-tabela.mercado-indices .mercado-hoje .mercado-celula {
-    margin-top: 0.1rem;
-  }
-}
-
-/* ---------- Busca de volume: lupa centrada na vertical, dentro do campo ---------- */
-.mercado-busca-volume .lista-busca {
-  position: relative;
-}
-
-.mercado-busca-volume .lista-busca__icone {
-  position: absolute;
-  top: 50%;
-  left: var(--espaco-4);
-  width: 18px;
-  height: 18px;
-  transform: translateY(-50%);
-  color: var(--cor-texto-suave);
-  pointer-events: none;
-}
-
-.mercado-busca-volume .lista-busca input {
-  min-height: 2.75rem;
-  padding-left: 2.75rem;
-  padding-right: 2.5rem;
-}
-
-.mercado-busca-volume .lista-busca input::-webkit-search-cancel-button {
-  cursor: pointer;
-}
-
-/* Celular: os cartões de "Em N meses" ficam dois por linha, com número menor */
 @media (max-width: 479px) {
   .mercado-resumo-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -848,3 +354,397 @@ th[aria-sort='ascending'] .mercado-ordem::after {
     font-size: var(--texto-xs);
   }
 }
+
+/* ---------- Como foi cada índice: grupos e placas (sub-superfícies dentro do cartão) ---------- */
+.mercado-grupo__cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-3);
+}
+
+.mercado-grupo__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-titulo);
+  color: var(--cor-texto-suave);
+}
+
+/* Juros e inflação e Câmbio e petróleo lado a lado; uma coluna no celular */
+.mercado-grupos-par {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-5);
+  margin-top: var(--espaco-5);
+}
+
+/* os dois grupos do par têm a mesma altura, e as placas esticam até o fim: Dólar e Brent ficam do tamanho de CDI e IPCA */
+.mercado-grupos-par > .mercado-grupo {
+  display: flex;
+  flex-direction: column;
+}
+
+.mercado-grupos-par .mercado-indices {
+  flex: 1;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  grid-auto-rows: 1fr;
+}
+
+@media (min-width: 900px) {
+  .mercado-grupos-par {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mercado-indices {
+  display: grid;
+  /* 12rem: os cinco índices da bolsa cabem numa fileira no computador */
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cinco índices em duas fileiras completas (2 + 3), sem cartão solto */
+@media (min-width: 641px) and (max-width: 1279px) {
+  .mercado-indices:has(> :nth-child(5):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .mercado-indices:has(> :nth-child(5):last-child) > * { grid-column: span 2; }
+  .mercado-indices:has(> :nth-child(5):last-child) > :nth-child(-n + 2) { grid-column: span 3; }
+}
+
+.mercado-indice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  min-width: 0;
+  padding: var(--espaco-4);
+  background: var(--sub-fundo);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  box-shadow: var(--sub-luz);
+}
+
+.mercado-indice__topo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.mercado-indice__nome {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-titulo);
+}
+
+.mercado-indice__explicacao {
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+  color: var(--cor-texto-suave);
+}
+
+.mercado-indice__valor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-1) var(--espaco-2);
+}
+
+.mercado-indice__grande {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: calc(var(--texto-2xl) * 0.9);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
+  line-height: 1.1;
+  color: var(--cor-texto);
+}
+
+.mercado-indice__grande[data-sinal='up'] {
+  color: var(--cor-alta);
+}
+
+.mercado-indice__grande[data-sinal='down'] {
+  color: var(--cor-queda);
+}
+
+.mercado-indice__grande--sem {
+  font-family: var(--fonte-texto);
+  font-stretch: normal;
+  font-size: var(--texto-base);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+.mercado-indice__legenda {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Variação do dia: pílula com o sinal no texto e a cor do sinal */
+.mercado-indice__dia {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.mercado-indice__pilula {
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-weight: 500;
+  color: var(--cor-estavel);
+  background: var(--sub-fundo);
+}
+
+.mercado-indice__pilula[data-sinal='up'] {
+  color: var(--cor-alta);
+  background: color-mix(in srgb, var(--cor-alta) 13%, transparent);
+}
+
+.mercado-indice__pilula[data-sinal='down'] {
+  color: var(--cor-queda);
+  background: color-mix(in srgb, var(--cor-queda) 13%, transparent);
+}
+
+.mercado-indice__so {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Taxa do dia do CDI: uma linha curta sob o valor, com a data da taxa */
+.mercado-indice__taxa {
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+/* Períodos com número: fileira compacta de rótulo pequeno e valor com o sinal */
+/* períodos em lista curta: rótulo à esquerda, valor à direita; cabe em qualquer largura sem quebrar o número */
+.mercado-indice__periodos {
+  display: grid;
+  margin-top: auto;
+  padding-top: var(--espaco-2);
+  border-top: 1px solid var(--cor-fio);
+}
+
+.mercado-indice__periodo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-1) 0;
+}
+
+.mercado-indice__periodo-rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.mercado-indice__periodo-valor {
+  white-space: nowrap;
+}
+
+.mercado-indice__periodo-valor {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-weight: 500;
+  color: var(--cor-estavel);
+}
+
+.mercado-indice__periodo[data-sinal='up'] .mercado-indice__periodo-valor {
+  color: var(--cor-alta);
+}
+
+.mercado-indice__periodo[data-sinal='down'] .mercado-indice__periodo-valor {
+  color: var(--cor-queda);
+}
+
+/* ---------- Respiro entre os cartões da seção: 2rem a 3rem, nunca colados ---------- */
+.mercado-grafico + .mercado-bloco {
+  margin-top: var(--espaco-6);
+}
+
+/* ---------- Dólar e juros lado a lado (mesma altura; uma coluna no celular) ---------- */
+.mercado-par {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--espaco-6);
+  margin-top: var(--espaco-6);
+}
+
+@media (min-width: 900px) {
+  .mercado-par {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mercado-serie {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mercado-serie__resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--espaco-2) var(--espaco-3);
+  margin-bottom: var(--espaco-3);
+}
+
+.mercado-serie__valor {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-size: var(--texto-2xl);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums slashed-zero;
+  line-height: 1.1;
+  color: var(--cor-texto);
+}
+
+.mercado-serie__variacao {
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--raio-pilula);
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-weight: 500;
+  color: var(--cor-estavel);
+  background: var(--sub-fundo);
+}
+
+.mercado-serie__variacao[data-sinal='up'] {
+  color: var(--cor-alta);
+  background: color-mix(in srgb, var(--cor-alta) 13%, transparent);
+}
+
+.mercado-serie__variacao[data-sinal='down'] {
+  color: var(--cor-queda);
+  background: color-mix(in srgb, var(--cor-queda) 13%, transparent);
+}
+
+.mercado-serie__variacao-legenda {
+  font-family: var(--fonte-texto);
+  font-stretch: normal;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+/* Juros sem série: três fatos curtos sobre Selic, Copom e CDI, separados por fio */
+.juros-fatos {
+  display: grid;
+  margin: var(--espaco-4) 0 0;
+}
+
+.juros-fatos__linha {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.8fr) minmax(0, 2fr);
+  gap: var(--espaco-1) var(--espaco-4);
+  padding-block: var(--espaco-3);
+  border-top: 1px solid var(--cor-fio);
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+}
+
+.juros-fatos dt {
+  color: var(--cor-texto-suave);
+}
+
+.juros-fatos dd {
+  margin: 0;
+  color: var(--cor-texto);
+}
+
+@media (max-width: 480px) {
+  .juros-fatos__linha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mercado-serie .mini-grafico {
+  margin-top: var(--espaco-2);
+}
+
+/* Selic: mudanças do período sob o gráfico, uma ficha por decisão (seta e sinal, nunca só cor) */
+.juros-mudancas {
+  margin-top: var(--espaco-4);
+  padding-top: var(--espaco-4);
+  border-top: 1px solid var(--cor-fio);
+}
+
+.juros-mudancas__titulo {
+  margin: 0 0 var(--espaco-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto-suave);
+}
+
+.juros-mudancas__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  gap: var(--espaco-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.juros-mudanca {
+  display: grid;
+  gap: 2px;
+  padding: var(--espaco-2);
+  padding-inline-start: var(--espaco-3);
+  border: 1px solid var(--cor-fio);
+  border-radius: var(--raio-3);
+  background: color-mix(in srgb, var(--cor-texto) 4%, transparent);
+}
+
+.juros-mudanca[data-sinal='down'] svg {
+  color: var(--cor-queda);
+}
+
+.juros-mudanca[data-sinal='up'] svg {
+  color: var(--cor-alta);
+}
+
+.juros-mudanca__taxa {
+  font-family: var(--fonte-numeros);
+  font-stretch: var(--numeros-largura);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-weight: 500;
+  color: var(--cor-texto);
+}
+
+/* celular estreito: duas por linha; com número ímpar, a última (a taxa atual) ocupa a linha inteira */
+@media (max-width: 359px) {
+  .juros-mudancas__lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .juros-mudanca:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+.juros-mudanca__data {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+/* Dólar e Selic lado a lado: o gráfico do cartão mais baixo cresce até a altura do vizinho, sem buraco */
+.mercado-par .mercado-serie .mini-grafico {
+  flex-grow: 1;
+}
+

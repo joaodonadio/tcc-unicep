@@ -15,6 +15,7 @@ describe('Hoje', () => {
     renderizar(<Hoje />);
 
     expect(screen.getByRole('heading', { level: 2, name: porNivel(TEXTOS.comoUsar.titulo, 'simples') })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { level: 1, name: /Top 5 para estudar hoje/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: TEXTOS.paginas.hoje })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 2, name: /Top 5 para estudar hoje/i })).toBeInTheDocument();
   });
 });

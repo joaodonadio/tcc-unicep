@@ -1,139 +1,209 @@
-import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { BotaoTermo } from '../ui/BotaoTermo.jsx';
 import { IconeSetor } from '../ui/IconeSetor.jsx';
+import { SeloRevisao } from '../ui/SeloRevisao.jsx';
 import { pct } from '../../lib/formato.js';
-import { PERIODOS_SETOR, ancoraDoSetor, descricaoDoSetor, sinalDaVariacao } from '../../lib/setores.js';
+import { ancoraDoSetor, descricaoDoSetor, sinalDaVariacao } from '../../lib/setores.js';
 import { tomDoSaldo } from '../../lib/mercadoTela.js';
+import { EXPLICACOES } from '../../lib/explicacoes.js';
 import { TEXTOS } from '../../lib/textos.js';
 
 const texto = (v) => (v == null ? TEXTOS.setores.semDado : pct(v));
-const largura = (v, maximo) => (v == null || !(maximo > 0) ? 0 : Math.min(100, (Math.abs(v) / maximo) * 100));
-const porcento = (parte, todo) => (todo > 0 ? `${(parte / todo) * 100}%` : '0%');
 
-function Barrinha({ valor, maximo }) {
+/** Brilho do cartão pela direção da média (alta, queda ou aço quando estável ou sem dado). */
+const BRILHO = { alta: 'alta', queda: 'queda', estavel: 'aco' };
+
+/** Seta de cada ação com nome (o sinal também vai na forma, não só na cor). */
+const SETA = { alta: '↑', queda: '↓' };
+
+/** Estado da ação: alta, queda, estável, sem dado ou em revisão. */
+function estadoDaAcao(a) {
+  if (a.revisao) return 'revisao';
+  if (a.variacao == null) return 'sem';
+  return sinalDaVariacao(a.variacao);
+}
+
+/** Texto da ação para leitor de tela e para o title ("PETR4, Petrobras, +1,2% no período"). */
+function rotuloDaAcao(a) {
+  const situacao = a.revisao
+    ? TEXTOS.setores.emRevisaoAcao
+    : a.variacao == null
+      ? TEXTOS.setores.semDado
+      : TEXTOS.setores.variacaoNoPeriodo(pct(a.variacao));
+  return TEXTOS.setores.pontoAcao(a.ticker, a.empresa, situacao);
+}
+
+/** Nome do setor que leva às ações dele, na tela Ações (a âncora cai na linha do setor no mapa). */
+function NomeDoSetor({ nome }) {
   return (
-    <span className="setor-trilho" aria-hidden="true">
-      <span className="setor-barra" data-sinal={sinalDaVariacao(valor)} style={{ width: `${largura(valor, maximo)}%` }} />
-    </span>
+    <Link className="setor-nome-link" to={`/acoes#${ancoraDoSetor(nome)}`}>
+      {nome}
+    </Link>
   );
 }
 
 /**
- * Cartão de um setor: selo com o ícone, o que o setor faz, algumas empresas dele, o resultado do
- * período e quantas ações subiram e caíram. A lista completa de ações abre dentro de uma área com rolagem.
- * No modo técnico mostra também o tom das notícias e a variação nos 4 períodos.
+ * Uma pílula ou um ponto por ação do setor, colorido pelo tom da própria variação. Na pílula, cada uma leva
+ * à ação; no ponto, não há link (o nome do setor é que leva às ações), e a lista traz um resumo para leitor de tela.
  */
-export function CartaoSetor({ setor, maximoAcoes, tecnico, tom, mediasPorPeriodo }) {
-  const [aberto, setAberto] = useState(false);
-  const idLista = useId();
-  const chaveTom = tomDoSaldo(tom?.saldo);
+function PontosAcoes({ setor, acoes, comTicker = false }) {
+  if (acoes.length === 0) return null;
+  const subiram = acoes.filter((a) => estadoDaAcao(a) === 'alta').length;
+  const cairam = acoes.filter((a) => estadoDaAcao(a) === 'queda').length;
+  return (
+    <ul
+      className={comTicker ? 'setor-pontos setor-pontos--pilulas' : 'setor-pontos'}
+      aria-label={
+        comTicker
+          ? TEXTOS.setores.pilulasDoSetor(setor)
+          : TEXTOS.setores.resumoPontos(acoes.length, subiram, cairam)
+      }
+    >
+      {acoes.map((a, i) => {
+        const estado = estadoDaAcao(a);
+        const rotulo = rotuloDaAcao(a);
+        return (
+          <li key={a.ticker}>
+            {comTicker ? (
+              <Link className="setor-ponto" data-estado={estado} to={`/acao/${a.ticker}`} title={rotulo} aria-label={rotulo} style={{ '--i': i }}>
+                <span className="setor-ponto-ticker">{a.ticker}</span>
+                {SETA[estado] && <span className="setor-ponto-seta" aria-hidden="true">{SETA[estado]}</span>}
+              </Link>
+            ) : (
+              <span className="setor-ponto" data-estado={estado} title={rotulo} style={{ '--i': i }} />
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Contagem curta "4↑ 3↓" (números em Mono); a frase de leitura de tela segue a concordância da lista. */
+function Contagem({ setor }) {
+  if (setor.n === 0) return <p className="setor-contagem setor-contagem--vazia">{TEXTOS.setores.semDado}</p>;
+  return (
+    <p className="setor-contagem">
+      <span data-sinal="alta" aria-hidden="true">{`${setor.subiram}↑`}</span>{' '}
+      <span data-sinal="queda" aria-hidden="true">{`${setor.cairam}↓`}</span>
+      <span className="sr-only">{TEXTOS.setores.subiramAcoes(setor.subiram, setor.n)}</span>
+    </p>
+  );
+}
+
+/** Fatias do tom do setor, na ordem da barra; o ícone diz o sinal, não só a cor. */
+const FATIAS_TOM = [
+  { chave: 'positivas', icone: <TrendingUp size={14} aria-hidden="true" focusable="false" /> },
+  { chave: 'neutras', icone: <Minus size={14} aria-hidden="true" focusable="false" /> },
+  { chave: 'negativas', icone: <TrendingDown size={14} aria-hidden="true" focusable="false" /> },
+];
+
+/**
+ * Tom das notícias do dia do setor, separado do resto do cartão por uma faixa. Barra e legenda
+ * com as três contagens. Sem contagem (tom nulo ou total zero), o bloco não aparece.
+ */
+function Tom({ tom }) {
+  const total = tom?.total ?? 0;
+  if (!total) return null;
+  const chaveTom = tomDoSaldo(tom.saldo);
+  return (
+    <div className="setor-tom">
+      <p className="setor-tom-cabeca">
+        <BotaoTermo chave="tom_setor">
+          <span className="setor-rotulo" title={EXPLICACOES.tom_setor.simples}>{TEXTOS.setores.tomNoticias}</span>
+        </BotaoTermo>
+      </p>
+      <p className="setor-tom-resumo">{chaveTom ? TEXTOS.setores.tom[chaveTom] : TEXTOS.setores.semDado}</p>
+      <div className="setor-tom-barra" aria-hidden="true">
+        {FATIAS_TOM.map(({ chave }) => (
+          <span key={chave} data-contagem={chave} style={{ flexGrow: tom[chave] ?? 0 }} />
+        ))}
+      </div>
+      <ul className="setor-tom-legenda">
+        {FATIAS_TOM.map(({ chave, icone }) => (
+          <li key={chave} data-contagem={chave}>
+            {icone}
+            <span className="num">{tom[chave] ?? '—'}</span>
+            <span>{TEXTOS.setores.tomFatias[chave]}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * Cartão de destaque: o setor que mais subiu ou mais caiu no período. Traz o que o setor faz (simples)
+ * ou o rótulo técnico, a média grande e todas as ações como pílulas com o ticker.
+ */
+export function CartaoDestaque({ setor, canto, linhaTecnica, tecnico, tom }) {
+  const sinal = sinalDaVariacao(setor.media);
   const descricao = descricaoDoSetor(setor.setor, TEXTOS.setores.descricoes);
-  const exemplos = setor.acoes.slice(0, 3);
+  // A primeira frase da descrição (antes dos dois pontos) é o que o setor faz, em uma linha.
+  const oQueFaz = descricao ? descricao.split(':')[0] : null;
+  // A frase técnica vem da grade, junto com o canto, para os dois nunca se contradizerem.
+  const linha = tecnico ? linhaTecnica : oQueFaz;
 
   return (
-    <article id={ancoraDoSetor(setor.setor)} className="cartao setor-cartao">
+    <article
+      id={ancoraDoSetor(setor.setor)}
+      className="cartao setor-cartao setor-cartao--destaque"
+      style={{ viewTransitionName: ancoraDoSetor(setor.setor) }}
+      data-brilho={BRILHO[sinal]}
+    >
+      <span className="setor-canto">{canto}</span>
       <header className="setor-cabeca">
         <span className="setor-selo-grande">
-          <IconeSetor setor={setor.setor} tamanho={22} />
+          <IconeSetor setor={setor.setor} tamanho={26} />
         </span>
-        <h3 className="setor-nome">{setor.setor}</h3>
+        <h3 className="setor-nome" title={descricao ?? undefined}><NomeDoSetor nome={setor.setor} /></h3>
       </header>
 
-      {descricao && <p className="setor-descricao">{descricao}</p>}
+      {linha && <p className="setor-linha-faz">{linha}</p>}
 
-      {exemplos.length > 0 && (
-        <div className="setor-bloco">
-          <span className="setor-rotulo">{TEXTOS.setores.empresasDoSetor}</span>
-          <ul className="setor-tickers">
-            {exemplos.map((a) => (
-              <li key={a.ticker}>
-                <Link to={`/acao/${a.ticker}`}>{a.ticker}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <p className="setor-valor setor-valor--grande" data-sinal={sinal}>
+        {texto(setor.media)}
+      </p>
 
-      <div className="setor-bloco">
-        <span className="setor-rotulo">{TEXTOS.setores.resultadoPeriodo}</span>
-        <span className="setor-valor" data-sinal={sinalDaVariacao(setor.media)}>
-          {texto(setor.media)}
+      <Contagem setor={setor} />
+      <PontosAcoes setor={setor.setor} acoes={setor.acoes} comTicker />
+      {setor.emRevisao.length > 0 && <SeloRevisao compacto />}
+      {tecnico && <Tom tom={tom} />}
+    </article>
+  );
+}
+
+/**
+ * Cartão compacto de um setor: ícone e nome, a média em destaque (com sinal e cor), a contagem curta
+ * e as ações como pontos coloridos. A descrição fica no title do nome. Ação em revisão não entra na média.
+ */
+export function CartaoSetor({ setor, tecnico, tom }) {
+  const sinal = sinalDaVariacao(setor.media);
+  const descricao = descricaoDoSetor(setor.setor, TEXTOS.setores.descricoes);
+
+  return (
+    <article
+      id={ancoraDoSetor(setor.setor)}
+      className="cartao setor-cartao setor-cartao--compacto"
+      style={{ viewTransitionName: ancoraDoSetor(setor.setor) }}
+      data-brilho={BRILHO[sinal]}
+    >
+      <header className="setor-cabeca">
+        <span className="setor-selo-grande">
+          <IconeSetor setor={setor.setor} tamanho={20} />
         </span>
-      </div>
+        <h3 className="setor-nome" title={descricao ?? undefined}><NomeDoSetor nome={setor.setor} /></h3>
+        <Contagem setor={setor} />
+      </header>
 
-      <div className="setor-bloco">
-        {setor.n > 0 ? (
-          <>
-            <span className="setor-empilhada" aria-hidden="true">
-              <span data-sinal="alta" style={{ width: porcento(setor.subiram, setor.n) }} />
-              <span data-sinal="queda" style={{ width: porcento(setor.cairam, setor.n) }} />
-            </span>
-            <p className="setor-contagem">
-              <span data-sinal="alta">{TEXTOS.setores.subiramDe(setor.subiram, setor.n)}</span>
-              <span data-sinal="queda">{TEXTOS.setores.cairamDe(setor.cairam, setor.n)}</span>
-            </p>
-          </>
-        ) : (
-          <p className="setor-contagem">{TEXTOS.setores.semDado}</p>
-        )}
-      </div>
+      <p className="setor-valor" data-sinal={sinal}>
+        {texto(setor.media)}
+      </p>
 
-      {tecnico && (
-        <p className="setor-tecnico">
-          <span className="setor-rotulo">{TEXTOS.setores.tomNoticias}</span>
-          <span>{chaveTom ? TEXTOS.setores.tom[chaveTom] : TEXTOS.setores.semDado}</span>
-        </p>
-      )}
-
-      {tecnico && mediasPorPeriodo && (
-        <table className="setor-periodos">
-          <caption className="sr-only">{TEXTOS.setores.quatroPeriodos}</caption>
-          <thead>
-            <tr>
-              {PERIODOS_SETOR.map((p) => (
-                <th key={p} scope="col">
-                  {TEXTOS.setores.periodos[p]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {PERIODOS_SETOR.map((p) => (
-                <td key={p} data-sinal={sinalDaVariacao(mediasPorPeriodo[p])}>
-                  {texto(mediasPorPeriodo[p])}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      )}
-
-      <button
-        type="button"
-        className="botao setor-expandir"
-        aria-expanded={aberto}
-        aria-controls={idLista}
-        onClick={() => setAberto((a) => !a)}
-      >
-        {aberto ? TEXTOS.setores.esconder : TEXTOS.setores.ver}
-      </button>
-
-      <div id={idLista} className="setor-acoes-caixa" hidden={!aberto}>
-        {aberto && (
-          <ul className="setor-acoes" aria-label={TEXTOS.setores.acoesDoSetor(setor.setor)}>
-            {setor.acoes.map((a) => (
-              <li key={a.ticker} className="setor-acao-linha">
-                <Link to={`/acao/${a.ticker}`}>{a.ticker}</Link>
-                <Barrinha valor={a.variacao} maximo={maximoAcoes} />
-                <span className="setor-numero" data-sinal={sinalDaVariacao(a.variacao)}>
-                  {texto(a.variacao)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <PontosAcoes setor={setor.setor} acoes={setor.acoes} />
+      {setor.emRevisao.length > 0 && <SeloRevisao compacto />}
+      {tecnico && <Tom tom={tom} />}
     </article>
   );
 }

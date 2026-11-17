@@ -20,4 +20,26 @@ describe('NumeroAnimado', () => {
     render(<NumeroAnimado valor={0} formatar={formatar} ausente="sem dado" />);
     expect(screen.getByText('0 pts')).toBeInTheDocument();
   });
+
+  it('com movimento, o texto para leitor de tela traz o valor formatado', () => {
+    const original = window.matchMedia;
+    window.matchMedia = (query) => ({
+      matches: false,
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+      addListener() {},
+      removeListener() {},
+    });
+    try {
+      const { container, unmount } = render(
+        <NumeroAnimado valor={1234} formatar={formatar} ausente="sem dado" />,
+      );
+      expect(container.querySelector('.counter__sr').textContent).toBe('1.234');
+      unmount();
+    } finally {
+      if (original === undefined) delete window.matchMedia;
+      else window.matchMedia = original;
+    }
+  });
 });

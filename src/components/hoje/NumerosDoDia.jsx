@@ -1,15 +1,16 @@
-import { useSerie } from '../../hooks/useDados.js';
+import { useSerie, useSerieDoDolar } from '../../hooks/useDados.js';
 import { useDetalhes } from '../../hooks/useDetalhes.js';
-import { dataBR, mesAno } from '../../lib/datas.js';
+import { dataBR, diaMes, mesAno } from '../../lib/datas.js';
 import { brl, numero, pct, quantidadeCheia } from '../../lib/formato.js';
+import { ariaDosEventos, eventosNaJanela, marcasDosEventos } from '../../lib/eventosMercado.js';
 import { usePreferencias } from '../../context/contextos.js';
-import { fechamentoAnterior } from '../../lib/hoje.js';
 import { direcaoDe } from '../../lib/mapaPregao.js';
 import { cortarJanela, JANELAS, mesSeguinte, variacoesMensais } from '../../lib/series.js';
 import { ROTULO_STATUS, TEXTOS, porNivel } from '../../lib/textos.js';
 import { MiniGrafico } from '../graficos/MiniGrafico.jsx';
 import { BotaoTermo } from '../ui/BotaoTermo.jsx';
 import { BotaoDetalhes, PainelDetalhes } from '../ui/Detalhes.jsx';
+import { SeloCalculo } from '../ui/SeloCalculo.jsx';
 import { Linhas } from '../ui/Estados.jsx';
 import { Variacao } from './Variacao.jsx';
 
@@ -21,6 +22,13 @@ const CAMPO_INDICE = 'indice_retorno_total';
 
 /** Valor formatado, ou o texto de indisponível quando não há número. */
 const texto = (valor, formatar) => (valor == null ? INDISPONIVEL : formatar(valor));
+
+/** Linha da Selic dentro do cartão do CDI: a meta do pacote, ou "indisponível"; sem campo (sem dado), nada aparece. */
+function linhaSelic(selic, nivel) {
+  if (selic?.status === 'ok') return porNivel(TEXTOS.hoje.selicLinha, nivel)(porcento(selic.valor));
+  if (selic?.status === 'indisponivel') return TEXTOS.hoje.selicIndisponivel;
+  return undefined;
+}
 
 /** Mancha pela direção do movimento: alta sálvia, queda rosa-terra; estável ou sem dado fica neutra. */
 const BRILHO_DA_DIRECAO = { up: 'alta', down: 'queda' };
@@ -122,9 +130,9 @@ const notaDetalhe = (chave, conteudo) => (
  * Fechado, o painel segue no DOM com `inert`: sai da ordem de foco e da leitura de tela.
  * `nome` é o título em texto puro (para o botão); `detalhes` é uma lista de elementos com key.
  * Sem detalhes, o cartão fica sem botão. Valor sem algarismo (Indisponível, Carregando) sai em texto, não em mono.
- * `largo` estica o cartão na grade.
+ * `largo` estica o cartão na grade. `periodo` é a janela do número (ex.: "Nos últimos 12 meses"), sempre visível logo abaixo do valor.
  */
-function Numero({ nome, rotulo, valor, variacao, grafico, detalhes = [], brilho, largo = false }) {
+function Numero({ nome, rotulo, valor, variacao, grafico, detalhes = [], brilho, largo = false, periodo }) {
   const { aberto, alternar, id } = useDetalhes();
   const palavra = !/\d/.test(valor);
   const temDetalhes = detalhes.length > 0;
@@ -135,6 +143,7 @@ function Numero({ nome, rotulo, valor, variacao, grafico, detalhes = [], brilho,
         {temDetalhes && <BotaoDetalhes nome={nome} aberto={aberto} controla={id} onClick={alternar} />}
       </div>
       <span className={palavra ? 'hoje-numero-valor hoje-numero-valor--palavra' : 'hoje-numero-valor'}>{valor}</span>
+      {periodo && <span className="hoje-numero-periodo">{periodo}</span>}
       {/* linha sempre presente (vazia sem variação): os cartões fechados da fileira ficam da mesma altura */}
       <span className="hoje-numero-nota hoje-numero-var">{variacao}</span>
       {grafico}
@@ -148,44 +157,10 @@ function Numero({ nome, rotulo, valor, variacao, grafico, detalhes = [], brilho,
 }
 
 /**
- * Dólar sem série: inclinação de dois pontos (pregão anterior → hoje) com rótulos curtos embaixo
- * (decorativos; a frase completa vai no gráfico). Sem o valor anterior, fica o espaço reservado do mini gráfico.
- */
-function InclinacaoDolar({ antes, hoje, cor }) {
-  const tem = antes != null && hoje != null;
-  return (
-    <div className="hoje-inclinacao">
-      <MiniGrafico
-        tipo="inclinacao"
-        valores={tem ? [antes, hoje] : []}
-        cor={cor}
-        altura={56}
-        rotulo={tem ? TEXTOS.hoje.mini.dolar(brl(antes), brl(hoje)) : undefined}
-      />
-      {tem && (
-        <span className="hoje-inclinacao-rotulos" aria-hidden="true">
-          <span>
-            {TEXTOS.hoje.inclinacao.antes} <span className="num">{brl(antes)}</span>
-          </span>
-          <span>{TEXTOS.hoje.inclinacao.hoje}</span>
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** CDI acumulado na janela de 1 ano da série (índice de retorno), para quando o pacote do dia não traz o CDI 12 meses. */
-function cdiDaSerie(serie) {
-  const indice = serie?.valores?.indice_retorno_total ?? [];
-  const finitos = indice.filter((v) => typeof v === 'number' && Number.isFinite(v));
-  if (finitos.length < 200) return null;
-  return finitos[finitos.length - 1] / finitos[0] - 1;
-}
-
-/**
  * Faixa "Os números do dia": Ibovespa, dólar, CDI, IPCA e altas e quedas do pregão.
- * Valores de data.fatos_pregao (pacotes do pregão); mini gráficos das séries diárias (Ibovespa, CDI, IPCA).
- * O dólar usa a série USDBRL quando existe (fonte simulada); sem ela, a inclinação do pregão anterior a hoje.
+ * Valores de data.fatos_pregao (pacotes do pregão); mini gráficos das séries (Ibovespa, dólar, CDI, IPCA).
+ * Sem o que a API traz, o cartão fica sem valor: nada é estimado. O dólar desenha o histórico de
+ * useSerieDoDolar (série diária do pacote ou histórico das publicações); sem histórico, o mini gráfico fica vazio.
  */
 export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
   const { nivel } = usePreferencias();
@@ -193,7 +168,7 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
   const serieIbov = useSerie('IBOV', '1a');
   const serieCdi = useSerie('CDI', '1a');
   const serieIpca = useSerie('IPCA', '1a');
-  const serieDolar = useSerie('USDBRL', '1a'); // só existe na fonte simulada; sem série, fica a inclinação
+  const serieDolar = useSerieDoDolar();
 
   if (carregando) {
     return (
@@ -208,27 +183,33 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
   const amplitude = fatos?.amplitude;
   const temAmplitude = Boolean(amplitude && amplitude.total > 0);
   const juros = fatos?.juros;
-  const cdi12m = juros?.cdi_12m ?? cdiDaSerie(serieCdi.data);
+  // CDI 12 meses só vem do pacote do dia; sem ele, fica sem valor (nada é estimado da série)
+  const cdi12m = juros?.cdi_12m ?? null;
 
   // Dólar: valor do pacote do pregão; variação suspeita sai
   const numeroOuNulo = (v) => (Number.isFinite(v) ? v : null);
   const dolarValor = numeroOuNulo(fatos?.dolar?.valor);
   const dolarVariacao = fatos?.dolar?.suspeito ? null : numeroOuNulo(fatos?.dolar?.variacao);
-  const dolarAntes = fechamentoAnterior(dolarValor, dolarVariacao);
-  const fechamentoDolar = cortarJanela(serieDolar.data, JANELAS['6m']).valores.fechamento ?? [];
-  const descDolar = descreverSerie(fechamentoDolar, (v) => brl(v), TEXTOS.hoje.mini.dolarSerie);
+  const historicoDoDolar = serieDolar.data?.valores ?? [];
+  const descDolar = descreverSerie(historicoDoDolar, (v) => brl(v), TEXTOS.hoje.mini.dolarSerie);
   const corDolar = COR_DA_DIRECAO[direcaoDe(dolarVariacao)] ?? COR_NEUTRA;
 
   // Mini gráficos: valores e frase de cada um (sem frase = dados insuficientes, o gráfico não aparece)
   const fechamento6m = cortarJanela(serieIbov.data, JANELAS['6m']).valores.fechamento ?? [];
-  // CDI: só meses completos (o mês da última data pode estar em andamento)
-  const cdiMensal = variacoesMensais(serieCdi.data, CAMPO_INDICE, { semUltimoMes: true }).valores;
-  // IPCA: a série sobe em degrau no 1º dia útil do mês seguinte ao de referência; entram meses até o seguinte a ipca_ate
+  const datasIbov = cortarJanela(serieIbov.data, JANELAS['6m']).datas;
+  const eventosIbov = eventosNaJanela(datasIbov);
+  const datasDolar = serieDolar.data?.datas ?? [];
+  const eventosDolar = eventosNaJanela(datasDolar);
+  // CDI: meses prontos do pacote (cdi_mensal); sem eles, só meses completos da série (o mês da última data pode estar em andamento)
+  const cdiMensal = juros?.cdi_mensal?.valores ?? variacoesMensais(serieCdi.data, CAMPO_INDICE, { semUltimoMes: true }).valores;
+  // IPCA: meses prontos do pacote (ipca_mensal, pelo mês de referência); sem eles, a série sobe em degrau no 1º dia útil
+  // do mês seguinte ao de referência, então entram meses até o seguinte a ipca_ate
+  const ipcaDoPacote = Boolean(juros?.ipca_mensal);
   const ateIpca = mesSeguinte(juros?.ipca_ate);
-  const ipcaMensal = variacoesMensais(serieIpca.data, CAMPO_INDICE, ateIpca ? { ateMes: ateIpca } : { semUltimoMes: true }).valores;
+  const ipcaMensal = juros?.ipca_mensal?.valores ?? variacoesMensais(serieIpca.data, CAMPO_INDICE, ateIpca ? { ateMes: ateIpca } : { semUltimoMes: true }).valores;
   const descIbov = descreverSerie(fechamento6m, formatarPontos, TEXTOS.hoje.mini.ibovespa);
   const descCdi = descreverMeses(cdiMensal, TEXTOS.hoje.mini.cdi);
-  const descIpca = descreverMeses(ipcaMensal, TEXTOS.hoje.mini.ipca);
+  const descIpca = descreverMeses(ipcaMensal, ipcaDoPacote ? TEXTOS.hoje.mini.ipcaPacote : TEXTOS.hoje.mini.ipca);
 
   // Fonte: só os pacotes do pregão; o dólar entra na lista quando o pacote trouxe o valor
   const dataPacote = dataBR(dataPregao);
@@ -236,7 +217,7 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
   const fonte = dataPacote ? TEXTOS.hoje.fonte.pacote(itensFonte, dataPacote) : null;
 
   return (
-    <div className="hoje-numeros">
+    <div className="hoje-numeros entra-cartoes">
       <Numero
         nome={porNivel(TEXTOS.hoje.ibovespa, nivel)}
         rotulo={<BotaoTermo chave="ibovespa">{porNivel(TEXTOS.hoje.ibovespa, nivel)}</BotaoTermo>}
@@ -247,7 +228,8 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
             tipo="area"
             valores={fechamento6m}
             cor={COR_DA_DIRECAO[direcaoDe(ibov?.variacao)] ?? COR_NEUTRA}
-            rotulo={descIbov}
+            marcas={marcasDosEventos(eventosIbov, datasIbov)}
+            rotulo={[descIbov, ariaDosEventos(eventosIbov, datasIbov)].filter(Boolean).join(' ') || undefined}
           />
         }
         detalhes={[
@@ -263,18 +245,20 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
         valor={texto(dolarValor, (v) => brl(v))}
         variacao={<Variacao valor={dolarVariacao} />}
         grafico={
-          descDolar ? (
-            <MiniGrafico tipo="area" valores={fechamentoDolar} cor={corDolar} rotulo={descDolar} />
-          ) : (
-            <InclinacaoDolar antes={dolarAntes} hoje={dolarValor} cor={corDolar} />
-          )
+          <MiniGrafico
+            tipo="area"
+            valores={historicoDoDolar}
+            cor={corDolar}
+            marcas={marcasDosEventos(eventosDolar, datasDolar)}
+            rotulo={[descDolar, ariaDosEventos(eventosDolar, datasDolar)].filter(Boolean).join(' ') || undefined}
+          />
         }
         detalhes={[
           dolarValor != null && notaDetalhe('pacote', TEXTOS.hoje.dolarPacote),
-          dolarAntes != null && notaDetalhe('anterior', TEXTOS.hoje.dolarAnterior(brl(dolarAntes))),
           dolarValor != null && dolarVariacao == null && notaDetalhe('variacao', TEXTOS.hoje.variacaoAusente),
           dolarValor > 0 && notaDetalhe('conversao', TEXTOS.hoje.dolarConversao(numero(100 / dolarValor, { casas: 2 }))),
-          descDolar ? notaDetalhe('grafico', TEXTOS.hoje.legendaGrafico.ibovespa) : notaDetalhe('historico', TEXTOS.hoje.dolarSemHistorico),
+          descDolar ? notaDetalhe('grafico', serieDolar.data?.origem === 'serie' ? TEXTOS.hoje.legendaGrafico.dolarSerie : TEXTOS.hoje.legendaGrafico.dolar) : notaDetalhe('historico', TEXTOS.hoje.dolarSemHistorico),
+          descDolar && serieDolar.data?.origem === 'publicacoes' && <SeloCalculo key="selo-dolar" conta="dolar" curto />,
         ].filter(Boolean)}
         brilho={BRILHO_DA_DIRECAO[direcaoDe(dolarVariacao)] ?? 'aco'}
       />
@@ -282,10 +266,13 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
         nome={porNivel(TEXTOS.hoje.cdi, nivel)}
         rotulo={<BotaoTermo chave="cdi">{porNivel(TEXTOS.hoje.cdi, nivel)}</BotaoTermo>}
         valor={texto(cdi12m, porcento)}
+        periodo={cdi12m != null ? porNivel(TEXTOS.hoje.cdiNota, nivel) : undefined}
+        variacao={linhaSelic(juros?.selic, nivel)}
         grafico={<MiniGrafico tipo="barras" valores={cdiMensal} cor={COR_ACO} rotulo={descCdi} />}
         detalhes={[
-          cdi12m != null && notaDetalhe('nota', porNivel(TEXTOS.hoje.cdiNota, nivel)),
+          juros?.selic?.status === 'ok' && notaDetalhe('selic', porNivel(TEXTOS.hoje.selicNota, nivel)(juros.selic.data ? diaMes(juros.selic.data) : null)),
           descCdi && notaDetalhe('grafico', TEXTOS.hoje.legendaGrafico.cdi),
+          descCdi && !juros?.cdi_mensal?.valores && <SeloCalculo key="selo-cdi" conta="cdi" curto />,
         ].filter(Boolean)}
         brilho="aco"
       />
@@ -293,10 +280,11 @@ export function NumerosDoDia({ fatos, dataPregao, carregando = false }) {
         nome={porNivel(TEXTOS.hoje.ipca, nivel)}
         rotulo={<BotaoTermo chave="ipca">{porNivel(TEXTOS.hoje.ipca, nivel)}</BotaoTermo>}
         valor={texto(juros?.ipca_12m, porcento)}
+        periodo={juros?.ipca_12m != null && juros?.ipca_ate ? porNivel(TEXTOS.hoje.ipcaNota, nivel)(mesAno(juros.ipca_ate)) : undefined}
         grafico={<MiniGrafico tipo="barras" valores={ipcaMensal} cor={COR_ACO} rotulo={descIpca} />}
         detalhes={[
-          juros?.ipca_12m != null && notaDetalhe('nota', porNivel(TEXTOS.hoje.ipcaNota, nivel)(mesAno(juros?.ipca_ate))),
-          descIpca && notaDetalhe('grafico', TEXTOS.hoje.legendaGrafico.ipca),
+          descIpca && notaDetalhe('grafico', ipcaDoPacote ? TEXTOS.hoje.legendaGrafico.ipcaPacote : TEXTOS.hoje.legendaGrafico.ipca),
+          descIpca && !ipcaDoPacote && <SeloCalculo key="selo-ipca" conta="ipca" curto />,
         ].filter(Boolean)}
         brilho="aco"
       />

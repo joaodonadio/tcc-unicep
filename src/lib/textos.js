@@ -22,7 +22,7 @@ export const ROTULO_STATUS = {
 export const TEXTO_EXECUCAO = {
   ok: 'Atualizado em {fim}',
   parcial: 'Parte dos dados de hoje não pôde ser atualizada.',
-  falhou: 'A atualização de hoje falhou; dados do pregão de {data}.',
+  falhou: 'A atualização de hoje não chegou. A tela mostra o pregão de {data}.',
   em_andamento: 'Atualizando os dados.',
 };
 
@@ -40,11 +40,12 @@ export function porNivel(valor, nivel) {
 }
 
 export const TEXTOS = Object.freeze({
+  // nome do site em duas partes: a logo pinta o destaque na cor do Cotinha
+  marca: { nome: 'CotAI', inicio: 'Cot', destaque: 'AI' },
+
   cabecalho: {
-    identificacao: 'Ações da B3',
-    pregao: 'Pregão',
-    pregaoDoDia: (data) => ` de ${data}`,
-    publicado: (quando) => `publicado em ${quando}`,
+    identificacao: 'CotAI',
+    avisoDetalhes: 'Ver o que houve',
     comoUsar: 'Como usar',
     navegacao: 'Páginas do site',
     paginas: {
@@ -59,8 +60,6 @@ export const TEXTOS = Object.freeze({
     },
     mais: 'Mais',
     maisRotulo: 'Mais páginas',
-    contadorLista: (n) => `Minha lista (${n})`,
-    glossario: 'Glossário',
     pularConteudo: 'Pular para o conteúdo',
   },
 
@@ -77,30 +76,32 @@ export const TEXTOS = Object.freeze({
       tecnico: (n, k) => `Só ${n} ${n === 1 ? 'manchete classificada' : 'manchetes classificadas'}, de ${k} ${k === 1 ? 'empresa' : 'empresas'}. O tom vale pouco com amostra tão pequena.`,
     },
     noticiasIntro: {
-      simples:
-        'Todo dia, um programa lê as manchetes sobre as empresas e diz se cada uma é boa, neutra ou ruim para elas. Aqui você vê o resultado e as empresas mais citadas.',
+      simples: 'Um programa lê as manchetes do dia e diz se cada uma é boa, neutra ou ruim para a empresa.',
       tecnico: 'Manchetes do último pregão classificadas pelo FinBERT, agregadas por tom e por empresa.',
     },
-    tomTitulo: { simples: 'O tom das manchetes de hoje', tecnico: 'Tom das manchetes' },
     modelo: 'O modelo',
     modeloIntro: 'De onde vêm os dados, como o modelo experimental funciona, se ele acerta e quem ajudou a construir este projeto.',
     dados: 'Sobre os dados',
-    mapaTitulo: 'O pregão por setor',
     setores: 'Setores',
-    setoresIntro: 'Setor é um grupo de empresas do mesmo ramo, como bancos ou energia. Veja quais grupos subiram e quais caíram.',
-    tituloDocumento: (pagina) => `${pagina} · Ações da B3`,
+    setoresIntro: 'Setor é um grupo de empresas do mesmo ramo. Veja quais subiram e quais caíram.',
+    tituloDocumento: (pagina) => `${pagina} · CotAI`,
   },
 
   comoUsar: {
-    titulo: { simples: 'Primeira vez aqui? Comece por aqui', tecnico: 'Para quem é e como usar' },
+    titulo: { simples: 'Um passeio rápido pela CotAI', tecnico: 'Para quem é e como usar' },
     publico: {
-      simples: 'Feito para quem nunca investiu e quer entender como a bolsa de valores funciona, sem pressa e sem jargão.',
+      simples: 'Feito para quem nunca investiu e quer entender como a bolsa de valores funciona, no seu ritmo e com palavras do dia a dia.',
       tecnico: 'Para quem investe na B3 e quer acompanhar o mercado e os indicadores das empresas.',
     },
-    finalidade: {
-      simples:
-        'Este site mostra o que aconteceu na bolsa e como estão as empresas, em linguagem simples. Ele não diz o que fazer com o seu dinheiro: a decisão é sempre sua.',
-      tecnico: 'Reúne dados de mercado e das empresas para apoiar a sua análise. A decisão continua sendo sua.',
+    nivel: {
+      texto: {
+        simples: 'Prefere explicações mais simples ou mais técnicas? Troque aqui, ou depois no botão Leitura, no alto.',
+        tecnico: 'Explicações simples ou técnicas: troque aqui ou, a qualquer hora, no botão Leitura, no alto.',
+      },
+    },
+    comoNavegar: {
+      simples: 'Para usar, é só clicar no que te interessa. Estas são as telas principais:',
+      tecnico: 'Clique no item de interesse para abrir a tela. Abaixo, as principais:',
     },
     passos: {
       simples: [
@@ -118,29 +119,34 @@ export const TEXTOS = Object.freeze({
         { titulo: 'Proventos', detalhe: 'Agenda de pagamentos e datas.' },
       ],
     },
-    termos: {
-      simples: 'As palavras sublinhadas são termos difíceis. Toque nelas para ler uma explicação curta.',
-      tecnico: 'Toque num termo sublinhado para ver a explicação logo abaixo dele.',
-    },
     fechar: 'Fechar a explicação',
-    palavras: {
-      simples: {
-        antes: 'Palavras que vão aparecer: ',
-        pregao: 'pregão',
-        meio1: ' (um dia de negociação), ',
-        b3: 'B3',
-        meio2: ' (a bolsa do Brasil) e ',
-        acoes: 'ações',
-        depois: ' (pedaços de empresas).',
-      },
-      tecnico: {
-        antes: 'Termos: ',
-        pregao: 'pregão',
-        meio1: ', ',
-        b3: 'B3',
-        meio2: ' e ',
-        acoes: 'ações',
-        depois: '.',
+    dicas: {
+      simples: [
+        'Mostra como foi a bolsa e como estão as empresas.',
+        'Não diz o que fazer com o dinheiro. A decisão é sua.',
+      ],
+      tecnico: [
+        'Reúne dados de mercado e das empresas.',
+        'Apoia a sua análise. A decisão continua sendo sua.',
+      ],
+    },
+    dicaTermo: {
+      simples: { antes: 'Toque no sublinhado, como ', termo: 'dividendo', depois: ', para entender.' },
+      tecnico: { antes: 'Toque num termo, como ', termo: 'dividendo', depois: ', para ver a definição.' },
+    },
+    dicionario: {
+      titulo: { simples: 'Palavras que vão aparecer', tecnico: 'Termos usados no painel' },
+      verbetes: {
+        simples: [
+          { termo: 'pregão', significado: 'Um dia de negociação na bolsa.' },
+          { termo: 'B3', significado: 'A bolsa de valores do Brasil.' },
+          { termo: 'ações', significado: 'Pedaços de uma empresa.' },
+        ],
+        tecnico: [
+          { termo: 'pregão', significado: 'Sessão de negociação da bolsa.' },
+          { termo: 'B3', significado: 'Operadora da bolsa brasileira.' },
+          { termo: 'ações', significado: 'Frações do capital de uma empresa.' },
+        ],
       },
     },
   },
@@ -152,11 +158,9 @@ export const TEXTOS = Object.freeze({
   leitura: {
     rotulo: 'Leitura',
     botao: 'Leitura',
-    fraseModo: 'Escolha como as explicações aparecem.',
-    fraseTamanho: 'Aumente ou diminua o texto de toda a página.',
     explicacoes: 'Explicações',
-    simples: 'Modo simples',
-    tecnica: 'Modo técnico',
+    simples: 'Simples',
+    tecnica: 'Técnico',
     dicaSimples: 'Explica tudo, para quem nunca investiu.',
     dicaTecnica: 'Mais números e termos de mercado.',
     texto: 'Tamanho do texto',
@@ -164,12 +168,11 @@ export const TEXTOS = Object.freeze({
     maior: 'A+',
     diminuir: 'Diminuir o texto',
     aumentar: 'Aumentar o texto',
-    zoomAtual: (pct) => `Texto em ${pct}%`,
+    zoomAtual: (pct) => `${pct}%`,
+    voltarNormal: 'Voltar ao normal',
     animacoes: 'Animações',
-    movSistema: 'Seguir o sistema',
     movLigadas: 'Ligadas',
     movDesligadas: 'Desligadas',
-    fraseAnimacoes: 'Se o seu computador desliga as animações, escolha Ligadas para vê-las aqui.',
     avisoTitulo: 'Seu computador está com as animações desligadas',
     avisoFrase: 'Este site tem animações que ajudam a entender os números. Você pode ligá-las só aqui.',
     avisoLigar: 'Ligar neste site',
@@ -199,7 +202,7 @@ export const TEXTOS = Object.freeze({
         },
       },
     ],
-    placarLegenda: (n, total) => `${n} de ${total} checagens apontaram algo hoje`,
+    placarLegenda: (n, total) => `${n} de ${total} checagens apontaram algo no último pregão`,
     deTotal: (n) => `de ${n}`,
     semReferencia: 'Sem referência',
     tipos: {
@@ -207,67 +210,44 @@ export const TEXTOS = Object.freeze({
       atencao: { nome: 'Atenção', texto: 'Um ponto que pede cuidado.' },
       contexto: { nome: 'Contexto', texto: 'Um fato que merece nota, sem ser bom nem ruim.' },
     },
-    acendeuHoje: 'apareceu hoje',
-    apagada: 'apagada hoje',
+    acendeuHoje: 'apareceu no último pregão',
+    apagada: 'apagada no último pregão',
     linkGlossario: 'O que são as checagens?',
   },
 
   dia: {
-    titulo: (data) => `O pregão de ${data}`,
-    tituloSemData: 'O último pregão',
-    resumo: 'Resumo',
-    ouvir: 'Ouvir o resumo',
-    parar: 'Parar a leitura',
-    verAcoes: 'Ver as ações',
     ibovespa: 'Ibovespa',
-    ibovespaNota: 'Índice das ações mais negociadas da B3.',
-    amplitude: 'Subiram e caíram',
-    amplitudeTexto: (subiram, cairam) => `${subiram} subiram, ${cairam} caíram`,
-    dolar: 'Dólar',
-    fonteFechamento: 'Fonte: cotação de fechamento do pregão',
-    dolarSuspeito: 'A variação recebida não confere com a cotação, então foi omitida.',
-    juros: 'Juros e inflação',
-    cdi12m: 'CDI em 12 meses',
-    ipca12m: (mes) => (mes ? `IPCA em 12 meses, até ${mes}` : 'IPCA em 12 meses'),
-    seisMeses: 'Renda fixa ou bolsa, em 6 meses',
-    rendaFixa: 'Renda fixa (CDI)',
-    bolsa: 'Bolsa (Ibovespa)',
-    seisMesesNota: 'Quanto cada um rendeu nos últimos 6 meses. Passado não garante o futuro.',
-    extremos: 'Maior alta e maior queda',
-    maiorAlta: 'Maior alta',
-    maiorQueda: 'Maior queda',
-    extremosNota: 'Subir ou cair muito num dia só não diz se a empresa vai bem. A ficha explica.',
-    noticias: { simples: 'O que as notícias dizem?', tecnico: 'Tom das notícias' },
+    termometro: { simples: 'Termômetro do dia', tecnico: 'Tom geral do pregão' },
+    manchetesTitulo: { simples: 'As manchetes, tom por tom', tecnico: 'Manchetes por tom' },
     noticiasNota: {
-      simples:
-        'Um programa de computador chamado FinBERT lê textos de economia. Ele leu cada manchete do dia e disse se ela é boa, neutra ou ruim para a empresa. Pode errar.',
+      simples: 'Quem classifica é um programa que lê textos de economia (FinBERT). Ele pode errar.',
       tecnico: 'FinBERT-PT-BR: classificação de cada manchete do dia em positiva, neutra ou negativa.',
     },
     manchetesPositivas: 'Positivas',
     manchetesNeutras: 'Neutras',
     manchetesNegativas: 'Negativas',
-    tomDaManchete: { positivo: 'Positiva', neutro: 'Neutra', negativo: 'Negativa' },
+    tonsManchetes: 'Tom das manchetes',
+    palavraLidas: (n) => (n === 1 ? 'manchete lida' : 'manchetes lidas'),
     semManchetes: {
       simples: 'Nenhuma manchete foi lida neste pregão. Quando houver, ela aparece aqui.',
       tecnico: 'Nenhuma manchete classificada neste pregão.',
     },
+    semManchetesTom: 'Nenhuma manchete deste tom.',
     empresasTitulo: { simples: 'Quais empresas estão nas notícias?', tecnico: 'Manchetes por empresa' },
     empresasNota: {
       simples: 'São as empresas com mais manchetes neste pregão. Toque no código para abrir a ficha da empresa.',
       tecnico: 'Empresas com mais manchetes no pregão. O ticker abre a ficha.',
     },
-    empresaPositivas: (n) => plural(n, 'positiva', 'positivas'),
-    empresaNeutras: (n) => plural(n, 'neutra', 'neutras'),
-    empresaNegativas: (n) => plural(n, 'negativa', 'negativas'),
-    empresaSemContagem: 'Sem contagem de manchetes.',
-    proventos: 'Próximos proventos',
-    proventosNota: 'Dividendos e juros sobre capital com pagamento marcado.',
-    mostrarTodosProventos: (n) => `Mostrar todos os ${n} pagamentos`,
-    mostrarMenosProventos: 'Mostrar só os próximos',
+    // texto da linha para leitor de tela: "PETR3 e PETR4: 129 manchetes, 30 positivas, ..."
+    empresaResumoSr: (nomes, total, positivas, neutras, negativas) =>
+      `${nomes}: ${total} ${total === 1 ? 'manchete' : 'manchetes'}, ${positivas} ${positivas === 1 ? 'positiva' : 'positivas'}, ${neutras} ${neutras === 1 ? 'neutra' : 'neutras'}, ${negativas} ${negativas === 1 ? 'negativa' : 'negativas'}`,
+    predominio: {
+      positivas: 'Mais positivas',
+      neutras: 'Mais neutras',
+      negativas: 'Mais negativas',
+      empate: 'Empate entre os tons',
+    },
     semProventos: 'Nenhum pagamento marcado para as próximas semanas.',
-    estaSemana: 'Esta semana',
-    proximaSemana: 'Próxima semana',
-    maisAdiante: 'Mais adiante',
     pagamento: (data) => `pagamento em ${data}`,
     sentimento: {
       otimista: { simples: 'Notícias animadoras', tecnico: 'Otimista' },
@@ -287,104 +267,88 @@ export const TEXTOS = Object.freeze({
     mapaRegrasAtencao: (n) => (n === 1 ? '1 de atenção' : `${n} de atenção`),
     mapaBloco: (cabeca, variacao, sinais) => (sinais ? `${cabeca}: ${variacao}. ${sinais}.` : `${cabeca}: ${variacao}.`),
     mapaEscala: ['−4% ou mais', '−2%', '0', '+2%', '+4% ou mais'],
-    estavel: 'estável',
-    erroTitulo: 'O pregão não carregou',
+    mapaCirculada: 'Mais papéis negociados do setor no dia.',
+    legendaCirculada: 'Canto marcado: a ação com mais papéis negociados no setor, no dia.',
     erro: 'Não deu para carregar os dados do pregão agora. Tente de novo em alguns minutos.',
-    carregando: 'Carregando o pregão…',
     abreNovaAba: '(abre em nova aba)',
-    dataCom: (data) => `Data-com: ${data}`,
-    naoInformada: 'não informada',
-    aDefinir: (n, tickers) =>
-      `Também há ${plural(n, 'pagamento anunciado', 'pagamentos anunciados')} com data a definir: ${tickers}.`,
     falhasProventos: (n) => `Não foi possível ler os proventos de ${n} ação(ões); a agenda pode estar incompleta.`,
     proventosCarregando: 'Buscando os proventos das ações…',
     proventosErro: 'Agenda indisponível',
-    quadro: 'Quadro do dia',
-    mostrarMaisManchetes: 'Mostrar mais manchetes',
-    colEmpresa: 'Empresa',
-    colPositivas: 'Positivas',
-    colNeutras: 'Neutras',
-    colNegativas: 'Negativas',
+    mostrarTodasManchetes: (n) => `Mostrar todas as ${n} manchetes`,
+    mostrarMenosManchetes: 'Mostrar menos manchetes',
   },
 
   proventos: {
-    titulo: { simples: 'Quais empresas pagam dinheiro a quem tem ações?', tecnico: 'Proventos' },
+    titulo: { simples: 'Quem paga proventos', tecnico: 'Proventos' },
+    porAcao: 'por ação',
+    dataComCurta: (d) => `data-com ${d}`,
     intro: {
       simples:
-        'Algumas empresas dividem uma parte do lucro com quem tem ações dela. Esse dinheiro se chama provento e cai na conta de quem tinha a ação na data certa. Veja quem vai pagar em breve e quem mais pagou no último ano.',
+        'Provento é a parte do lucro que a empresa divide com quem tem a ação. Veja quem paga em breve e quem mais pagou.',
       tecnico: 'Dividendos e JCP das ações acompanhadas: agenda de pagamentos e ranking por dividend yield em 12 meses.',
     },
-    graficoTitulo: { simples: 'Quantos pagamentos vêm em cada mês', tecnico: 'Pagamentos por mês' },
+    resumo: {
+      guia: {
+        simples: 'Em resumo: quem paga em breve, quanto paga e em que dia.',
+        tecnico: 'Resumo da agenda de pagamentos e do ranking.',
+      },
+      proximo: { simples: 'Próximo a pagar', tecnico: 'Próximo pagamento' },
+      proximoSemValor: 'valor por ação não informado',
+      proximoData: 'paga em',
+      marcados: { simples: 'Quantos pagamentos vêm', tecnico: 'Pagamentos marcados' },
+      marcadosADefinir: (n) => `+ ${n} com data a definir`,
+      mesPico: { simples: 'Mês com mais pagamentos', tecnico: 'Mês de pico' },
+      mesPicoApoio: (qtd) => (qtd === 1 ? '1 pagamento' : `${qtd} pagamentos`),
+      topo: { simples: 'Quem mais pagou em 12 meses', tecnico: 'Maior dividend yield, 12 meses' },
+      topoApoio: 'do preço da ação',
+    },
+    graficoTitulo: { simples: 'Quantos pagamentos vêm por mês', tecnico: 'Pagamentos por mês' },
     graficoRotulo: 'Pagamentos',
     graficoDescricao: 'Quantidade de pagamentos de dividendos e JCP marcados para cada mês.',
     graficoVazio: {
       simples: 'Nenhuma empresa marcou pagamento para os próximos meses.',
       tecnico: 'Sem pagamentos marcados nos próximos meses.',
     },
-    rankingTitulo: { simples: 'Quem mais devolveu dinheiro no último ano', tecnico: 'Ranking por dividend yield, 12 meses' },
-    rankingDescricao: {
-      simples: 'Ações em ordem: primeiro as que mais pagaram em relação ao preço.',
-      tecnico: 'Ações ordenadas pelo dividend yield, do maior para o menor.',
+    rankingTitulo: { simples: 'Quem mais pagou em 12 meses', tecnico: 'Dividend yield, 12 meses' },
+    rankingComoLer: {
+      simples: 'De cada R$ 100 do preço da ação, quanto voltou em um ano.',
+      tecnico: 'Proventos pagos em 12 meses sobre o preço atual.',
     },
-    rankingCarregando: 'Carregando o ranking.',
+    rankingAviso: 'Pagamento passado não garante pagamento futuro.',
+    rankingRolagem: 'Lista de quem mais pagou',
     rankingErro: 'Ranking indisponível',
+    rankingCarregando: 'Buscando quem mais pagou…',
     rankingVazio: {
-      simples: 'Ainda não há dados de pagamentos para montar esta lista.',
-      tecnico: 'Sem dados de dividend yield para montar o ranking.',
+      simples: 'Nenhuma ação tem proventos informados nos últimos 12 meses.',
+      tecnico: 'Sem dividend yield informado.',
     },
-    colPosicao: 'Posição',
-    colAcao: 'Ação',
-    colEmpresa: 'Empresa',
-    colDy: { simples: 'Pagou sobre o preço', tecnico: 'Dividend yield' },
-    semEmpresa: 'Empresa não informada',
-    rankingRolagem: 'Tabela de quem mais pagou, rolável na horizontal',
     termoDataCom: 'Data-com',
     agendaNota: {
-      simples:
-        'é o último dia em que você precisa ter a ação para receber. O dinheiro cai na conta só na data de pagamento, depois disso.',
-      tecnico: 'é o último dia com direito ao provento. Valores por ação; pagamento na data indicada.',
+      simples: 'último dia para ter a ação e receber.',
+      tecnico: 'último dia com direito ao provento.',
     },
-    legendaAlertas: {
-      antes: 'Dois tipos de pagamento: ',
-      dividendo: 'dividendo',
-      meio: ' e ',
-      jcp: 'JCP',
-      depois: '. A ',
-      dataCom: 'data-com',
-      fim: ' é o último dia para ter a ação e receber.',
-    },
-    alertasTitulo: { simples: 'Avisos para os próximos dias', tecnico: 'Alertas de proventos' },
-    alertasIntro: {
-      simples: 'O que acontece nos próximos 7 dias.',
-      tecnico: 'Data-com e pagamentos em até 7 dias corridos, e proventos futuros da sua lista.',
-    },
-    alertasVazio: {
-      simples: 'Nenhuma data importante nos próximos 7 dias e nada futuro das ações da sua lista.',
-      tecnico: 'Sem data-com ou pagamento em 7 dias e sem proventos futuros na lista.',
-    },
-    alertaDataCom: {
-      titulo: { simples: 'Último dia para ter direito ao provento', tecnico: 'Data-com chegando' },
-    },
-    alertaPagamento: {
-      titulo: { simples: 'Pagamentos desta semana', tecnico: 'Pagamento nesta semana' },
-    },
-    alertaLista: {
-      titulo: { simples: 'Das ações que você guardou', tecnico: 'Na sua lista' },
-    },
-    // o prazo ("em 4 dias") já aparece na pílula ao lado; a frase não repete
-    fraseDataCom: (ticker, tipo, data) => `Último dia para ter ${ticker} e receber o ${tipo}: ${data}`,
-    frasePagamento: (ticker, valor, data) =>
-      valor ? `${ticker} paga ${valor} por ação em ${data}` : `${ticker} paga em ${data}; valor por ação não informado`,
-    fraseLista: (ticker, tipo, valor, quando) =>
-      valor ? `${ticker}: ${tipo} de ${valor} por ação, ${quando}` : `${ticker}: ${tipo}, ${quando}; valor por ação não informado`,
-    quandoPagamento: (data) => `pagamento em ${data}`,
-    quandoADefinir: 'data de pagamento a definir',
+    agendaTitulo: 'Próximos pagamentos',
+    verTodos: (n) => `Ver todos (${n})`,
+    verMenos: 'Ver menos',
+    mesPagamentos: (n) => (n === 1 ? '1 pagamento' : `${n} pagamentos`),
+    notaListaAberta: 'Valores por ação. A data-com de cada pagamento está na ficha da ação.',
+    aDefinirCurto: (n) => `Também há ${n} com data a definir.`,
     prazo: (dias) => (dias === 0 ? 'hoje' : dias === 1 ? 'amanhã' : `em ${dias} dias`),
-    calendarioTitulo: { simples: 'Calendário de pagamentos', tecnico: 'Calendário do mês' },
-    calendarioDica: {
-      simples: 'Os dias com fundo claro e bolinhas têm pagamento; cada bolinha é um pagamento. Toque num dia para ver quem paga.',
-      tecnico: 'Dias com pagamento marcados; toque para listar.',
+    comoLer: {
+      grafico: 'Cada barra é um mês; quanto mais alta, mais pagamentos.',
     },
+    passo1Titulo: 'Ter a ação na ',
+    passo1Termo: 'data-com',
+    passo2Titulo: 'A empresa marca o pagamento',
+    passo3Titulo: 'O dinheiro cai na conta',
+    valorNaoInformado: 'valor não informado',
+    agendaRolagem: 'Lista de próximos pagamentos',
+    calendarioTitulo: { simples: 'Calendário de proventos', tecnico: 'Alertas de proventos' },
+    calendarioDica: {
+      simples: 'Toque num dia para ver quem paga ou marca a data-com.',
+      tecnico: 'Pagamentos e datas-com marcados; toque num dia para listar.',
+    },
+    legendaPagamento: 'Pagamento',
     mesAnterior: 'Mês anterior',
     proximoMes: 'Próximo mês',
     meses: [
@@ -393,185 +357,44 @@ export const TEXTOS = Object.freeze({
     ],
     diasSemanaCurto: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
     diasSemanaLongo: ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'],
-    celulaComPagamento: (dia, qtd) => `Dia ${dia}: ${qtd === 1 ? '1 pagamento' : `${qtd} pagamentos`}`,
-    calendarioMais: '+',
-    listaDoDia: (data) => `Pagamentos em ${data}`,
-    listaDoDiaVazia: 'Nenhum pagamento neste dia.',
+    celulaComEventos: (data, qtd, com) => {
+      const partes = [];
+      if (qtd) partes.push(qtd === 1 ? '1 pagamento' : `${qtd} pagamentos`);
+      if (com) partes.push(com === 1 ? '1 data-com' : `${com} datas-com`);
+      return `${data}: ${partes.join(' e ')}`;
+    },
+    listaDoDia: (data) => `Proventos em ${data}`,
+    outrosDiasDoMes: 'Mais neste mês',
     mesSemPagamento: {
       simples: 'Nenhuma empresa marcou pagamento neste mês.',
       tecnico: 'Sem pagamentos neste mês.',
     },
-    dyNota: {
-      simples:
-        'Como ler: se a ação custa R$ 100 e pagou R$ 8 no último ano, a taxa é 8%. O que foi pago no passado não garante que será pago de novo.',
-      tecnico: 'DY = proventos com data-com nos últimos 12 meses ÷ preço. Pagamento passado não garante pagamento futuro.',
-    },
-    comoFunciona: 'Como funciona',
-    comoLer: {
-      funciona: 'Três passos para receber um provento. Leia da esquerda para a direita.',
-      grafico: 'Cada barra é um mês. Quanto mais alta, mais pagamentos estão marcados nele.',
-      ranking: 'Cada linha é uma ação. A barra mostra quanto ela pagou em relação ao preço, nos últimos 12 meses.',
-    },
-    passo1Titulo: 'Ter a ação até a ',
-    passo1Termo: 'data-com',
-    passo1Texto: 'Quem tem a ação até esse último dia tem direito ao provento.',
-    passo2Titulo: 'Esperar a data de pagamento',
-    passo2Texto: 'A empresa informa essa data. Ela costuma vir algumas semanas depois da data-com.',
-    passo3Titulo: 'O dinheiro cai na conta da corretora',
-    passo3Antes: 'Pode ser ',
-    passo3Meio: ' ou ',
-    passo3Depois: ', conforme o que a empresa decidiu pagar.',
-    valorNaoInformado: 'valor não informado',
-    dataAdefinir: 'a definir',
-    agendaMostrarMenos: 'Mostrar menos',
-    agendaRolagem: 'Lista de próximos pagamentos, rolável',
   },
 
   acoes: {
-    titulo: {
-      simples: (n) => `As ${n} ações que acompanhamos`,
-      tecnico: (n) => `${n} ações`,
+    intro: 'Todas as ações do pregão, agrupadas por setor.',
+    dicaFicha: {
+      simples: 'Dados fundamentalistas (os números da empresa): toque no código da ação que quiser ver.',
+      tecnico: 'Dados fundamentalistas: toque no código do ativo para abrir a ficha completa.',
     },
-    tituloSemTotal: { simples: 'As ações que acompanhamos', tecnico: 'Ações' },
-    intro: {
-      simples:
-        'Todas as ações, lidas com os números do último pregão.',
-      tecnico: 'Regras de limite fixo sobre os dados do pregão anterior.',
-    },
-    legenda: {
-      checagens: (n) => `${n} checagens por ação, e cada resultado vira um selo:`,
-      nome: { forte: 'a favor', atencao: 'atenção', contexto: 'contexto' },
-    },
-    filtros: 'Filtrar ações',
-    filtro: {
-      todas: 'Todas',
-      forte: 'Pontos fortes',
-      atencao: 'Atenção',
-      contexto: 'Só contexto',
-      minha: 'Minha lista',
-    },
-    filtroExplica: {
-      todas: {
-        simples: 'Todas as ações passam pelas mesmas checagens, uma a uma.',
-        tecnico: 'Todas as ações passam pelas mesmas regras.',
-      },
-      forte: {
-        simples: 'Ações em que pelo menos uma checagem deu um resultado bom.',
-        tecnico: 'Ações com pelo menos uma regra a favor.',
-      },
-      atencao: {
-        simples: 'Ações em que pelo menos uma checagem pede atenção.',
-        tecnico: 'Ações com pelo menos uma regra de cuidado.',
-      },
-      contexto: {
-        simples: 'Ações que só têm um fato curioso a observar, sem nada muito bom nem muito ruim.',
-        tecnico: 'Ações só com regras de contexto, sem ponto forte nem atenção.',
-      },
-      minha: {
-        simples: 'As ações que você guardou. A lista fica só neste navegador.',
-        tecnico: 'Ações guardadas neste navegador.',
-      },
-    },
-    busca: 'Buscar por código ou empresa',
-    buscaExemplo: 'Ex.: PETR4',
-    contagem: (mostradas, total) => `Mostrando ${mostradas} de ${total}`,
-    mostrarMais: (n) => `Mostrar mais ${n}`,
-    semResultado: (busca) => `Nenhuma ação encontrada para "${busca}".`,
-    semResultadoFiltro: {
-      simples: 'Hoje nenhuma ação se encaixa neste filtro. Tente outro filtro.',
-      tecnico: 'Nenhuma ação neste filtro hoje.',
-    },
-    listaVazia: {
-      simples:
-        'Sua lista está vazia. Toque em Guardar ao lado de uma ação para ela aparecer aqui. A lista fica salva só neste navegador.',
-      tecnico: 'Lista vazia. Use Guardar ao lado de uma ação. A lista fica salva só neste navegador.',
-    },
-    colunas: {
-      acao: 'Ação',
-      empresa: 'Empresa',
-      setor: 'Setor',
-      fechamento: 'Fechamento',
-      variacao: 'No dia',
-      pl: 'P/L',
-      dy: 'DY',
-      regras: 'Regras',
-    },
-    pontosAFavor: (n) => (n === 1 ? '1 ponto a favor' : `${n} pontos a favor`),
-    pontosDeAtencao: (n) => (n === 1 ? '1 ponto de atenção' : `${n} pontos de atenção`),
-    fatosDeContexto: (n) => (n === 1 ? '1 fato de contexto' : `${n} fatos de contexto`),
-    semSinal: 'Nenhuma regra',
-    vistaGrupo: 'Forma de ver as ações',
-    vista: { destaques: 'Destaques por setor', lista: 'Todas as ações' },
-    tituloDestaques: {
-      simples: 'As ações em destaque de cada setor',
-      tecnico: 'Ações em destaque por setor',
-    },
-    introDestaques: {
-      simples:
-        'A ação com mais pontos a favor em cada setor, para você começar a estudar.',
-      tecnico:
-        'Uma ação por setor. Critério: mais regras a favor, depois menos atenção, depois maior volume relativo, depois ticker.',
-    },
-    destaqueGrade:'Ação em destaque de cada setor',
-    destaqueVerFicha: (t) => `Ver a ficha de ${t}`,
-    destaqueFicha: 'Ver a ficha',
-    destaquePorque: {
-      simples: 'Por que está em destaque',
-      tecnico: 'Regra a favor',
-    },
-    destaqueSemMotivo: {
-      simples: 'Nenhuma checagem deu resultado bom hoje neste setor. Esta é a ação com menos alertas e mais negociação.',
-      tecnico: 'Sem regra a favor no setor; vence pelos critérios de desempate.',
-    },
-    destaqueVazio: {
-      simples: 'Hoje não há ações com setor informado para mostrar.',
-      tecnico: 'Nenhuma ação com setor informado.',
-    },
-  },
-
-  guardar: {
-    guardar: 'Guardar',
-    guardada: 'Guardada',
-    guardarAcao: (t) => `Guardar ${t} na minha lista`,
-    tirarAcao: (t) => `Tirar ${t} da minha lista`,
-  },
-
-  top5: {
-    titulo: 'Top 5 do experimento',
-    intro:
-      'O experimento do TCC testa se o tom das notícias do dia ajuda a apontar as ações que vão render ' +
-      'mais que o Ibovespa no pregão seguinte. É um teste acadêmico, não uma indicação.',
-    fluxo: 'Como o Top 5 é montado',
-    passos: [
-      { titulo: 'Notícias do dia', texto: 'O FinBERT lê as manchetes e dá um tom a cada uma.' },
-      { titulo: 'Preços e balanços', texto: 'Entram os números de cada empresa, como preço, dívida e lucro.' },
-      { titulo: 'Modelo', texto: 'Um modelo estatístico estima a chance de cada ação render mais que o Ibovespa.' },
-      { titulo: 'Top 5', texto: 'As 5 ações com maior chance estimada aparecem aqui.' },
-    ],
-    vaga: (n) => `${n}º`,
-    vagaVazia: 'Vaga ainda sem ação',
-    esperaTitulo: 'O Top 5 do modelo ainda não existe',
-    esperaTexto:
-      'O modelo precisa de 5 anos de pregões para aprender, e a coleta desse histórico ainda não terminou. ' +
-      'Quando terminar, as 5 vagas se preenchem aqui todo dia útil.',
-    chance: (pct) => `${pct} de chance estimada de render mais que o Ibovespa`,
-    acaso: 'Escolhendo ao acaso, a chance seria de 50%.',
-    erro: 'Não deu para carregar o Top 5 agora. Tente de novo em alguns minutos.',
+    buscaRotulo: 'Procurar ação',
+    buscaPlaceholder: 'Código ou nome, ex.: PETR4 ou Petrobras',
+    buscaContagem: (n) => `${n} ${n === 1 ? 'ação encontrada' : 'ações encontradas'}`,
+    buscaVazia: 'Nenhuma ação com esse código ou nome.',
   },
 
   acerto: {
     titulo: 'O modelo acerta?',
-    intro: 'Antes de confiar numa lista, vale ver como ela foi no passado. A régua é o acaso: 50%.',
+    intro: 'Antes de confiar numa lista, veja como ela foi no passado: as 5 ações do modelo, lado a lado com o acaso.',
     acaso: 'Acaso',
     modelo: 'Modelo',
     esperaTitulo: 'Ainda não dá para saber',
-    esperaTexto:
-      'O acerto só pode ser medido depois que o modelo tiver histórico. Quando houver, esta parte mostra ' +
-      'em quantos pregões o Top 5 rendeu mais que o Ibovespa, sempre comparado com o acaso, ' +
-      'inclusive quando o modelo perde dele.',
-    resultado: (taxa, dias) => `Em ${dias} pregões, o Top 5 rendeu mais que o Ibovespa em ${taxa} deles.`,
+    esperaTexto: 'O acerto aparece quando o modelo tiver histórico, sempre comparado com o acaso, mesmo quando perde dele.',
+    resultado: (taxa, dias) =>
+      `Em ${dias} ${dias === 1 ? 'pregão' : 'pregões'}, ${taxa} das ações que o modelo escolheu renderam mais que o Ibovespa.`,
     acimaDoAcaso: 'Acima do acaso.',
     abaixoDoAcaso: 'Abaixo do acaso.',
+    dentroDoAcaso: 'Dentro da faixa do acaso: ainda não dá para separar acerto de sorte.',
     erro: 'Não deu para carregar o histórico do modelo agora.',
   },
 
@@ -604,7 +427,7 @@ export const TEXTOS = Object.freeze({
           sai: 'Dados crus',
           fontes: [
             'Preços, índices e balanços: B3 e empresas',
-            'Selic (SGS 432) e dólar PTAX (SGS 1): Banco Central',
+            'Juros (CDI) e dólar: Banco Central',
             'Notícias, com o tom lido pelo FinBERT',
           ],
         },
@@ -660,89 +483,70 @@ export const TEXTOS = Object.freeze({
         },
         { chave: 'modelo', nome: 'Modelo', itens: ['Aprende com o passado'] },
         { chave: 'chance', nome: 'Chance', itens: ['De cada ação render mais que o Ibovespa'] },
-        { chave: 'top5', nome: 'Top 5', itens: ['As 5 maiores chances'] },
+        { chave: 'top5', nome: 'Top 5 do modelo', itens: ['As 5 maiores chances, medidas contra o acaso'] },
       ],
+      guia: {
+        simples: 'Antes de ver se ele acerta, veja o que o modelo faz.',
+        tecnico: 'Antes do histórico de acerto: entrada, aprendizado, régua e limites do modelo.',
+      },
       cartoes: [
         {
           chave: 'preve',
-          titulo: 'O que ele tenta prever',
+          titulo: 'O que prevê',
           texto: {
             simples: [
-              'Para cada ação, uma pergunta: no próximo pregão, ela vai render mais que o ',
+              'Se a ação vai render mais que o ',
               { termo: 'ibovespa', texto: 'Ibovespa' },
-              '? A resposta vem como uma chance, nunca como certeza.',
+              ' no próximo pregão. Sempre como chance, nunca certeza.',
             ],
             tecnico: [
-              'Classificação por ação: o retorno no pregão seguinte fica acima do retorno do ',
+              'Classificação por ação: o retorno do pregão seguinte fica acima do ',
               { termo: 'ibovespa', texto: 'Ibovespa' },
-              '? A saída é uma probabilidade calibrada.',
+              '. A saída é uma probabilidade.',
             ],
           },
         },
         {
           chave: 'le',
-          titulo: 'O que ele lê',
-          texto: {
-            simples: [
-              'O tom das notícias do dia, lido pelo ',
-              { termo: 'finbert', texto: 'FinBERT' },
-              ', junto com preços, volume negociado, dólar, petróleo e números de balanço de cada empresa.',
-            ],
-            tecnico: [
-              'Tom das notícias do dia classificado pelo ',
-              { termo: 'finbert', texto: 'FinBERT' },
-              '-PT-BR, preços, ',
-              { termo: 'volume', texto: 'volume' },
-              ', dólar, petróleo ',
-              { termo: 'brent', texto: 'Brent' },
-              ' e indicadores de balanço.',
-            ],
+          titulo: 'O que lê',
+          itens: {
+            simples: ['Notícias (FinBERT)', 'Preços', 'Volume', 'Dólar', 'Petróleo', 'Balanços'],
+            tecnico: ['Tom das notícias (FinBERT-PT-BR)', 'Preços', 'Volume', 'Dólar', 'Brent', 'Indicadores de balanço'],
           },
         },
         {
           chave: 'aprende',
-          titulo: 'Como ele aprende',
+          titulo: 'Como aprende',
           texto: {
-            simples: [
-              'Ele estuda o passado: precisa de 5 anos de pregões para ver o que aconteceu depois de cada tipo de notícia. ',
-              'Essa coleta ainda não terminou, por isso o Top 5 do modelo ainda não existe. O Top 5 da página inicial, por enquanto, usa as checagens.',
-            ],
-            tecnico: [
-              'Modelo de árvores ',
-              { termo: 'xgboost', texto: 'XGBoost' },
-              ', treinado com 5 anos de pregões e validado mês a mês, sempre com dados anteriores ao período testado. ',
-              'A coleta do histórico ainda não terminou.',
-            ],
+            simples: 'Estuda 5 anos de pregões.',
+            tecnico: 'Árvores XGBoost com 5 anos de pregões, validadas mês a mês com dados anteriores ao período testado.',
+          },
+          pilula: {
+            simples: 'Modelo em teste: as 5 ações dele são medidas, mas ainda não aparecem no site. O Top 5 da página inicial vem das regras.',
+            tecnico: 'Modelo provisório em teste: o Top 5 dele entra no histórico de acerto, mas não é exibido.',
           },
         },
         {
           chave: 'acerta',
-          titulo: 'Como saber se acerta',
+          titulo: 'Como mede o acerto',
           texto: {
-            simples: [
-              'Quem escolhe ao acaso acerta metade das vezes: 50%. Esta página conta em quantos pregões o Top 5 rendeu mais que o ',
-              { termo: 'ibovespa', texto: 'Ibovespa' },
-              ' e compara com essa régua.',
-            ],
+            simples: 'A régua é o acaso, calculado a cada dia: quanto uma escolha ao acaso acertaria.',
             tecnico: [
-              'Compara a taxa de pregões em que o Top 5 superou o ',
+              'Fração das ações do Top 5 que superaram o ',
               { termo: 'ibovespa', texto: 'Ibovespa' },
-              ' com a ',
+              ', comparada à ',
               { termo: 'faixa_acaso', texto: 'faixa do acaso' },
-              ', obtida com 10 mil sorteios. A referência é 50%.',
+              ' (10 mil sorteios). A referência é o acaso médio de cada dia.',
             ],
           },
+          regua: true,
         },
         {
           chave: 'naoE',
-          titulo: 'O que ele não é',
+          titulo: 'O que não é',
           texto: {
-            simples: [
-              'Não é uma indicação para decidir o que fazer com o seu dinheiro. É um teste acadêmico, e quando o modelo perde para o acaso, esta página mostra.',
-            ],
-            tecnico: [
-              'Experimento acadêmico, sem finalidade de aconselhamento. Resultados abaixo da faixa do acaso são exibidos do mesmo modo.',
-            ],
+            simples: 'Não é indicação para o seu dinheiro. É um teste acadêmico, e quando perde para o acaso, a página mostra.',
+            tecnico: 'Experimento acadêmico, sem finalidade de aconselhamento. Resultados abaixo do acaso também são exibidos.',
           },
         },
       ],
@@ -772,8 +576,8 @@ export const TEXTOS = Object.freeze({
         ausencia: 'Sem número para medir. Isso acontece, por exemplo, com bancos e seguradoras.',
         caixaLiquido: 'Não. Tem mais caixa do que dívida.',
         comparacao: { menos: 'Menos que o setor', igual: 'Parecido com o setor', mais: 'Mais que o setor' },
-        comSetor: (cmp, n, setor) => `${cmp}: ${n} anos de lucro para quitar a dívida; o setor, ${setor}.`,
-        semSetor: (n) => `${n} anos de lucro para quitar a dívida.`,
+        comSetor: (cmp, n, setor) => `${cmp}: ${n} anos de lucro operacional para quitar a dívida; o setor, ${setor}.`,
+        semSetor: (n) => `${n} anos de lucro operacional para quitar a dívida.`,
       },
       moedas: {
         pergunta: 'Está cara?',
@@ -890,6 +694,7 @@ export const TEXTOS = Object.freeze({
         },
       },
       noticias: {
+        semHorario: 'sem horário',
         titulo: { simples: 'O que dizem as notícias?', tecnico: 'Fluxo de notícias' },
         curto: 'Notícias',
         intro: {
@@ -913,11 +718,20 @@ export const TEXTOS = Object.freeze({
     setor: (valor) => `No setor: ${valor}`,
     origem: (fonte) => `Fonte: ${fonte}`,
     periodo: 'Período',
-    periodos: { '1M': '1 mês', '6M': '6 meses', '1A': '1 ano' },
+    periodos: { '1S': '1 semana', '1M': '1 mês', '6M': '6 meses', '1A': '1 ano' },
     comparar: 'Comparar com o Ibovespa',
     balancos: 'Balanços trimestrais',
     historico: 'Histórico do indicador',
     retornos: 'Retorno por período',
+    retornosTabela: {
+      periodos: { d1: '1 dia', s1: '1 semana', m1: '1 mês', m6: '6 meses', a1: '1 ano' },
+      linhas: {
+        precoAcao: 'Preço da ação',
+        comProventos: 'Ação com proventos',
+        ibovespa: 'Ibovespa',
+        setor: 'Setor, sem a empresa',
+      },
+    },
     semNoticias: {
       simples: 'Nenhuma manchete sobre esta empresa nos últimos dias.',
       tecnico: 'Sem manchetes da empresa nos últimos dias.',
@@ -944,8 +758,15 @@ export const TEXTOS = Object.freeze({
       volumeMaiorQue: (p) => `Volume maior que em ${p}% dos pregões do último ano.`,
       volumePercentil: (p) => `Volume do dia: percentil ${p} no último ano`,
       regua: 'Posição entre as ações acompanhadas',
+      // nota quando a API segurou algum número desta ação (ex.: RAIZ4 em nov/2026)
+      retido: {
+        simples:
+          'Por que falta número aqui: a API confere cada dado antes de publicar. Quando um valor sai muito do normal ou não tem base suficiente, ele fica de fora, para não mostrar informação errada.',
+        tecnico:
+          'Campos com histórico insuficiente ou indisponíveis: a validação da API retém valores fora do normal ou sem janela completa, em vez de publicar um número possivelmente errado.',
+      },
     },
-    tecnicoNota: 'Detalhes técnicos aparecem com as explicações em Técnica.',
+    tecnicoNota: 'Detalhes técnicos aparecem com as explicações em Técnico.',
     // Leitura por nível: Simples ensina cada número; Técnica mostra tabelas densas.
     indicadores: {
       origemRotulo: 'De onde vem:',
@@ -1148,11 +969,9 @@ export const TEXTOS = Object.freeze({
 
   grafico: {
     rotuloPadrao: 'Preço',
-    percorrer: 'Percorrer os dias do gráfico',
     descricaoSerie: (de, ate) => `Série de preços do período: de ${de} a ${ate}.`,
     descricaoMulti: (rotulo, de, ate) => `${rotulo}: de ${de} a ${ate}`,
     dupla: (rotulo, valor) => `${rotulo} ${valor}`,
-    valorial: (data, itens) => `${data}: ${itens}`,
     tipRotulo: (rotulo) => `${rotulo}: `,
     semDado: 'sem dado',
     semDados: 'Sem dados suficientes para desenhar o gráfico.',
@@ -1176,16 +995,9 @@ export const TEXTOS = Object.freeze({
     vazio: 'Os setores não estão disponíveis.',
     semDado: 'Sem dado',
     periodoGrupo: 'Período',
-    periodos: { d1: 'Hoje', m1: '1 mês', m6: '6 meses', a1: '12 meses' },
-    periodosExtenso: { d1: 'Hoje', m1: 'Em 1 mês', m6: 'Em 6 meses', a1: 'Em 12 meses' },
+    periodos: { d1: 'Último pregão', s1: '1 semana', m1: '1 mês', m6: '6 meses', a1: '1 ano' },
+    periodosExtenso: { d1: 'No último pregão', s1: 'Em 1 semana', m1: 'Em 1 mês', m6: 'Em 6 meses', a1: 'Em 1 ano' },
     periodoAjuda: 'Escolha o período. A lista e os cartões mostram a variação nesse período.',
-    oQueE: 'Pense no setor como uma prateleira: cada uma reúne empresas do mesmo ramo. Estes são quatro exemplos.',
-    exemplosTopo: [
-      { setor: 'Utilidade Pública', rotulo: 'Energia e água' },
-      { setor: 'Consumo não Cíclico', rotulo: 'Comida e higiene' },
-      { setor: 'Financeiro', rotulo: 'Bancos e seguros' },
-      { setor: 'Tecnologia da Informação', rotulo: 'Software e chips' },
-    ],
     rankingTitulo: 'Quem subiu e quem caiu',
     comoLerRanking:
       'Cada barra mostra a variação média das ações do setor. Para a direita, o setor subiu; para a esquerda, caiu. Toque no nome para ir ao cartão dele.',
@@ -1202,12 +1014,27 @@ export const TEXTOS = Object.freeze({
     resumoMaior: (nome, valor) => `O que mais subiu foi ${nome} (${valor}).`,
     resumoMenor: (nome, valor) => `O que mais caiu, ${nome} (${valor}).`,
     cartoesTitulo: 'Cada setor, de perto',
-    cartoesTexto: 'Em cada cartão: o que o setor faz, algumas empresas dele e quanto ele variou no período escolhido.',
+    cartoesTexto: {
+      simples: 'Cada ponto é uma ação: círculo subiu, losango caiu. Toque no nome do setor para ver as ações dele.',
+      tecnico: 'Cada ponto é uma ação, na cor da variação no período. Tracejado: o preço mudou de escala.',
+    },
+    subiuMais: 'Subiu mais',
+    caiuMais: 'Caiu mais',
+    subiuMenos: 'Subiu menos',
+    caiuMenos: 'Caiu menos',
+    semanaErro: 'A semana não carregou',
+    maiorAltaMedia: 'Maior alta média do período',
+    maiorQuedaMedia: 'Maior queda média do período',
+    menorAltaMedia: 'Menor alta média do período',
+    menorQuedaMedia: 'Menor queda média do período',
+    pilulasDoSetor: (nome) => `Ações de ${nome}`,
+    resumoPontos: (n, subiram, cairam) =>
+      `${n} ${n === 1 ? 'ação' : 'ações'} do setor: ${subiram} subiram e ${cairam} caíram no período.`,
+    pontoAcao: (ticker, empresa, situacao) => `${[ticker, empresa].filter(Boolean).join(', ')}, ${situacao}`,
+    variacaoNoPeriodo: (variacao) => `${variacao} no período`,
+    emRevisaoAcao: 'preço mudou de escala',
     listaTitulo: 'Um cartão por setor',
-    resultadoPeriodo: 'Resultado no período',
-    empresasDoSetor: 'Algumas empresas',
     subiramDe: (subiram, n) => `${subiram} de ${n} subiram`,
-    cairamDe: (cairam, n) => `${cairam} de ${n} caíram`,
     subiramAcoes: (subiram, n) =>
       subiram === 0
         ? `nenhuma das ${n} ${n === 1 ? 'ação' : 'ações'} subiu`
@@ -1224,53 +1051,54 @@ export const TEXTOS = Object.freeze({
       'Tecnologia da Informação': 'Software, sistemas e serviços digitais: os programas e a nuvem que as empresas usam.',
       Comunicações: 'Telefonia, internet e TV por assinatura: as empresas que levam conexão para casa e para o celular.',
     },
-    melhor: 'Melhor ação',
-    pior: 'Pior ação',
-    tomNoticias: 'Tom das notícias',
+    tomNoticias: 'Tom das notícias do dia',
+    tomFatias: { positivas: 'positivas', neutras: 'neutras', negativas: 'negativas' },
     tom: { positivas: 'mais positivas', negativas: 'mais negativas', equilibrado: 'equilibrado' },
-    quatroPeriodos: 'Variação média em cada período',
-    ver: 'Ver as ações',
-    esconder: 'Esconder as ações',
-    acoesDoSetor: (nome) => `Ações de ${nome}`,
-    mapaTitulo: 'Todas as ações por setor, hoje',
-    verTodos: 'Ver todos os setores',
-    dispersao: {
-      titulo: 'Como as ações de cada setor se espalham',
+    mapaTitulo: 'Todas as ações por setor, no último pregão',
+    velas: {
+      titulo: 'Como cada setor andou no período',
       comoLer:
-        'A caixa vai do 1º ao 3º quartil: metade das ações do setor ficou dentro dela. O traço no meio é a mediana. As hastes chegam à menor e à maior variação comuns; pontos soltos são ações fora do padrão.',
+        'Cada vela é um setor. O corpo vai do começo ao fim do período e o pavio marca o ponto mais alto e o mais baixo. A vela é feita com o fechamento de cada dia, pela média das ações do setor: a máxima e a mínima são de fechamento, não de dentro do pregão.',
+      notaDia: 'No último pregão a vela só tem o fechamento anterior e o do dia, por isso fica sem pavio.',
       legenda: 'Como ler o gráfico',
-      legendaCaixa: 'Caixa: metade das ações',
-      legendaMediana: 'Traço: mediana',
-      legendaAtipico: 'Ponto: ação fora do padrão',
-      tabela: 'Quartis da variação de cada setor',
-      descricao: (n) => `Gráfico de caixas com a variação das ações de ${n} setores no período escolhido.`,
-      semDados: (lista) => `Sem ações suficientes: ${lista}`,
+      legendaCorpo: 'Corpo: do começo ao fim do período',
+      legendaPavio: 'Pavio: ponto mais alto e mais baixo',
+      legendaSinal: 'Sinal: + subiu, − caiu',
+      tabela: 'Vela de cada setor',
+      descricao: (n) => `Gráfico de velas de ${n} setores no período escolhido, feito com os fechamentos de cada dia.`,
+      semDados: (lista) => `Sem dado no período: ${lista}`,
+      carregando: 'Carregando as velas dos setores.',
+      erro: 'Não foi possível montar as velas dos setores agora.',
       tooltip: {
-        minimo: 'Mínimo',
-        q1: '1º quartil',
-        mediana: 'Mediana',
-        q3: '3º quartil',
-        maximo: 'Máximo',
         acoes: (n) => `${n} ${n === 1 ? 'ação' : 'ações'}`,
-        atipico: (valor) => `Fora do padrão: ${valor}`,
+        periodo: (inicio, fim) => `De ${inicio} a ${fim}`,
+        subiu: 'Subiu',
+        caiu: 'Caiu',
+        estavel: 'Ficou estável',
+        comeco: 'Começo',
+        maxima: 'Ponto mais alto',
+        minima: 'Ponto mais baixo',
+        nota: 'Pelos fechamentos de cada dia',
       },
     },
   },
 
   mercado: {
     titulo: 'O mercado',
-    intro: 'Índices, setores e alertas do pregão: quanto rendeu cada índice, como foi cada setor e quais movimentos fugiram do comum.',
+    intro: 'Quanto rendeu cada índice do mercado, no dia e nos últimos meses.',
     carregando: 'Carregando os dados do mercado.',
-    traco: '—',
-    indisponivel: 'Indisponível',
     cdi: 'CDI',
+    cdi12m: 'acumulado em 12 meses',
     semDado: 'sem dado',
+    semSoDia: 'Só o valor do dia',
+    noDia: 'no dia',
+    noPeriodo: 'no período',
     graficoTitulo: 'Quanto rendeu cada índice',
     graficoTexto: 'Rentabilidade acumulada no período, a partir do primeiro dia da janela.',
     periodoGrupo: 'Período',
-    comparacaoGrupo: 'Comparar também com',
+    comparacaoGrupo: 'Índices no gráfico',
     comparacaoIndisponivel: (rotulos) => `Não foi possível carregar: ${rotulos}.`,
-    periodos: { '1m': '1 mês', '6m': '6 meses', '1a': '1 ano' },
+    periodos: { '1s': '1 semana', '1m': '1 mês', '6m': '6 meses', '1a': '1 ano' },
     comparacao: {
       IPCA: 'IPCA',
       IDIV: 'IDIV dividendos',
@@ -1285,10 +1113,8 @@ export const TEXTOS = Object.freeze({
       IFIX: 'Fundos imobiliários (IFIX)',
       IVVB11: 'S&P 500 em reais (IVVB11)',
     },
-    fixo: 'fixo',
-    limiteSeries: 'Marque quantos índices quiser. As linhas tracejadas são as comparações.',
-    marcarTodas: 'Marcar todos',
-    desmarcarTodas: 'Desmarcar todos',
+    limiteSeries: 'Ligue e desligue os índices que quiser. As linhas tracejadas são as comparações.',
+    semSelecao: 'Escolha um ou mais índices para ver as linhas.',
     resumoTitulo: (periodo) => `Em ${periodo}`,
     resumoLista: (periodo) => `Rentabilidade de cada série em ${periodo}`,
     leituraCem: {
@@ -1296,61 +1122,109 @@ export const TEXTOS = Object.freeze({
       tecnico: (final) => `Valor final de R$ 100: R$ ${final}`,
     },
     semSerie: 'Sem histórico suficiente para este período.',
-    tabelaTitulo: 'Como foi cada índice',
-    colIndicador: 'Indicador',
-    colHoje: 'Hoje',
-    setoresTitulo: 'Os setores no pregão',
-    setoresTexto: 'Variação média das ações de cada setor no dia. A barra vai para a direita se o setor subiu e para a esquerda se caiu.',
-    setoresRegiao: 'Tabela dos setores no pregão',
-    colSetor: 'Setor',
-    colVariacao: 'Variação média',
-    colAcoes: 'Ações no pregão',
-    colTom: 'Tom das notícias',
-    subiramCaíram: (subiram, caíram, n) => `subiram ${subiram}, caíram ${caíram} de ${n}`,
-    tom: { positivas: 'mais positivas', negativas: 'mais negativas', equilibrado: 'equilibrado' },
-    semSetores: 'Os setores do pregão não estão disponíveis.',
-    alertasTitulo: 'Movimentos fora do comum',
-    maiorAlta: 'Maior alta',
-    maiorQueda: 'Maior queda',
-    volumeTitulo: 'Volume incomum',
-    volumeVezes: (vezes) => `${vezes} o volume normal`,
-    semVolume: 'Nenhum volume incomum no pregão.',
-    alertasVazio: 'Nenhum movimento fora do comum no pregão.',
-    resumoAtivos: (n) => `${n} ${n === 1 ? 'ação acompanhada' : 'ações acompanhadas'}.`,
-    estadoDia: { volatil: 'Dia volátil.', estavel: 'Dia estável.' },
-    abasRotulo: 'Visões do mercado',
-    abas: { indices: 'Índices', setores: 'Setores', destaques: 'Destaques' },
-    abasDescricao: {
-      indices: 'Quanto rendeu o Ibovespa e outros índices, e como foi cada um no dia e nos períodos.',
-      destaques: 'A ação que mais negociou em cada setor no dia, e a busca de volume de qualquer ação.',
+    indicesTitulo: 'Como foi cada índice',
+    grupos: { bolsa: 'Bolsa', juros: 'Juros e inflação', cambio: 'Câmbio e petróleo' },
+    indices: {
+      IBOV: { nome: 'Ibovespa', explicacao: { simples: 'as ações mais negociadas da B3', tecnico: 'principal índice da B3, em pontos' } },
+      DOLAR: { nome: 'Dólar', explicacao: { simples: 'quanto custa um dólar em reais', tecnico: 'cotação do dólar em reais' } },
+      BRENT: { nome: 'Petróleo Brent', explicacao: { simples: 'preço do petróleo de referência, em dólares', tecnico: 'petróleo Brent, em dólares por barril' } },
+      CDI: { nome: 'CDI, 12 meses', explicacao: { simples: 'juro de referência da renda fixa', tecnico: 'taxa CDI acumulada em 12 meses' } },
+      IPCA: { nome: 'IPCA, 12 meses', explicacao: { simples: 'inflação oficial dos últimos 12 meses', tecnico: 'IPCA acumulado em 12 meses' } },
+      IDIV: { nome: 'IDIV', explicacao: { simples: 'empresas que mais pagam proventos', tecnico: 'ações com maior pagamento de proventos' } },
+      SMLL: { nome: 'SMLL', explicacao: { simples: 'empresas menores da bolsa', tecnico: 'small caps: empresas de menor porte' } },
+      IFIX: { nome: 'IFIX', explicacao: { simples: 'fundos imobiliários negociados na bolsa', tecnico: 'fundos imobiliários (FIIs) da B3' } },
+      IVVB11: { nome: 'IVVB11', explicacao: { simples: 'ações dos EUA (S&P 500) em reais', tecnico: 'ETF que acompanha o S&P 500 em reais' } },
+    },
+    pregaoData: (data) => `Dados do pregão de ${data}.`,
+    taxaDia: {
+      simples: (taxa, data) => (data ? `Juros do dia: ${taxa} (${data})` : `Juros do dia: ${taxa}`),
+      tecnico: (taxa, data) => (data ? `Taxa do dia: ${taxa} (${data})` : `Taxa do dia: ${taxa}`),
     },
     asterisco: '*',
     calculadoSr: 'calculado pela série histórica',
-    calculadoNota: 'calculado pela série histórica, pois o pacote do dia não trouxe este número.',
-    semHistoricoNota: (nomes) => `Sem série histórica nos dados do projeto: ${nomes}. Por isso os períodos ficam sem número.`,
-    destaqueSetorTitulo: 'O destaque de cada setor',
-    destaqueSetorTexto: 'Cada linha é um setor e a ação que mais negociou nele hoje. A barra compara o volume com a maior do ranking. Quando o volume passa de 1,5 vez a mediana dos últimos 20 pregões, o número aparece em destaque.',
-    destaqueSetorVazio: 'O volume por setor não está disponível.',
-    volumeDoDia: 'Volume do dia',
-    vezesNormal: (vezes) => `${vezes} ${vezes === '1,0' ? 'vez' : 'vezes'} o normal`,
-    buscaTitulo: 'Pesquise o volume de qualquer ação',
-    buscaTexto: 'Digite o código ou o nome da empresa. A lista começa pelas ações mais negociadas.',
-    buscaRotulo: 'Buscar ação por código ou empresa',
-    buscaExemplo: 'Código ou empresa',
-    volumeTabela: 'Volume negociado por ação',
-    colAcao: 'Ação',
-    colVolume: 'Volume do dia',
-    colMediana: 'Mediana de 20 pregões',
-    colVezes: 'Vezes o normal',
-    colVariacaoDia: 'Variação do dia',
-    ordenarVolume: 'Ordenar pelo volume do dia',
-    semResultado: 'Nenhuma ação encontrada para essa busca.',
-    mostrarMais: (n) => `Mostrar mais ${n}`,
-    mostrandoDe: (n, total) => `Mostrando ${n} de ${total} ações.`,
-    termosVolumeErro: 'Os volumes do dia não carregaram agora.',
+    calculadoNota: {
+      simples: 'calculado pelo histórico do índice.',
+      tecnico: 'calculado pela série histórica; ausente no pacote do dia.',
+    },
+    resumoAtivos: (n) => `${n} ${n === 1 ? 'ação acompanhada' : 'ações acompanhadas'}.`,
+    estadoDia: { volatil: 'Dia volátil.', estavel: 'Dia estável.' },
+    dolar: {
+      titulo: { simples: 'Quanto custa o dólar', tecnico: 'Dólar (R$ por US$)' },
+      apoio: 'Fechamento de cada pregão, em reais por dólar.',
+      vazio: 'O histórico do dólar ainda não tem pregões para mostrar.',
+      nota: {
+        simples: 'O site junta o fechamento de cada dia num só gráfico.',
+        tecnico: 'Série montada com as publicações diárias de mercado_dia.',
+      },
+      notaSerie: {
+        simples: 'Cada ponto é o fechamento de um pregão, da série diária do dólar.',
+        tecnico: 'Série diária USDBRL de series_diarias (fechamento em R$ por US$).',
+      },
+    },
+    juros: {
+      titulo: { simples: 'Juros hoje: Selic e CDI', tecnico: 'Juros: CDI anualizado e Selic' },
+      tituloSerie: { simples: 'Selic, a taxa básica de juros', tecnico: 'Meta da Selic (histórico estimado pelo CDI)' },
+      apoioSerie: {
+        simples: 'O Copom, do Banco Central, revê a Selic a cada 45 dias, numa quarta-feira. O valor de hoje é a meta dele; o gráfico mostra a taxa estimada pelo CDI.',
+        tecnico: 'Meta definida pelo Copom em 8 reuniões por ano. Histórico estimado pelo CDI diário: anualizado em 252 dias, + 0,10 p.p., arredondado a 0,25.',
+      },
+      tituloSeriePublicada: { simples: 'Selic, a taxa básica de juros', tecnico: 'Meta da Selic no período' },
+      apoioSeriePublicada: {
+        simples: 'O Copom, do Banco Central, revê a Selic a cada 45 dias, numa quarta-feira. O gráfico mostra a meta de cada dia.',
+        tecnico: 'Meta definida pelo Copom em 8 reuniões por ano. Série diária da meta publicada em series_diarias (SELIC).',
+      },
+      mudancasTitulo: { simples: 'Quando a Selic mudou', tecnico: 'Mudanças da meta no período' },
+      semMudanca: 'A Selic não mudou no período.',
+      mudancaDesdeSr: 'a partir de',
+      mudancaSr: { down: (de) => `caiu de ${de} para`, up: (de) => `subiu de ${de} para` },
+      notaCdi: {
+        simples: (cdi, data) => `CDI de hoje: ${cdi} ao ano${data ? ` (${data})` : ''}. A Selic fica cerca de 0,10 ponto acima.`,
+        tecnico: (cdi, data) => `CDI anualizado${data ? ` em ${data}` : ''}: ${cdi} a.a. (base 252); spread típico de 0,10 p.p. para a meta.`,
+      },
+      graficoSerie: (de, ate, final) => `Selic ao longo do tempo, estimada pelo CDI, de ${de} a ${ate}; terminou em ${final} ao ano.`,
+      graficoSeriePublicada: (de, ate, final) => `Meta da Selic ao longo do tempo, de ${de} a ${ate}; terminou em ${final} ao ano.`,
+      apoio: {
+        simples: 'A Selic é a taxa básica de juros do país. O valor de hoje é a meta que o Copom definiu. O gráfico é estimado pelo CDI, que anda colado nela.',
+        tecnico: 'Meta da Selic publicada pelo Copom. O histórico é estimado pelo CDI do dia: anualizado em 252 dias úteis, + 0,10 ponto, arredondado ao múltiplo de 0,25.',
+      },
+      valorLegenda: {
+        simples: (data) => (data ? `ao ano, meta vigente em ${data}` : 'ao ano, meta do Copom'),
+        tecnico: (data) => (data ? `a.a., meta vigente em ${data}` : 'a.a., meta do Copom'),
+      },
+      selicIndisponivel: 'indisponível',
+      selicSemDado: 'sem dado',
+      cdiRotulo: { simples: 'CDI de hoje', tecnico: 'CDI anualizado' },
+      cdiTexto: { simples: (taxa) => `${taxa} ao ano`, tecnico: (taxa) => `${taxa} a.a. (base 252)` },
+      fatos: {
+        simples: [
+          { rotulo: 'Quem decide a Selic', texto: 'O Copom, o comitê do Banco Central que cuida dos juros.' },
+          { rotulo: 'De quanto em quanto tempo', texto: 'Mais ou menos a cada 45 dias, sempre numa quarta-feira.' },
+          { rotulo: 'E o CDI?', texto: 'É o juro que os bancos cobram entre si. Fica colado na Selic, um pouquinho abaixo.' },
+        ],
+        tecnico: [
+          { rotulo: 'Copom', texto: 'Comitê de Política Monetária do Banco Central; define a meta da Selic.' },
+          { rotulo: 'Reuniões', texto: '8 por ano, a cada 45 dias em média; decisão divulgada na quarta-feira.' },
+          { rotulo: 'CDI x Selic', texto: 'O CDI acompanha a Selic efetiva, em geral 0,10 ponto abaixo da meta.' },
+        ],
+      },
+      grafico: { simples: 'Taxa Selic ao longo do tempo, estimada', tecnico: 'Meta da Selic no período (estimada pelo CDI)' },
+      vazio: 'O gráfico do histórico aparece quando a série do CDI chegar. O valor de hoje vem da meta do Copom.',
+    },
+    serieRotulo: (titulo, de, ate, final) => `${titulo}, de ${de} a ${ate}, terminou em ${final}.`,
   },
 
+  eventos: {
+    eleicao2026: {
+      marca: 'Eleição',
+      nota: {
+        simples: '26/10/2026: primeiro pregão depois do 2º turno da eleição. A bolsa caiu tanto que a B3 pausou os negócios (circuit breaker).',
+        tecnico: '26/10/2026: pregão seguinte ao 2º turno; Ibovespa −13,88% no dia, com circuit breaker acionado pela B3.',
+      },
+      aria: 'Marcação em 26/10/2026: pregão depois da eleição, com circuit breaker.',
+    },
+  },
   rodape: {
+    assinatura: 'A bolsa explicada em palavras simples, com o Cotinha do lado.',
     projeto: 'Projeto acadêmico de TCC.',
     dados: (pregao, publicado) => `Dados do pregão de ${pregao}, publicados em ${publicado}.`,
     fonte: 'Os números vêm dos pacotes diários publicados pelo projeto.',
@@ -1364,11 +1238,21 @@ export const TEXTOS = Object.freeze({
     tituloSemData: { simples: 'Como foi a bolsa no último dia?', tecnico: 'Último pregão' },
     erroTitulo: 'O pregão de hoje não carregou',
     erro: 'Os dados do dia não chegaram. Tente de novo em instantes.',
-    ouvir: 'Ouvir o resumo',
-    parar: 'Parar a leitura',
-    carregando: 'Carregando',
     estavel: 'Estável',
     numeros: { simples: 'Os números do dia, explicados', tecnico: 'Indicadores do dia' },
+    fatos: {
+      leadInicio: { simples: 'O Ibovespa fechou em', tecnico: 'Ibovespa fechou em' },
+      leadPontos: 'pontos',
+      leadVariacao: 'no dia',
+      amplitude: { simples: 'Subiram e caíram', tecnico: 'Altas e baixas' },
+      subiu: (n) => (n === 1 ? 'subiu' : 'subiram'),
+      caiu: (n) => (n === 1 ? 'caiu' : 'caíram'),
+      estaveis: (n) => (n === 1 ? 'estável' : 'estáveis'),
+      maiorAlta: { simples: 'Quem mais subiu', tecnico: 'Maior alta' },
+      maiorQueda: { simples: 'Quem mais caiu', tecnico: 'Maior queda' },
+      dolar: { simples: 'Dólar no dia', tecnico: 'Dólar' },
+      brent: { simples: 'Petróleo (Brent)', tecnico: 'Brent' },
+    },
     fonte: {
       pacote: (itens, data) => `${itens}: pacotes do pregão de ${data}.`,
       itensPacote: 'Ibovespa, CDI, IPCA e altas e quedas',
@@ -1376,12 +1260,17 @@ export const TEXTOS = Object.freeze({
     },
     variacaoAusente: 'Variação do dia indisponível',
     ibovespa: { simples: 'Como está a bolsa (Ibovespa)', tecnico: 'Ibovespa, var. diária' },
-    ibovespaSerie: 'Ibovespa',
     dolar: { simples: 'Preço de 1 dólar em reais', tecnico: 'Dólar' },
     dolarPacote: 'Fechamento do pregão',
     dolarSemHistorico: 'Os dados do projeto trazem só o fechamento do dia, sem o histórico do dólar.',
     cdi: { simples: 'Quanto a renda fixa rendeu (CDI)', tecnico: 'CDI' },
     cdiNota: { simples: 'Nos últimos 12 meses', tecnico: 'Acumulado em 12 meses' },
+    selicLinha: { simples: (taxa) => `Selic: ${taxa} ao ano`, tecnico: (taxa) => `Selic: ${taxa} a.a.` },
+    selicNota: {
+      simples: (data) => `Juro definido pelo Copom${data ? `, vigente em ${data}` : ''}`,
+      tecnico: (data) => `Meta do Copom${data ? `, vigente em ${data}` : ''}`,
+    },
+    selicIndisponivel: 'Selic: indisponível',
     ipca: { simples: 'Quanto os preços subiram (IPCA)', tecnico: 'IPCA' },
     ipcaNota: {
       simples: (mes) => `Em 12 meses, até ${mes}`,
@@ -1401,11 +1290,12 @@ export const TEXTOS = Object.freeze({
     detalhes: (nome) => `Mais sobre: ${nome}`,
     mini: {
       ibovespa: (inicio, fim) => `Ibovespa nos últimos 6 meses: de ${inicio} a ${fim} pontos.`,
+      valorPontos: (valor) => `${valor} pontos`,
+      semDado: 'sem dado',
       cdi: (meses, ultimo) => `CDI de cada mês nos últimos ${meses} meses completos; no mais recente, rendeu ${ultimo}.`,
       ipca: (meses, ultimo) => `IPCA de cada mês nos últimos ${meses} meses, pela série do projeto; o mais recente foi ${ultimo}.`,
-      dolar: (antes, hoje) => `Dólar: ${antes} no pregão anterior e ${hoje} hoje.`,
-      dolarSerie: (inicio, fim) => `Dólar nos últimos 6 meses: de ${inicio} a ${fim}.`,
-      acao: (ticker, inicio, fim) => `${ticker} no último mês: de ${inicio} a ${fim}.`,
+      ipcaPacote: (meses, ultimo) => `IPCA de cada mês nos últimos ${meses} meses, pelo mês de referência; o mais recente foi ${ultimo}.`,
+      dolarSerie: (inicio, fim) => `Dólar pregão a pregão: de ${inicio} a ${fim}.`,
       amplitude: (subiram, cairam, estaveis) =>
         `Um ponto por ação. Subiram: ${subiram}. Caíram: ${cairam}.${estaveis != null ? ` Estáveis: ${estaveis}.` : ''}`,
       tom: (positivas, neutras, negativas) =>
@@ -1413,8 +1303,11 @@ export const TEXTOS = Object.freeze({
     },
     legendaGrafico: {
       ibovespa: 'O gráfico mostra o fechamento de cada dia nos últimos 6 meses. A linha tracejada marca onde a janela começou.',
+      dolar: 'Cada ponto é o fechamento de um pregão guardado. A linha tracejada marca o primeiro valor.',
+      dolarSerie: 'Cada ponto é o fechamento de um pregão, da série diária do dólar. A linha tracejada marca o primeiro valor.',
       cdi: 'Cada barra é quanto o CDI rendeu em um mês completo. A barra em destaque é o mês mais recente.',
       ipca: 'Cada barra é o IPCA de um mês, calculado pela série de inflação do projeto. Barra para baixo é mês em que os preços caíram. A barra em destaque é o mês mais recente.',
+      ipcaPacote: 'Cada barra é o IPCA de um mês, pelo mês de referência que o pacote do dia publica. Barra para baixo é mês em que os preços caíram. A barra em destaque é o mês mais recente.',
     },
     legendaAmplitude: { subiram: 'Subiram', estaveis: 'Estáveis', cairam: 'Caíram' },
     graficoIndisponivel: 'O gráfico não carregou agora.',
@@ -1426,10 +1319,6 @@ export const TEXTOS = Object.freeze({
     vezesMediana: {
       simples: (vezes) => `${vezes} vezes o normal`,
       tecnico: (vezes) => `${vezes}× a mediana`,
-    },
-    semDestaques: {
-      simples: 'Nada fora do comum aconteceu neste pregão.',
-      tecnico: 'Nenhum destaque no pregão.',
     },
     verAcoes: 'Ver todas as ações',
     proventosTitulo: { simples: 'Quem vai pagar dinheiro em breve', tecnico: 'Próximos proventos' },
@@ -1449,7 +1338,6 @@ export const TEXTOS = Object.freeze({
     },
     verProventos: 'Ver a agenda completa',
     noticiasTitulo: { simples: 'O que as notícias dizem?', tecnico: 'Tom das notícias' },
-    tomContagem: (texto) => `${texto}.`,
     semNoticias: {
       simples: 'O programa que lê as notícias ainda não classificou nenhuma manchete hoje.',
       tecnico: 'Sem notícias classificadas no dia.',
@@ -1468,17 +1356,8 @@ export const TEXTOS = Object.freeze({
       pessimista: { simples: 'No geral, as notícias estão preocupantes.', tecnico: 'Tom geral pessimista.' },
     },
     verNoticias: 'Ler as notícias',
-    minhaListaTitulo: { simples: 'As ações que você guardou', tecnico: 'Minha lista' },
-    minhaListaVazia: { simples: 'Nenhuma ação guardada ainda.', tecnico: 'Lista vazia.' },
-    semDadoDoPregao: 'Sem dado do pregão.',
-    dolarAnterior: (valor) => `No pregão anterior, fechou em ${valor}.`,
     dolarConversao: (dolares) => `Pelo fechamento do dia, R$ 100 equivalem a US$ ${dolares}.`,
-    inclinacao: { antes: 'Antes', hoje: 'Hoje' },
     graficoVariacao: { simples: 'em 6 meses', tecnico: 'var. em 6 meses' },
-    destaquesNota: {
-      simples: 'A barra mostra o tamanho da subida ou da queda. O maior movimento do dia enche a barra.',
-      tecnico: 'Barras na mesma escala: o maior módulo de variação ocupa a largura toda.',
-    },
     volumeNota: {
       simples: 'O número com × diz quantas vezes a ação foi negociada a mais que num dia normal. O risco na barra marca o normal (1×).',
       tecnico: 'Múltiplo do volume do dia sobre a mediana; o traço marca 1×.',
@@ -1492,29 +1371,43 @@ export const TEXTOS = Object.freeze({
     tomTotal: (texto) => `${texto} no dia.`,
     tomContagens: (positivas, neutras, negativas) =>
       `${positivas} positivas, ${neutras} neutras e ${negativas} negativas.`,
-    minhaListaComoGuardar: {
-      simples: 'Toque em Guardar numa ação para acompanhá-la aqui.',
-      tecnico: 'Use Guardar em qualquer ação.',
-    },
-    minhaListaNota: {
-      simples: 'A linha pequena mostra o preço de cada ação no último mês.',
-      tecnico: 'Linha: fechamento diário em 1 mês.',
-    },
-    verMinhaLista: 'Ver minha lista',
   },
 
   top5Hoje: {
     tituloInicio: 'Top 5',
     tituloFim: 'para estudar hoje',
     apoio: 'Cinco ações que as regras destacaram hoje. Toque numa para ver o porquê.',
+    apoioModelo: 'Cinco ações escolhidas pelo modelo em teste. Toque numa para ver o porquê.',
     listaRotulo: 'As cinco ações para estudar hoje',
     origemRegras: {
       simples: (total) =>
-        `O site olha ${total} coisas em cada ação, sempre pelas mesmas regras: preço, lucro, dívida, proventos e notícias. Entram aqui as que têm mais pontos a favor; no empate, as com menos pontos de atenção e, depois, as mais negociadas que o normal. Se ainda empatar, vale a ordem alfabética do código. O modelo de previsão ainda junta histórico.`,
+        `Olhamos ${total} regras em cada ação. Entram as com mais pontos a favor; no empate, as com menos pontos de atenção. O modelo de previsão ainda está em teste.`,
       tecnico: (total) =>
-        `${total} regras fixas sobre o resumo do pregão e as notícias. Ordem: mais sinais a favor, menos sinais de atenção, maior volume relativo e, por fim, o código. O modelo de previsão ainda junta histórico.`,
+        `${total} regras fixas sobre o resumo do pregão e as notícias. Ordem: mais sinais a favor, menos sinais de atenção, maior volume relativo e, por fim, o código. O modelo de previsão ainda está em teste.`,
     },
-    origemModelo: 'Escolhidas pelo modelo de previsão, que está em avaliação. A chance é uma estimativa.',
+    origemModelo: {
+      simples:
+        'Escolhidas e ordenadas pelo modelo de previsão, que ainda está em avaliação. A chance de cada ação fica oculta enquanto ele é conferido. Preço, gráfico e números vêm dos dados do dia.',
+      tecnico:
+        'Ordem do modelo de previsão, em avaliação. Chance oculta até a conferência. Preço, gráfico e números vêm dos dados do pregão.',
+    },
+    seloModelo: 'Em avaliação',
+    avisosModelo: 'Avisos do modelo de hoje',
+    // o que cada efeito de um motivo do modelo quer dizer (o texto do motivo vem do pacote)
+    motivoModelo: {
+      ajudou: {
+        simples: 'Este ponto ajudou a ação a subir na ordem do modelo.',
+        tecnico: 'Contribuição positiva para a pontuação do modelo neste pregão.',
+      },
+      atrapalhou: {
+        simples: 'Este ponto puxou a ação para baixo na ordem do modelo.',
+        tecnico: 'Contribuição negativa para a pontuação do modelo.',
+      },
+      neutro: {
+        simples: 'Este ponto quase não mudou a ordem do modelo.',
+        tecnico: 'Contribuição próxima de zero para a pontuação.',
+      },
+    },
     chance: (valor, acaso) => `Chance estimada ${valor}, acaso ${acaso}`,
     painelRotulo: 'Detalhes da ação escolhida',
     porQue: 'Por que está aqui',
@@ -1547,9 +1440,9 @@ export const TEXTOS = Object.freeze({
     },
     // título de cada regra (ids de REGRAS em sugestoes.js): simples para quem começa; técnico = título do sinal
     tituloSinal: {
-      volume_incomum: { simples: 'Foi bem mais negociada que o normal hoje', tecnico: 'Volume acima do normal' },
-      queda_forte_dia: { simples: 'Caiu bastante hoje', tecnico: 'Queda forte no dia' },
-      alta_forte_dia: { simples: 'Subiu bastante hoje', tecnico: 'Alta forte no dia' },
+      volume_incomum: { simples: 'Foi bem mais negociada que o normal no último pregão', tecnico: 'Volume acima do normal' },
+      queda_forte_dia: { simples: 'Caiu bastante no último pregão', tecnico: 'Queda forte no dia' },
+      alta_forte_dia: { simples: 'Subiu bastante no último pregão', tecnico: 'Alta forte no dia' },
       desempenho_6m: {
         simples: 'Rendeu mais que a bolsa e o setor em 6 meses',
         tecnico: 'Desempenho acima do Ibovespa e do setor em 6 meses',
@@ -1581,17 +1474,13 @@ export const TEXTOS = Object.freeze({
       simples: 'Ainda não há registro de quando os números foram atualizados pela última vez.',
       tecnico: 'Não há registro da última atualização.',
     },
-    frase: {
-      pregao: (dia) => `Pregão de ${dia}.`,
-      atualizacao: (rodada) => `Atualização número ${rodada}`,
-      atualizacaoSemRodada: 'Atualização',
-      intervalo: (inicio, fim) => `de ${inicio} a ${fim}`,
-      inicio: (inicio) => `a partir de ${inicio}`,
-      fim: (fim) => `até ${fim}`,
-      dia: (dia) => `de ${dia}`,
-      situacao: (rotulo) => `Situação: ${rotulo}.`,
+    ultima: 'Última atualização',
+    pavio: {
+      ok: 'Os dados chegaram completos.',
+      parcial: 'Parte dos dados chegou nesta atualização.',
+      falhou: 'A atualização falhou. Alguns números podem estar desatualizados.',
+      desconhecida: 'Não dá para saber se os dados chegaram completos.',
     },
-    situacao: { ok: 'concluída', parcial: 'parcial', falhou: 'com falha' },
     situacaoPainel: {
       ok: 'Atualização concluída',
       parcial: 'Atualização parcial',
@@ -1599,12 +1488,21 @@ export const TEXTOS = Object.freeze({
       desconhecida: 'Situação não informada',
     },
     secoes: {
-      origens: 'De onde vem cada coisa',
+      origens: 'Por onde os dados passam',
       pacotes: 'O que chegou nesta atualização',
       avisos: 'Avisos da coleta',
+      fatosColeta: 'Como foi a coleta',
+    },
+    // Bloco recolhido para a equipe: pacotes e avisos da coleta, que o público não precisa ler.
+    equipe: {
+      titulo: 'Para quem mantém o projeto',
+      texto: 'O que chegou em cada pacote e os avisos da coleta. Serve para a equipe conferir a atualização; para entender os números, não é preciso abrir.',
+      abrir: 'Ver detalhes da equipe',
     },
     fatos: {
-      pregao: 'Pregão de',
+      status: 'Status',
+      pregao: 'Pregão',
+      dadosAte: 'Dados até',
       publicado: 'Publicado em',
       atualizacao: 'Atualização do dia',
       periodo: 'Início e fim',
@@ -1623,27 +1521,27 @@ export const TEXTOS = Object.freeze({
     semQuantidade: 'Quantidade não informada',
     cru: (registros, removidos) => `Registros: ${registros}; removidos: ${removidos}`,
     origens: {
-      b3: {
-        titulo: 'B3 e empresas',
+      coleta: {
+        titulo: 'Coleta',
         texto: {
-          simples:
-            'Preços das ações, índices e balanços das empresas. Os dados são atualizados toda manhã de dia útil.',
-          tecnico: 'Preços, índices e balanços: dados públicos da B3 e das empresas, processados todo dia útil, de manhã.',
+          simples: 'Toda manhã de dia útil, um programa do projeto junta preços, balanços, juros, dólar e notícias.',
+          tecnico: 'Módulo de coleta (web scraping): preços e balanços da B3 e das empresas, CDI, IPCA, dólar e manchetes, toda manhã de dia útil.',
         },
       },
-      bancoCentral: {
-        titulo: 'Banco Central',
-        texto: {
-          simples: 'Juros, como a Selic e o CDI, e o dólar.',
-          tecnico: 'Juros (Selic, CDI) e dólar PTAX.',
-        },
-      },
-      finbert: {
-        titulo: 'Tom das notícias',
+      processamento: {
+        titulo: 'Processamento',
         texto: {
           simples:
-            'Um programa de computador, o FinBERT, lê as notícias e diz se o tom é positivo, neutro ou negativo. Ele pode errar.',
-          tecnico: 'Classificação automática do tom das notícias por um modelo de linguagem (FinBERT).',
+            'Outro programa confere tudo, faz as contas e lê o tom das notícias com o FinBERT. O FinBERT pode errar. Valor muito fora do normal não é publicado: a ficha mostra um traço no lugar.',
+          tecnico:
+            'Módulo de processamento: validação, indicadores, tom das manchetes pelo FinBERT e o modelo experimental do Top 5. Valores suspeitos são retidos (status sem número), nunca publicados.',
+        },
+      },
+      api: {
+        titulo: 'API do projeto',
+        texto: {
+          simples: 'O site pega tudo daqui. Nenhum dado vem de outro lugar.',
+          tecnico: 'A API privada (/v1) é a única fonte do site: nenhuma consulta a serviço público.',
         },
       },
     },
@@ -1656,6 +1554,8 @@ export const TEXTOS = Object.freeze({
       proventos: 'Proventos',
       noticias_dia: 'Notícias do dia',
       execucao: 'Dados da atualização',
+      experimento_historico: 'Histórico do modelo',
+      experimento_top: 'Top 5 do modelo',
     },
     avisosResumo: {
       modelo: 'O modelo de previsão ainda está em teste. Por isso o Top 5 do modelo não aparece no site.',
@@ -1664,7 +1564,6 @@ export const TEXTOS = Object.freeze({
       generico: 'Há observações técnicas sobre esta atualização.',
       nenhum: 'Nenhum aviso nesta atualização.',
     },
-    detalhesTecnicos: 'Ver detalhes técnicos',
     categoriasAviso: {
       ibovespa: 'Ibovespa',
       modelo: 'Modelo',
@@ -1678,6 +1577,171 @@ export const TEXTOS = Object.freeze({
       naoConsultada: {
         simples: 'A coleta não foi consultada nesta atualização.',
         tecnico: 'Coleta não consultada nesta atualização.',
+      },
+      etapasTitulo: 'Etapas da coleta',
+      segundos: (n) => `${n} s`,
+      fatos: {
+        inicio: 'Início da coleta',
+        fim: 'Fim da coleta',
+        entrega: 'Entrega concluída',
+        prazo: 'Prazo',
+        primeiraConsulta: 'Primeira consulta',
+        ultimaConsulta: 'Última consulta',
+        consultas: 'Consultas',
+        espera: 'Espera',
+        pregaoEsperado: 'Pregão esperado',
+        pregaoLido: 'Pregão lido',
+        origem: 'Origem',
+        execucao: 'Execução',
+      },
+      etapas: {
+        precos: 'Preços',
+        macro: 'Juros, inflação e câmbio',
+        noticias: 'Notícias',
+        ipe: 'Documentos das empresas',
+        enriquecimento: 'Enriquecimento',
+        juiza: 'Checagem dos dados',
+        cadastro: 'Cadastro',
+        entrega: 'Entrega',
+        analise: 'Análise',
+      },
+      situacoes: { concluida: 'concluída', pulada: 'pulada', falhou: 'falhou', pendente: 'pendente' },
+    },
+  },
+  // Variação suspeita (grupamento ou desdobramento sem ajuste nos dados): selo "mudou de escala" e período sem valor.
+  revisao: {
+    rotulo: 'mudou de escala',
+    explicacao: {
+      simples: 'O preço mudou de escala (provável grupamento de ações). Os dados não trazem o ajuste, então essa variação fica de fora.',
+      tecnico: 'Fechamento anterior sem ajuste de grupamento/desdobramento na origem; variação descartada.',
+    },
+    periodo: 'Período com mudança de escala do preço (grupamento ou desdobramento); variação não exibida.',
+    desde: (data) => `Desde ${data}, quando o preço mudou de escala (provável grupamento ou desdobramento). Antes disso, os preços estão em outra escala e ficam de fora.`,
+  },
+  // Contas feitas no próprio site com os dados da API (selo "Calculado no site" + página Dados).
+  contas: {
+    selo: 'Calculado no site',
+    comoFeito: 'como é feito',
+    titulo: 'O que o site calcula',
+    intro: {
+      simples: 'Todos os dados vêm da API do projeto. Alguns números são contas feitas aqui no site com esses dados. Nada é inventado: sem o dado de base, a conta não aparece.',
+      tecnico: 'A fonte é só a API privada. Os números abaixo são derivados no cliente (ou no servidor do site) a partir dos pacotes dela; sem a entrada, o resultado fica null e não é exibido.',
+    },
+    rotuloUsa: 'Usa',
+    rotuloComo: 'Como',
+    rotuloOnde: 'Aparece em',
+    // cartão à parte no fim da grade: não é conta, explica as datas que aparecem no site
+    datas: {
+      titulo: 'Datas de cada número',
+      usa: 'Data do pregão e da publicação de cada pacote',
+      como: {
+        simples:
+          'A API publica de manhã os números do pregão anterior, por isso o site mostra a data do pregão. Os períodos contam desse pregão para trás. O IPCA vai até o mês passado. Nos proventos, a data-com (último dia para ter a ação) vem antes do pagamento.',
+        tecnico:
+          'data_referencia é o pregão, publicado por volta das 8h do dia útil seguinte. As janelas d1 a a1 terminam nela; o "de X a Y" dos gráficos é a janela usada. IPCA por mês de referência (ipca_ate). Proventos: a data-com define o direito, o pagamento ordena a agenda.',
+      },
+      onde: 'Gráficos, períodos e proventos de todas as telas',
+    },
+    itens: {
+      selic: {
+        titulo: 'Histórico dos juros básicos',
+        usa: 'Série diária do CDI',
+        como: {
+          simples: 'A taxa básica de juros anda quase junto com o CDI. O site transforma o CDI de cada dia em taxa ao ano, soma 0,10 ponto e arredonda para o degrau de 0,25 usado pelo Banco Central. O valor de hoje vem pronto da API.',
+          tecnico: 'Taxa anual = (índice/índice anterior)^252 − 1; Selic ≈ taxa + 0,10 p.p., arredondada a múltiplo de 0,25 e suavizada pela mediana de 5 pregões. O ponto de hoje é `selic_meta`.',
+        },
+        onde: 'Mercado (gráfico de juros)',
+      },
+      dolar: {
+        titulo: 'Histórico e períodos do dólar',
+        usa: 'Cotação do dólar de cada publicação diária do mercado',
+        como: {
+          simples: 'O site junta o dólar de cada dia publicado nos últimos 120 dias e monta a linha. A variação de 1 mês, 6 meses e 1 ano compara com o dia mais próximo daquela data.',
+          tecnico: 'Série = `USDBRL.fechamento` de cada `mercado_dia` dos últimos 120 dias corridos. Período = último / ponto mais próximo da data-alvo − 1; 1 dia contra o pregão anterior.',
+        },
+        onde: 'Hoje (mini gráfico) e Mercado (gráfico e tabela do dólar)',
+      },
+      ipca: {
+        titulo: 'IPCA de cada mês',
+        usa: 'Série do IPCA (índice acumulado)',
+        como: {
+          simples: 'A inflação de cada mês é a diferença entre o índice no fim do mês e no fim do mês anterior.',
+          tecnico: 'Variação mensal = último valor do mês / último valor do mês anterior − 1, cortada no mês de referência `ipca_ate`.',
+        },
+        onde: 'Hoje (barras do IPCA)',
+      },
+      cdi: {
+        titulo: 'CDI de cada mês',
+        usa: 'Série diária do CDI (índice acumulado)',
+        como: {
+          simples: 'O rendimento de cada mês é a diferença entre o índice no fim do mês e no fim do mês anterior. O mês em curso fica de fora.',
+          tecnico: 'Variação mensal = último valor do mês / último valor do mês anterior − 1; o mês incompleto é descartado.',
+        },
+        onde: 'Hoje (barras do CDI)',
+      },
+      semana: {
+        titulo: 'Variação de 1 semana',
+        usa: 'Fechamentos diários de cada ação',
+        como: {
+          simples: 'Compara o último fechamento com o de 5 pregões atrás.',
+          tecnico: 'Variação = fechamento atual / fechamento de 5 pregões antes − 1; janela com mudança de escala fica null.',
+        },
+        onde: 'Setores (1 semana)',
+      },
+      periodosIndice: {
+        titulo: 'Períodos dos índices',
+        usa: 'Série histórica de cada índice',
+        como: {
+          simples: 'Quando a variação do período não vem pronta, o site compara o último valor com o de alguns pregões atrás.',
+          tecnico: 'Retorno = último / valor de 1, 21, 126 e 252 pregões atrás − 1.',
+        },
+        onde: 'Mercado (índices)',
+      },
+      mediaSetor: {
+        titulo: 'Média e contagem por setor',
+        usa: 'Variação de cada ação e o setor dela',
+        como: {
+          simples: 'A variação do setor é a média simples das ações dele. O site também conta quantas subiram e quantas caíram. Ações com o preço em outra escala ficam de fora.',
+          tecnico: 'Média aritmética das variações críveis das ações do setor (peso igual); contagem de altas e quedas. Variações fora dos limites de escala são excluídas.',
+        },
+        onde: 'Setores e mapa do pregão (Ações)',
+      },
+      velas: {
+        titulo: 'Velas por setor',
+        usa: 'Fechamentos diários das ações do setor',
+        como: {
+          simples: 'Cada vela mostra o caminho médio das ações do setor no período: começa em zero, termina no resultado do período, e as pontas são o maior e o menor valor de fechamento no caminho.',
+          tecnico: 'Índice do setor = média simples do retorno acumulado das ações; abertura 0, fechamento = último ponto, máxima e mínima = extremos do índice (de fechamento, não intradiários).',
+        },
+        onde: 'Setores (modo técnico)',
+      },
+      comparacao: {
+        titulo: 'Comparação com o Ibovespa e o setor',
+        usa: 'Fechamentos da ação, do Ibovespa e do setor sem a empresa',
+        como: {
+          simples: 'As três linhas começam em zero no primeiro dia do período e mostram quanto cada uma subiu ou caiu desde então.',
+          tecnico: 'Retorno acumulado = valor / valor do primeiro dia comum − 1, com as séries alinhadas pelas datas.',
+        },
+        onde: 'Ficha da ação (comparar com o Ibovespa)',
+      },
+      escala: {
+        titulo: 'Mudança de escala do preço',
+        usa: 'Fechamentos e variações de cada ação',
+        como: {
+          simples: 'Quando o preço muda de tamanho de um dia para o outro (grupamento ou desdobramento), os dados não trazem o ajuste. O site não inventa esse ajuste: tira a variação das contas e mostra o selo "mudou de escala".',
+          tecnico: 'Descarta variação diária acima de +100% ou abaixo de −75%, período acima de +300% ou abaixo de −85%, e janelas com razão entre fechamentos seguidos acima de 2 ou abaixo de 0,25 (os mesmos limites do dia, iguais aos da API). O gráfico da ficha começa depois do último salto.',
+        },
+        onde: 'Todas as telas com variação de ação',
+      },
+      proventos: {
+        selo: 'Juntado no site',
+        titulo: 'Agenda de proventos',
+        usa: 'Proventos de cada ação',
+        como: {
+          simples: 'A API entrega os proventos ação por ação. O site junta as consultas de todas as ações numa agenda só, sem mudar nenhum valor.',
+          tecnico: 'Junção de `/v1/proventos/{ticker}` de todas as ações (só registros com data de pagamento), sem transformação dos valores.',
+        },
+        onde: 'Proventos e Hoje (próximos pagamentos)',
       },
     },
   },

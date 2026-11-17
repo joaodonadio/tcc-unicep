@@ -8,7 +8,7 @@ Este documento descreve a arquitetura da interface como ela está implementada n
 
 ## Contexto
 
-A interface é a camada de apresentação do TCC. Ela consome os pacotes produzidos pelo módulo de processamento, no contrato de versão 1.x, e os apresenta em nove páginas: Hoje, Mercado, Setores, Ações, Proventos, Notícias, O modelo, Sobre os dados e a ficha de cada ação. Um cabeçalho fixo leva às páginas, dá acesso à Minha lista e abre os controles de leitura.
+A interface é a camada de apresentação do TCC. Ela consome os pacotes produzidos pelo módulo de processamento, no contrato de versão 1.x, e os apresenta em nove páginas: Hoje, Mercado, Setores, Ações, Proventos, Notícias, O modelo, Sobre os dados e a ficha de cada ação. Um cabeçalho fixo leva às páginas e abre os controles de leitura.
 
 Os documentos de referência do módulo de processamento são: *Guia da API para a interface*, *Guia dos pacotes para a interface*, *Especificação do Módulo de Processamento* e a planilha *Dados que precisam ser mandados para a interface*, todos de outubro de 2026.
 
@@ -43,8 +43,7 @@ Coleta ──► Processamento ──► banco tcc_processador
   Páginas (src/pages/)                                 Ficha (/acao/:ticker)
 
   Camada transversal (em todas as telas): cabeçalho fixo, menu Mais,
-  controles de leitura (Simples/Técnica e tamanho do texto), termos com balão
-  e Minha lista.
+  controles de leitura (Simples/Técnica e tamanho do texto) e termos com balão.
 ```
 
 Decisões de alto nível (detalhadas nas seções seguintes):
@@ -54,7 +53,7 @@ Decisões de alto nível (detalhadas nas seções seguintes):
 | Padrão de aplicação | SPA com React Router 7 (`createBrowserRouter`), uma rota por página e a ficha da ação (`/acao/:ticker`) | Cada tema tem endereço próprio, e o cabeçalho leva a cada página sem recarregar o site |
 | Divisão por rota | `React.lazy` em cada página, com `Suspense` | Carregamento inicial menor; cabeçalho e controles montam uma única vez no layout |
 | Estado de servidor | TanStack Query 5 | Telas que usam a mesma consulta compartilham o cache |
-| Estado de cliente | Dois contextos: preferências de leitura (nível e zoom) e Minha lista | Volume mínimo de estado; o restante é estado de servidor |
+| Estado de cliente | Um contexto: preferências de leitura (nível e zoom) | Volume mínimo de estado; o restante é estado de servidor |
 | Fonte de dados | Ponto único em `services/cliente.js`, escolhido por `VITE_FONTE_DADOS` (`arquivos`, padrão, ou `api`) | A interface funciona sem back-end, com os pacotes de exemplo; trocar a fonte não altera hooks nem telas |
 | Chave da API | Somente no proxy do servidor de desenvolvimento e de preview, em variável sem prefixo `VITE_` | Uma variável com prefixo `VITE_` entraria no pacote do navegador |
 | Valor ausente | Nunca vira zero; a tela mostra o texto "Indisponível" ou o motivo | Um zero seria uma informação falsa |
@@ -74,7 +73,7 @@ Cada requisito tem um identificador `RF-x.y`, para citação. A última coluna i
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
-| RF-0.1 | Cabeçalho fixo, com o nome "Ações da B3" (link para Hoje), os links das páginas, o ícone de Minha lista com a contagem e o botão Leitura | H4, H6 |
+| RF-0.1 | Cabeçalho fixo, com a logo CotAI (link para Hoje), os links das páginas e o botão Leitura | H4, H6 |
 | RF-0.2 | Páginas Hoje, Mercado, Setores e Ações ficam na barra. Proventos, Notícias, O modelo e Sobre os dados aparecem na linha a partir de 1280 px e ficam no menu Mais entre 721 px e 1279 px. No celular, o menu Mais fica na barra inferior | H4, H6 |
 | RF-0.3 | Aviso no cabeçalho quando a coleta do dia não terminou bem (status `parcial` ou `falhou`, seção 3.8). Texto `role="status"` | H1, H9 |
 | RF-0.4 | Erro de rota tem tela própria (`ErroRota`) | H9 |
@@ -90,44 +89,43 @@ A página Hoje é o painel inicial. Começa com o bloco Como usar e segue com o 
 | RF-1.1 | Bloco "Como usar", com o passo a passo das páginas, que pode ser fechado e fica fechado na próxima visita | H6, H10 |
 | RF-1.2 | Top 5 para estudar hoje, no topo do painel: cinco ações, com o motivo de cada uma | H1, H2 |
 | RF-1.3 | Título com a data do pregão e resumo em frases curtas, gerado a partir dos números do pregão | H2 |
-| RF-1.4 | Botão "Ouvir o resumo" pela Web Speech API (`SpeechSynthesis`, pt-BR). O botão alterna para parar a leitura. Não aparece se o navegador não tiver a API | H7 |
-| RF-1.5 | Números do dia: Ibovespa, dólar (fechamento do pregão, sem histórico), CDI, IPCA e amplitude do pregão (matriz de pontos). Linha de fonte abaixo da grade, com a data do pacote | H1, H2 |
+| RF-1.5 | Números do dia: Ibovespa, dólar, CDI, IPCA e altas e quedas do pregão (matriz de pontos). Cada cartão traz um mini gráfico: Ibovespa em 6 meses, histórico do dólar e barras mensais de CDI e IPCA. Sem o dado, o cartão fica sem valor. Linha de fonte abaixo da grade, com a data do pacote | H1, H2 |
 | RF-1.6 | Gráfico do Ibovespa nos últimos 6 meses, com link para a página Mercado | H1 |
 | RF-1.7 | Destaques do dia: maior alta, maior queda e volume fora do comum | H1, H2 |
-| RF-1.8 | Resumos de proventos, de notícias e da Minha lista, com link para a página completa | H6 |
+| RF-1.8 | Resumos de proventos e de notícias, com link para a página completa | H6 |
 
 ### 2.3 Mercado (RF-2.x, rota `/mercado`)
 
-Duas abas: Índices e Destaques (os setores têm página própria) (`aria-selected`). O mapa do pregão, em que cada setor é uma linha colorida e cada ação é uma estação, aparece nas abas de setor.
+A página não tem abas. Mostra uma frase sobre o pregão, os índices em grupos (Bolsa, Juros e inflação, Câmbio e petróleo) e, abaixo, os gráficos do dólar e de juros. O valor de hoje da Selic vem da meta publicada em `mercado_dia` (`selic_meta`); o gráfico de juros usa a série da Selic (`series_diarias/SELIC`) quando a API privada a manda; sem ela, é estimado pelo CDI.
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
-| RF-2.1 | Abas com o estado da escolha no próprio elemento (`aria-selected`) | H4 |
-| RF-2.2 | O mapa do pregão tem lista textual equivalente; tocar numa estação abre a ficha da ação | H4, H7 |
+| RF-2.1 | Uma placa por índice, com o valor de hoje, a variação do dia em pílula (com sinal) e os períodos que têm número | H1, H2 |
+| RF-2.2 | Gráficos do dólar e de juros, cada um com descrição em texto (`aria-label`) e estado vazio explicado | H1, H9 |
 
 ### 2.4 Setores (RF-3.x, rota `/setores`)
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
-| RF-3.1 | Seletor de período (1 dia, 1 mês, 6 meses e 1 ano) para a comparação entre setores | H7 |
-| RF-3.2 | Cena 3D de colunas por setor, decorativa (`aria-hidden`), acima da lista "Quem subiu e quem caiu". Sem WebGL, a cena não aparece e a lista continua | H4, H7 |
-| RF-3.3 | Explicação "O que é um setor" e resumo do que mudou em cada setor | H2, H10 |
+| RF-3.1 | Seletor de período (Último pregão, 1 semana, 1 mês, 6 meses e 1 ano) para a comparação entre setores, com o estado da escolha na URL (`?periodo=`) | H4, H7 |
+| RF-3.2 | Vitrine 3D com um objeto por setor, decorativa (`aria-hidden`), ao lado da lista "Quem subiu e quem caiu". Sem WebGL, a vitrine não aparece e a lista continua | H4, H7 |
+| RF-3.3 | Mosaico com um cartão por setor: média do período, quantas ações subiram e caíram e o tom das notícias. No modo Técnico, o gráfico de velas de cada setor (pelos fechamentos diários) | H2, H10 |
 
 ### 2.5 Ações (RF-4.x, rota `/acoes`)
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
-| RF-4.1 | Filtros: Todas, Pontos fortes, Atenção, Só contexto e Minha lista. O filtro escolhido fica na URL (`?filtro=`) | H4, H6 |
-| RF-4.2 | Busca por código ou por nome da empresa | H7 |
-| RF-4.3 | Botão Guardar em cada linha, que leva a ação para a Minha lista | H3, H6 |
+| RF-4.1 | Mapa do pregão por setor: cada setor é um grupo com a média do dia e a contagem de ações que subiram; cada ação leva à ficha. A ação mais negociada de cada setor vem circulada | H1, H4 |
+
+A página não tem abas nem busca.
 
 ### 2.6 Proventos, Notícias e O modelo (RF-5.x)
 
 | ID | Requisito | Heurísticas |
 |---|---|---|
-| RF-5.1 | Proventos (`/proventos`): agenda de pagamentos, gráfico por mês e ranking de quem mais pagou | H1, H2 |
-| RF-5.2 | Notícias (`/noticias`): tom das manchetes do último pregão e empresas mais citadas. Manchetes em outra língua são traduzidas quando o proxy responde | H1, H2 |
-| RF-5.3 | O modelo (`/modelo`): de onde vêm os dados, o modelo experimental, a comparação do acerto com o acaso (50%) e as menções | H1, H2, H10 |
+| RF-5.1 | Proventos (`/proventos`): resumo, calendário do mês, próximos pagamentos, gráfico por mês e top 5 em barras de quem mais pagou | H1, H2 |
+| RF-5.2 | Notícias (`/noticias`): termômetro com o tom do último pregão, manchetes por tom e barras por empresa. As manchetes aparecem no idioma original | H1, H2 |
+| RF-5.3 | O modelo (`/modelo`): de onde vêm os dados, o modelo experimental, a comparação do acerto com a faixa do acaso (calculada a cada dia pela API) e as menções | H1, H2, H10 |
 | RF-5.4 | Sobre os dados (`/dados`): o que chegou na última atualização, avisos e fontes | H1, H10 |
 
 ### 2.7 Ficha da ação (RF-6.x, rota `/acao/:ticker`)
@@ -135,7 +133,7 @@ Duas abas: Índices e Destaques (os setores têm página própria) (`aria-select
 | ID | Requisito | Heurísticas |
 |---|---|---|
 | RF-6.1 | Faixa de fundamentos da empresa (`Fundamentos`). Cada indicador traz a explicação simples, a linha "De onde vem" (`TEXTOS.ficha.indicadores.origem`) e, quando o valor falta, o motivo visível abaixo do valor | H1, H2 |
-| RF-6.2 | Sete perguntas em abas (`role="tablist"`), nesta ordem: O que as regras dizem?, Ela deve muito?, Está cara?, Paga proventos?, Oscila muito?, Como foi o preço? e O que dizem as notícias? | H4, H6 |
+| RF-6.2 | Sete perguntas em abas (`role="tablist"`), nesta ordem: O que as checagens mostram?, Ela deve muito?, Está cara?, Paga proventos?, Oscila muito?, Como foi o preço? e O que dizem as notícias? | H4, H6 |
 | RF-6.3 | A pergunta aberta fica na URL (`?pergunta=regras`, `divida`, `cara`, `proventos`, `oscila`, `preco` ou `noticias`). O parâmetro antigo `?aba=` continua valendo | H4, H7 |
 | RF-6.4 | Cada pergunta traz indicadores com a explicação simples. No nível técnico, a ficha mostra os balanços trimestrais (em Ela deve muito?), o histórico do indicador (em Está cara?) e o retorno por período (em Como foi o preço?) | H2, H7 |
 | RF-6.5 | Bloco "Entenda com um objeto", com um modelo 3D ilustrativo, carregado sob demanda | H6, H8 |
@@ -216,6 +214,8 @@ A interface consome as rotas abaixo, todas `GET`, sob `/v1` no modo `api`. No mo
 | `resumo_acao/{ticker}` | Ficha (indicadores) | Cotação e indicadores da ação |
 | `resumo_acao/{ticker}/historico` | Ficha (Está cara?, no nível técnico) | Histórico de um indicador |
 | `series_diarias/{ticker}` | Ficha (preço e tendência) | Série de fechamento |
+| `series_diarias/USDBRL` | Hoje (mini gráfico do dólar) e Mercado (gráfico do dólar) | Série diária do dólar; sem ela, a rota local `/dolar-historico` |
+| `series_diarias/SELIC` | Mercado (gráfico de juros) | Série da Selic (tipo taxa; `indice_retorno_total` é a meta ao ano); sem ela, estimativa pelo CDI |
 | `fundamentos_trimestrais/{ticker}` | Ficha (balanços, no nível técnico) | Balanços trimestrais |
 | `noticias_dia` | Hoje e Notícias | Notícias classificadas e tom do dia |
 | `noticias_dia/{ticker}` | Ficha (O que dizem as notícias) | Notícias da ação |
@@ -227,6 +227,8 @@ A interface consome as rotas abaixo, todas `GET`, sob `/v1` no modo `api`. No mo
 | `experimento/historico` | O modelo | Histórico de acertos, quando existe |
 
 A agenda de proventos lê todas as ações pela rota local `/proventos-todos`, que o servidor do Vite monta a partir da lista de ações (`services/proventosTodos.js`). Se essa rota faltar ou falhar, a agenda usa `proventos/{ticker}`, uma ação por vez.
+
+O período de 1 semana de Setores segue a mesma ideia: a variação vem de `resumo_acao` (`variacao_preco.s1`) quando a API a manda. Sem o campo, a rota local `/series-semana` entrega os últimos pregões das 85 ações numa resposta só; sem ela, a tela busca `series_diarias/{ticker}` ação por ação. A mesma montagem do servidor entrega `/velas-setores` (as velas por setor dos 4 períodos), e o cliente só recebe o resultado.
 
 Não existe endpoint de agregado. A análise do dia é composta no front por `hooks/useAnalise.js`, que lê os pacotes e os combina em `lib/analiseDoDia.js`.
 
@@ -285,9 +287,9 @@ A coluna "Tipo" é o tipo da regra; a interface o exibe como "Ponto forte", "Ate
 
 Os números de cada regra (quantas ações disparam) mudam a cada pregão e não são registrados neste documento.
 
-### 4.3 Filtros da página Ações
+### 4.3 Página Ações
 
-As abas Pontos fortes, Atenção e Só contexto mostram as ações que têm pelo menos um sinal daquele tipo. Uma ação pode aparecer em mais de uma aba. A aba Minha lista mostra as ações guardadas pelo usuário.
+A página mostra todas as ações do pregão agrupadas por setor, sem abas de tipo de sinal.
 
 A interface não exibe percentual de confiança. O número de regras que dispararam é mostrado como contagem, sem ser convertido em probabilidade.
 
@@ -307,14 +309,14 @@ Lista formada pelos limites de cada sinal e pela ressalva base de que a análise
 
 **O que é.** Experimento que testa se um modelo consegue indicar quais ações têm maior chance de superar o Ibovespa no pregão seguinte. O modelo cruza o tom das notícias da noite, classificado pelo FinBERT-PT-BR, com preços e índices. O bloco é um teste acadêmico e não é sugestão de compra.
 
-**Top 5 para estudar hoje.** A seção do Top 5 fica no topo da página Hoje. Ela usa o ranking do experimento quando o pacote existe e, enquanto isso não acontece, escolhe as cinco ações pelas regras, nesta ordem:
+**Top 5 para estudar hoje.** A seção do Top 5 fica no topo da página Hoje. A tela escolhe as cinco ações só pelas regras, nesta ordem (o Top 5 do modelo ainda não é publicado: exibi-lo quando a régua indicar acerto acima do acaso é trabalho futuro; `top5Estudo.js` mantém esse ramo, sem uso na tela):
 
 1. mais pontos a favor (sinais do tipo forte);
 2. menos pontos de atenção;
 3. maior volume relativo, no empate;
 4. ordem alfabética do ticker, se ainda empatar.
 
-O texto da seção diz qual critério está em uso ("Escolhidas pelas regras" ou "Escolhidas pelo modelo de previsão, que está em avaliação").
+O texto da seção diz qual critério está em uso ("Escolhidas pelas regras").
 
 **Como o ranking do experimento é lido.** `services/experimento.js` normaliza o pacote:
 
@@ -323,7 +325,9 @@ O texto da seção diz qual critério está em uso ("Escolhidas pelas regras" ou
 - cada motivo tem efeito "ajudou", "atrapalhou" ou "sem efeito claro"; qualquer outro valor vira "sem efeito claro";
 - sem selo no pacote, o selo padrão é "em avaliação".
 
-**O modelo.** A página O modelo compara o acerto do modelo com o acaso, que é de 50%. Ela lê `experimento/historico`. Sem histórico, mostra que ainda não há resultado para comparar.
+No Top 5, cada motivo do modelo vira um ponto da ação: "ajudou" é a favor, "atrapalhou" é atenção e "sem efeito claro" é contexto. Os avisos do pacote aparecem no painel "Como escolhemos". Preço, gráfico e números vêm dos dados do dia, não do modelo.
+
+**O modelo.** A página O modelo compara o acerto do modelo com o acaso informado pelo pacote. Ela lê `experimento/historico`. Sem histórico, mostra que ainda não há resultado para comparar; sem o acaso no pacote, a régua mostra só a taxa de acerto, sem o marcador do acaso.
 
 **Método (texto técnico, no nível Técnica).** Modelo 3, com notícias da noite; validação walk-forward mensal; faixa do acaso obtida com 10 mil sorteios; a chance só aparece depois da calibração.
 
@@ -374,9 +378,11 @@ A camada de dados usa `fetch` nativo.
 | `services/erros.js` | Mensagens de erro em português. Traduz 401, 422 e 503 e as falhas de rede. Repete no máximo duas vezes as falhas transitórias (503 ou sem resposta) |
 | `services/experimento.js` | Normaliza o Top 5 e o histórico de acertos do experimento |
 | `services/proventosTodos.js` | Monta a agenda de proventos pela rota local `/proventos-todos` ou, se ela falhar, por ação |
+| `services/seriesSemana.js` | Traz os últimos pregões de cada ação pela rota local `/series-semana` ou, se ela falhar, por ação |
+| `services/velasSetores.js` | Velas por setor pela rota local `/velas-setores` ou, se ela falhar, pelas séries de 1 ano de cada ação |
 | `hooks/useDados.js` | Um hook por rota, com `queryKey` em `['dados', caminho, parâmetros]` |
 | `hooks/useAnalise.js` | Combina os pacotes da análise do dia |
-| `hooks/useAgenda.js`, `useLeituraEmVoz.js`, `useReducedMotion.js`, `useRolarParaAncora.js`, `useMetaPublicacao.js` | Apoio: agenda de proventos, leitura em voz, preferência de movimento reduzido, rolagem para âncoras e metadados da publicação |
+| `hooks/useAgenda.js`, `useReducedMotion.js`, `useRolarParaAncora.js`, `useMetaPublicacao.js` | Apoio: agenda de proventos, preferência de movimento reduzido, rolagem para âncoras e metadados da publicação |
 | `lib/*.js` | Funções puras de montagem, formatação, datas, séries, perguntas da ficha, lista de ações, setores e textos. Não fazem chamadas de rede, salvo as que são feitas por hooks |
 | `lib/textos.js` | Objeto `TEXTOS`, com todo texto da interface |
 
@@ -385,7 +391,7 @@ Na fonte de arquivos, o parâmetro `data` é ignorado: a emulação sempre serve
 ### 7.3 Estado
 
 - **Servidor:** TanStack Query. A consulta não é refeita ao focar a janela. Falhas transitórias são repetidas no máximo duas vezes (`services/erros.js`).
-- **Cliente:** dois contextos, `PreferenciasContext` (nível e tamanho do texto) e `ListaContext` (Minha lista). Ficam no `localStorage`, nas chaves `painel-b3:preferencias` e `painel-b3:lista`. O bloco Como usar fechado usa a chave `painel-b3:como-usar-fechado`. Cada leitura e gravação tem tratamento de erro, para o caso de o armazenamento estar indisponível (por exemplo, em navegação privada).
+- **Cliente:** um contexto, `PreferenciasContext` (nível e tamanho do texto). Fica no `localStorage`, na chave `painel-b3:preferencias`. O bloco Como usar fechado usa a chave `painel-b3:como-usar-fechado`. Cada leitura e gravação tem tratamento de erro, para o caso de o armazenamento estar indisponível (por exemplo, em navegação privada). Nenhum dado de mercado fica no navegador: a agenda de proventos vem pronta da rota `/api/v1/proventos-todos`, que o servidor monta ao subir, guarda só na memória dele e renova por trás a cada 6 horas.
 
 ### 7.4 Proxy, chave e produção
 
@@ -400,7 +406,7 @@ Em produção, o build é estático e os proxies do Vite não existem. É precis
 ### 7.5 Renderização gráfica
 
 - **SVG:** os gráficos próprios e as sparklines são SVG declarativo. Quando há série, o elemento tem alternativa textual (`role="img"` com `aria-label` descrevendo a série).
-- **ECharts:** usado em alguns gráficos (por exemplo, boxplot e gráfico interativo), com o núcleo importado de forma modular.
+- **ECharts:** usado em alguns gráficos (por exemplo, velas por setor e gráfico interativo), com o núcleo importado de forma modular.
 - **Three.js:** usado só nos objetos 3D (ficha e Top 5) e nas colunas da página Setores. A biblioteca é carregada sob demanda. Sem WebGL, o objeto não aparece e o texto ao lado continua.
 
 Com movimento reduzido (`prefers-reduced-motion`), os contadores aparecem no valor final e as animações deixam de rodar, exceto o feedback de estado dos botões.
@@ -446,10 +452,8 @@ A tabela liga os recursos da interface às heurísticas e aos critérios de aces
 | Gráficos com `aria-label` | H1 | 1.1.1 Conteúdo não textual | A série é descrita em texto para leitor de tela |
 | Cena 3D decorativa | H4 | 1.1.1 Conteúdo não textual | `aria-hidden`; a lista ao lado traz a informação |
 | Abas com `aria-selected` e `aria-pressed` | H4 | 4.1.2 Nome, função, valor | O estado da escolha fica no próprio elemento |
-| Minha lista | H3, H6 | 3.3.2 Rótulos ou instruções | Memória externa; o usuário guarda e retira ações a qualquer momento |
 | Foco visível | H1 | 2.4.7 Foco visível | Contorno na cor `--cor-foco` |
 | Movimento reduzido | H8 | 2.3.3 Animação por interação (AAA) | Contadores e animações respeitam a preferência do sistema operacional |
-| Resumo em voz | H7, H2 | 1.1.1 Conteúdo não textual | Alternativa de leitura; o botão some se o navegador não tiver a função |
 | Mensagens de erro e de zoom | H1, H9 | 4.1.3 Mensagens de status | `role="alert"` nos erros; `aria-live` no percentual de zoom |
 
 O contraste de cores (1.4.3) ainda será verificado com o Lighthouse, na avaliação da seção 10.
@@ -471,8 +475,8 @@ O contraste de cores (1.4.3) ainda será verificado com o Lighthouse, na avalia�
 
 - **Setores:** a média é simples e calculada na própria interface. Não é índice oficial.
 - **Regras de sinal:** foram calibradas em um único pregão (22/10/2026). A frequência de disparos não foi validada em série histórica.
-- **Armazenamento:** preferências e Minha lista ficam no navegador. A API é somente leitura, então nada disso chega ao servidor.
-- **Top 5:** enquanto o pacote do experimento não existe, o Top 5 usa as regras, e o texto da seção diz isso.
+- **Armazenamento:** as preferências ficam no navegador. A API é somente leitura, então nada disso chega ao servidor.
+- **Top 5:** o Top 5 da página Hoje usa sempre as regras, e o texto da seção diz isso.
 - **Modo de arquivos:** serve sempre a última geração do pacote, por isso o pregão mostrado é fixo.
 
 ---
@@ -504,11 +508,11 @@ A suíte roda com `npm test` (Vitest, em modo único) e tem mais de 1.000 testes
 | Funções puras | `src/test/lib/` | Análise do dia; regras de sinal e seus limites; séries; formatação, valores e datas; perguntas da ficha; lista de ações; mapa do pregão; experimento; linguagem |
 | Camada de dados | `src/test/services/`, `src/test/dados/` | Emulação das rotas da API, 404 como `null`, normalização do Top 5, e agenda de proventos |
 | Páginas e rotas | `src/test/paginas/`, `src/test/rotas.test.jsx` | Páginas, redirecionamentos e rotas |
-| Hoje, Mercado, Setores, Proventos e Notícias | `src/test/hoje/`, `src/test/inicio/`, `src/test/mercado/`, `src/test/setores/`, `src/test/proventos/`, `src/test/noticias/` | Blocos de cada página |
+| Hoje, Mercado, Setores, Proventos e Notícias | `src/test/hoje/`, `src/test/acoes/`, `src/test/mercado/`, `src/test/setores/`, `src/test/proventos/`, `src/test/noticias/` | Blocos de cada página |
 | O modelo | `src/test/modelo/` | Página O modelo |
 | Apoio | `src/test/apoio/`, `src/test/fixtures/` | Hooks de apoio e dados de exemplo dos testes |
 | Ficha e gráficos | `src/test/ficha/`, `src/test/graficos/`, `src/test/modelos3d/` | Perguntas, painéis, gráficos e objetos 3D |
-| Layout e contexto | `src/test/layout/`, `src/test/contexto/`, `src/test/ui/` | Cabeçalho, controles de leitura, Minha lista e componentes de interface |
+| Layout e contexto | `src/test/layout/`, `src/test/contexto/`, `src/test/ui/` | Cabeçalho, controles de leitura e componentes de interface |
 | Linguagem | `src/test/lib/linguagem.test.js` | Termos proibidos, em todo o código e na documentação |
 
 Também são usados `npm run lint` (ESLint) e `npm run build` (build de produção). O build gera a separação do código por rota.
@@ -521,7 +525,6 @@ Também são usados `npm run lint` (ESLint) e `npm run build` (build de produç�
 - Nielsen, J. *Why You Only Need to Test with 5 Users*. Nielsen Norman Group. <https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/>
 - Brooke, J. (1996). *SUS: A "quick and dirty" usability scale*. In: Jordan, P. W. et al. (eds.), *Usability Evaluation in Industry*. Taylor & Francis.
 - W3C. *Web Content Accessibility Guidelines (WCAG) 2.2*. <https://www.w3.org/TR/WCAG22/>
-- MDN. *Web Speech API (SpeechSynthesis)*. <https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis>
 - Chen, T.; Guestrin, C. (2016). *XGBoost: A Scalable Tree Boosting System*. In: KDD '16. ACM. DOI 10.1145/2939672.2939785.
 - Lucas Leme. *FinBERT-PT-BR*. <https://github.com/lucas-leme/FinBERT-PT-BR>
 - Documentação oficial: React <https://react.dev/>; Vite <https://vite.dev/>; TanStack Query <https://tanstack.com/query/latest>; React Router <https://reactrouter.com/>; Atkinson Hyperlegible Next <https://www.brailleinstitute.org/freefont>.

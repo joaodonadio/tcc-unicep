@@ -1,65 +1,66 @@
+import { CheckCircle2, Minus, TriangleAlert } from 'lucide-react';
 import { usePreferencias } from '../../context/contextos.js';
 import { linhasDePacotes } from '../../lib/sobreDados.js';
 import { contar, quantidadeCheia } from '../../lib/formato.js';
 import { exibirNumero } from '../../lib/valor.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 
-/** Quantidade do pacote na linguagem simples. Zero não aparece: o selo "Sem mudança" já diz isso. */
+const ICONE_POR_SELO = { atualizado: CheckCircle2, semMudanca: Minus, ausente: TriangleAlert };
+
+/** Quantidade do pacote na linha. Zero não aparece (o ícone de "Sem mudança" já diz isso); ausente vira "—". */
 function quantidadeSimples(linha) {
-  const { itens, semQuantidade } = TEXTOS.dados;
-  if (linha.registros === null) return semQuantidade;
+  const { itens } = TEXTOS.dados;
+  if (linha.registros === null) return exibirNumero(null);
   if (linha.registros === 0) return '';
   return contar(linha.registros, itens.um, itens.varios);
 }
 
-/** O que chegou nesta atualização: um cartão por pacote enviado. */
+/** O que chegou nesta atualização: quadro com uma linha compacta por pacote enviado. */
 export default function PacotesAtualizacao({ registro, nivelSecao = 2 }) {
   const { nivel } = usePreferencias();
   const Sub = `h${nivelSecao}`;
-  const Cabeca = `h${nivelSecao + 1}`;
   const { dados } = TEXTOS;
   const linhas = linhasDePacotes(registro);
 
   if (linhas.length === 0) return null;
 
   return (
-    <section className="dados__bloco" aria-labelledby="dados-pacotes">
+    <section className="dados__bloco dados__quadro" aria-labelledby="dados-pacotes">
       <Sub id="dados-pacotes" className="dados__subtitulo">
         {dados.secoes.pacotes}
       </Sub>
-      <ul className="dados__grade">
+      <ul className="dados__lista entra-cartoes">
         {linhas.map((linha) => {
+          const chaveSelo = linha.selo ?? 'ausente';
+          const Icone = ICONE_POR_SELO[chaveSelo];
+          const rotuloSelo = {
+            atualizado: dados.selos.atualizado,
+            semMudanca: porNivel(dados.selos.semMudanca, nivel),
+            ausente: dados.semQuantidade,
+          }[chaveSelo];
           const quantidade = quantidadeSimples(linha);
           return (
-            <li className="dados__cartao" key={linha.chave}>
-              <Cabeca className="dados__cartao-titulo">{linha.nome}</Cabeca>
-              {nivel === 'tecnico' && linha.arquivo && <p className="dados__arquivo">{linha.arquivo}</p>}
-              {quantidade && <p className="dados__quantidade">{quantidade}</p>}
-              <div className="dados__selos">
-                {linha.selo === 'atualizado' && (
-                  <span className="pilula" data-tom="alta">
-                    {dados.selos.atualizado}
-                  </span>
-                )}
-                {linha.selo === 'semMudanca' && (
-                  <span className="pilula" data-tom="neutro">
-                    {porNivel(dados.selos.semMudanca, nivel)}
-                  </span>
-                )}
+            <li className="dados__item" data-selo={chaveSelo} key={linha.chave}>
+              <Icone aria-hidden="true" size={18} className="dados__item-icone" />
+              <div className="dados__item-corpo">
+                <p className="dados__item-nome">
+                  <span className="sr-only">{rotuloSelo}. </span>
+                  {linha.nome}
+                </p>
                 {linha.retirados !== null && (
-                  <span className="pilula" data-tom="acento">
-                    {dados.selos.retirados(quantidadeCheia(linha.retirados))}
-                  </span>
+                  <p className="dados__nota-item">{dados.selos.retirados(quantidadeCheia(linha.retirados))}</p>
+                )}
+                {nivel === 'tecnico' && linha.arquivo && <p className="dados__arquivo">{linha.arquivo}</p>}
+                {nivel === 'tecnico' && (
+                  <p className="dados__cru">
+                    {dados.cru(
+                      exibirNumero(linha.registros, quantidadeCheia),
+                      exibirNumero(linha.removidos, quantidadeCheia),
+                    )}
+                  </p>
                 )}
               </div>
-              {nivel === 'tecnico' && (
-                <p className="dados__cru">
-                  {dados.cru(
-                    exibirNumero(linha.registros, quantidadeCheia),
-                    exibirNumero(linha.removidos, quantidadeCheia),
-                  )}
-                </p>
-              )}
+              {quantidade && <span className="dados__quantidade">{quantidade}</span>}
             </li>
           );
         })}

@@ -72,6 +72,15 @@ export function mesAno(ano_mes) {
   return m ? `${MESES_ABREV[Number(m[2]) - 1]}/${m[1]}` : '';
 }
 
+/** "2026-11" -> "Novembro de 2026"; vazio se o mês não existir. */
+export function mesExtenso(ano_mes) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(ano_mes ?? ''));
+  const mes = m ? Number(m[2]) : 0;
+  if (mes < 1 || mes > 12) return '';
+  const nome = MESES[mes - 1];
+  return `${nome.charAt(0).toUpperCase()}${nome.slice(1)} de ${m[1]}`;
+}
+
 const FORMATO_HORA = new Intl.DateTimeFormat('pt-BR', {
   timeZone: FUSO,
   day: '2-digit',
@@ -137,25 +146,4 @@ export function rotuloTrimestre(iso) {
   const d = lerData(iso);
   if (!d) return '';
   return `${Math.ceil(Number(d.mes) / 3)}T${d.ano.slice(2)}`;
-}
-
-/**
- * Texto de data igual em todas as telas:
- * "Publicado hoje, 27/10, às 10h53 · dados do pregão de segunda, 26/10".
- * Publicação em outro dia: "Publicado em 24/10, às 23h25 · dados do pregão de quinta, 22/10".
- * Sem publicação: "Dados do pregão de quinta, 22/10". Sem nada: ''.
- */
-export function textoPublicacao({ publicadoEm, dataPregao, agora = new Date() } = {}) {
-  const partes = [];
-  const p = partesNoFuso(publicadoEm);
-  if (p) {
-    const diaPub = `${p.year}-${p.month}-${p.day}`;
-    const quando = diaPub === hojeISO(agora) ? 'hoje,' : 'em';
-    partes.push(`Publicado ${quando} ${p.day}/${p.month}, às ${p.hour}h${p.minute}`);
-  }
-  if (lerData(dataPregao)) {
-    partes.push(`dados do pregão de ${diaSemanaCurto(dataPregao)}, ${diaMes(dataPregao)}`);
-  }
-  const texto = partes.join(' · ');
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }

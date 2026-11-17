@@ -168,15 +168,6 @@ describe('ficha da ação por perguntas /acao/:ticker', () => {
     expect(screen.getByText(TEXTOS.ficha.tecnicoNota)).toBeInTheDocument();
   });
 
-  it('Guardar alterna aria-pressed', () => {
-    renderizarFicha('/acao/PETR4?pergunta=regras');
-    const botao = screen.getByRole('button', { name: /Guardar PETR4/ });
-    expect(botao).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(botao);
-    // o nome acessível é fixo ("Guardar PETR4"); o estado vai só em aria-pressed
-    expect(botao).toHaveAttribute('aria-pressed', 'true');
-  });
-
   it('ticker inexistente mostra a mensagem de não encontrada', () => {
     renderizarFicha('/acao/XPTO3');
     expect(screen.getByText(TEXTOS.ficha.naoEncontrada)).toBeInTheDocument();

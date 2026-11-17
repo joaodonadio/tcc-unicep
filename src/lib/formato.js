@@ -126,11 +126,3 @@ export function contar(n, um, varios) {
 export function tons(positivas, neutras, negativas) {
   return `${contar(positivas, 'positiva', 'positivas')}, ${contar(neutras, 'neutra', 'neutras')} e ${contar(negativas, 'negativa', 'negativas')}`;
 }
-
-/** "Bom dia" / "Boa tarde" / "Boa noite" conforme o horário (RF-1.1). */
-export function saudacao(agora = new Date()) {
-  const h = agora.getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
-}

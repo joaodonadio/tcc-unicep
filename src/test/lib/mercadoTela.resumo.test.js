@@ -74,6 +74,20 @@ describe('ultimoPonto e pontoHaMeses', () => {
     const curta = { datas: ['2026-06-01', '2026-10-27'], valores: [14, 15] };
     expect(pontoHaMeses(curta, 12)).toBeNull();
   });
+
+  it('dia que não existe no mês-alvo cai no último dia dele', () => {
+    const fim = (ultima) => ({
+      datas: ['2026-02-27', '2026-02-28', '2026-03-01', ultima],
+      valores: [1, 2, 3, 4],
+    });
+    // 31/03 − 1 mês = 28/02 (e não 03/03, que pegaria 01/03)
+    expect(pontoHaMeses(fim('2026-03-31'), 1)).toEqual({ data: '2026-02-28', valor: 2 });
+    // 31/08 − 6 meses = 28/02
+    expect(pontoHaMeses(fim('2026-08-31'), 6)).toEqual({ data: '2026-02-28', valor: 2 });
+    // ano bissexto: 31/03/2024 − 1 mês = 29/02/2024
+    const bissexto = { datas: ['2024-02-28', '2024-02-29', '2024-03-01', '2024-03-31'], valores: [1, 2, 3, 4] };
+    expect(pontoHaMeses(bissexto, 1)).toEqual({ data: '2024-02-29', valor: 2 });
+  });
 });
 
 describe('frasesDoResumo', () => {

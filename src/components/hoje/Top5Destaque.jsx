@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 import { usePreferencias } from '../../context/contextos.js';
 import { useAnaliseDoDia, useRecarregarAnalise } from '../../hooks/useAnalise.js';
-import { useExperimentoTop } from '../../hooks/useDados.js';
 import { useDetalhes } from '../../hooks/useDetalhes.js';
 import { useIndicador } from '../../hooks/useIndicador.js';
 import { brl, pct } from '../../lib/formato.js';
-import { trazerParaVista } from '../../lib/movimento.js';
+import { trocarComTransicao } from '../../lib/movimento.js';
 import { humorDoResumo } from '../../lib/mascote.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 import {
@@ -20,7 +19,7 @@ import {
   top5ParaEstudar,
 } from '../../lib/top5Estudo.js';
 import { REGRAS } from '../../lib/sugestoes.js';
-import { BlocoErro, Linhas } from '../ui/Estados.jsx';
+import { BlocoErro, Carregador, Linhas } from '../ui/Estados.jsx';
 import { BotaoDetalhes, PainelDetalhes } from '../ui/Detalhes.jsx';
 import { IconeSetor } from '../ui/IconeSetor.jsx';
 import Mascote from '../ui/Mascote.jsx';
@@ -59,11 +58,7 @@ function ItemDaLista({ item, selecionado, aoEscolher, nivel }) {
         className="top5-item"
         aria-pressed={selecionado}
         data-indicador-alvo={selecionado ? 'true' : undefined}
-        onClick={(e) => {
-          aoEscolher(item.ticker);
-          // no celular a lista é uma faixa que rola: a pílula escolhida entra inteira na vista
-          trazerParaVista(e.currentTarget, e.currentTarget.closest('.top5-lista'));
-        }}
+        onClick={() => aoEscolher(item.ticker)}
       >
         <span className="top5-pos" aria-hidden="true">
           {item.posicao}
@@ -149,8 +144,10 @@ function AbaObjeto({ item, resumo }) {
   const idBase = useId();
   const dados = dadosDosModelos(resumo)[objeto];
 
+  // a troca de objeto dá o crossfade curto do painel (movimento.css, seção 21)
+  const trocarObjeto = (tipo) => trocarComTransicao(() => setObjeto(tipo), 'suave');
   const escolher = (tipo) => {
-    setObjeto(tipo);
+    trocarObjeto(tipo);
     botoes.current[tipo]?.focus();
   };
   const aoTecla = (e, indice) => {
@@ -176,7 +173,7 @@ function AbaObjeto({ item, resumo }) {
             aria-selected={objeto === tipo}
             aria-controls={`${idBase}-painel`}
             tabIndex={objeto === tipo ? 0 : -1}
-            onClick={() => setObjeto(tipo)}
+            onClick={() => trocarObjeto(tipo)}
             onKeyDown={(e) => aoTecla(e, indice)}
           >
             {T.abas[tipo]}
@@ -290,19 +287,18 @@ function Painel({ item, nivel }) {
 
 /**
  * Top 5 para estudar hoje: lista (faixa de pílulas no celular) e o palco da ação escolhida.
- * Vem do modelo quando ele existe; senão, das regras. "Como escolhemos" explica a origem.
+ * Vem só das regras (o Top 5 do modelo ainda não é publicado). "Como escolhemos" explica a origem.
  * Conteúdo educativo: não é indicação de compra.
  */
 export default function Top5Destaque() {
   const { data, isPending, isError } = useAnaliseDoDia();
-  const experimento = useExperimentoTop();
   const recarregar = useRecarregarAnalise();
   const { nivel } = usePreferencias();
   const comoEscolhemos = useDetalhes();
   const [escolhido, setEscolhido] = useState(null);
 
-  const carregando = isPending || (Boolean(data) && experimento.isPending);
-  const top = data ? top5ParaEstudar({ experimento: experimento.data, sugestoes: data.sugestoes }) : null;
+  const carregando = isPending;
+  const top = data ? top5ParaEstudar({ sugestoes: data.sugestoes }) : null;
   const itens = top?.itens ?? [];
   const atual = itens.find((i) => i.ticker === escolhido) ?? itens[0] ?? null;
   const comLista = !isError && !carregando && itens.length > 0;
@@ -314,13 +310,12 @@ export default function Top5Destaque() {
     corpo = <BlocoErro titulo={T.erroTitulo} mensagem={T.erro} onTentarNovamente={recarregar} mascote />;
   } else if (carregando) {
     corpo = (
-      <div role="status">
+      <>
         <div className="top5-carregando">
-          <Mascote humor="pensativo" className="top5-mascote" />
-          <p>{T.carregando}</p>
+          <Carregador rotulo={T.carregando} />
         </div>
         <Linhas quantidade={5} larguras={['100%', '92%', '100%', '88%', '96%']} />
-      </div>
+      </>
     );
   } else if (itens.length === 0) {
     corpo = <p className="top5-vazio">{T.vazio}</p>;
@@ -353,10 +348,11 @@ export default function Top5Destaque() {
     <section id="top5" className="cartao top5" data-brilho="acento" aria-labelledby="top5-titulo">
       <div className="top5-topo">
         <div className="top5-topo-texto">
-          <h1 id="top5-titulo" className="top5-titulo">
+          <h2 id="top5-titulo" className="top5-titulo">
             <span className="top5-realce">{T.tituloInicio}</span> {T.tituloFim}
-          </h1>
-          <p className="top5-apoio">{T.apoio}</p>
+          </h2>
+          {comLista && top.origem === 'modelo' && <span className="chip top5-selo">{T.seloModelo}</span>}
+          <p className="top5-apoio">{top?.origem === 'modelo' ? T.apoioModelo : T.apoio}</p>
         </div>
         {comLista && (
           <BotaoDetalhes
@@ -369,7 +365,16 @@ export default function Top5Destaque() {
       </div>
       {comLista && (
         <PainelDetalhes id={comoEscolhemos.id} aberto={comoEscolhemos.aberto}>
-          <p>{top.origem === 'modelo' ? T.origemModelo : porNivel(T.origemRegras, nivel)(REGRAS.length)}</p>
+          <p>
+            {top.origem === 'modelo' ? porNivel(T.origemModelo, nivel) : porNivel(T.origemRegras, nivel)(REGRAS.length)}
+          </p>
+          {top.origem === 'modelo' && top.avisos.length > 0 && (
+            <ul className="top5-avisos" aria-label={T.avisosModelo}>
+              {top.avisos.map((aviso) => (
+                <li key={aviso}>{aviso}</li>
+              ))}
+            </ul>
+          )}
         </PainelDetalhes>
       )}
       {corpo}

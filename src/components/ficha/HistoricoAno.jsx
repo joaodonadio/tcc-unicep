@@ -5,6 +5,7 @@ import { diaMes } from '../../lib/datas.js';
 import { CAMPOS_SERIE_ANO, resumoSerie, trechosSemValor } from '../../lib/historicoAcao.js';
 import { numero } from '../../lib/formato.js';
 import { ROTULO_STATUS, TEXTOS } from '../../lib/textos.js';
+import { trocarComTransicao } from '../../lib/movimento.js';
 import { exibirNumero } from '../../lib/valor.js';
 import { GraficoInterativo } from '../graficos/GraficoInterativo.jsx';
 import { BlocoErro, BlocoVazio, Linhas } from '../ui/Estados.jsx';
@@ -46,10 +47,12 @@ export function HistoricoAno({ ticker }) {
   const validos = valores.filter(finito).length;
   const trechos = trechosSemValor(data.status?.[def.campo], datas);
   const idAba = (campo) => `${idPainel}-${campo}`;
+  // a troca de aba dá o crossfade curto da página (movimento.css, seção 21)
+  const trocarAba = (campo) => trocarComTransicao(() => setCampoEscolhido(campo), 'suave');
 
   // setas, Home e End trocam a aba e levam o foco até ela (setas circulares)
   const escolherAba = (campo) => {
-    setCampoEscolhido(campo);
+    trocarAba(campo);
     botoesAba.current[campo]?.focus();
   };
   const aoTeclaAba = (e, indice) => {
@@ -84,7 +87,7 @@ export function HistoricoAno({ ticker }) {
             aria-controls={idPainel}
             tabIndex={c.campo === def.campo ? 0 : -1}
             className="ficha-hist-aba"
-            onClick={() => setCampoEscolhido(c.campo)}
+            onClick={() => trocarAba(c.campo)}
             onKeyDown={(e) => aoTeclaAba(e, indice)}
           >
             {c.rotulo}

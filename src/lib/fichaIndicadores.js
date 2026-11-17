@@ -1,11 +1,12 @@
 /**
- * Indicadores da aba "Visão geral" da ficha: valor, mediana do setor, barrinha
+ * Indicadores das perguntas da ficha: valor, mediana do setor, barrinha
  * de comparação e textos. Valor ausente vira "—" com o motivo, nunca 0.
  */
 
 import { brlCompacto, numero, numeroCompacto, pct, pp, quantidade, vezes } from './formato.js';
 import { TEXTOS } from './textos.js';
 import { exibir, valorOuNulo } from './valor.js';
+import { variacaoDiaSuspeita } from './crivel.js';
 
 const fracao = (v) => pct(v, { casas: 1, sinal: false });
 const casas = (n) => (v) => numero(v, { casas: n });
@@ -109,29 +110,43 @@ export function montarIndicadoresFicha(R) {
 }
 
 const PERIODOS_RETORNO = [
-  { chave: 'd1', rotulo: '1 dia' },
-  { chave: 'm1', rotulo: '1 mês' },
-  { chave: 'm6', rotulo: '6 meses' },
-  { chave: 'a1', rotulo: '1 ano' },
+  { chave: 'd1', rotulo: TEXTOS.ficha.retornosTabela.periodos.d1 },
+  { chave: 's1', rotulo: TEXTOS.ficha.retornosTabela.periodos.s1 },
+  { chave: 'm1', rotulo: TEXTOS.ficha.retornosTabela.periodos.m1 },
+  { chave: 'm6', rotulo: TEXTOS.ficha.retornosTabela.periodos.m6 },
+  { chave: 'a1', rotulo: TEXTOS.ficha.retornosTabela.periodos.a1 },
 ];
 
-/** Tabela d1/m1/m6/a1: preço, ação com proventos, Ibovespa e setor (sem a empresa). */
-export function montarTabelaRetornos(R) {
-  const linha = (rotulo, grupo) => ({
+/**
+ * Tabela d1/s1/m1/m6/a1: preço, ação com proventos, Ibovespa e setor (sem a empresa).
+ * A coluna s1 só aparece quando o resumo traz variacao_preco.s1 ou rentabilidade.s1; sem eles, a tabela
+ * fica com as 4 colunas de sempre. `saltos` ({s1, m1, m6, a1}, true quando a janela da série da ação tem
+ * salto de escala) zera a célula do preço nesse período. Variação do dia impossível (grupamento) vira célula "mudou de escala".
+ */
+export function montarTabelaRetornos(R, saltos = {}) {
+  const temSemana = R?.variacao_preco?.s1 !== undefined || R?.rentabilidade?.s1 !== undefined;
+  const colunas = temSemana ? PERIODOS_RETORNO : PERIODOS_RETORNO.filter((p) => p.chave !== 's1');
+  const linha = (rotulo, grupo, ehAcao = false) => ({
     rotulo,
-    celulas: PERIODOS_RETORNO.map(({ chave }) => {
+    celulas: colunas.map(({ chave }) => {
       const campo = grupo?.[chave];
       const v = valorOuNulo(campo);
+      if (ehAcao && chave === 'd1' && variacaoDiaSuspeita(v)) {
+        return { texto: '—', motivo: TEXTOS.revisao.explicacao.tecnico, sinal: null, emRevisao: true };
+      }
+      if (ehAcao && saltos[chave]) {
+        return { texto: '—', motivo: TEXTOS.revisao.periodo, sinal: null, emRevisao: true };
+      }
       return { ...exibir(campo, (x) => pct(x)), sinal: v == null ? null : v > 0 ? 'up' : v < 0 ? 'down' : 'flat' };
     }),
   });
   return {
-    colunas: PERIODOS_RETORNO,
+    colunas,
     linhas: [
-      linha('Preço da ação', R?.variacao_preco),
-      linha('Ação com proventos', R?.rentabilidade),
-      linha('Ibovespa', R?.rentabilidade?.ibov),
-      linha('Setor, sem a empresa', R?.rentabilidade?.setor),
+      linha(TEXTOS.ficha.retornosTabela.linhas.precoAcao, R?.variacao_preco, true),
+      linha(TEXTOS.ficha.retornosTabela.linhas.comProventos, R?.rentabilidade, true),
+      linha(TEXTOS.ficha.retornosTabela.linhas.ibovespa, R?.rentabilidade?.ibov),
+      linha(TEXTOS.ficha.retornosTabela.linhas.setor, R?.rentabilidade?.setor),
     ],
   };
 }

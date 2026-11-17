@@ -1,5 +1,6 @@
+import Mascote from '../components/ui/Mascote.jsx';
 import { useEffect } from 'react';
-import SecaoAcerto from '../components/inicio/SecaoAcerto.jsx';
+import SecaoAcerto from '../components/modelo/SecaoAcerto.jsx';
 import Abertura from '../components/modelo/Abertura.jsx';
 import FluxoDados from '../components/modelo/FluxoDados.jsx';
 import ModeloExperimental from '../components/modelo/ModeloExperimental.jsx';
@@ -16,7 +17,10 @@ export default function Modelo() {
     <div className="pagina">
       <header className="pagina-topo">
         <h1 className="pagina-titulo">{TEXTOS.paginas.modelo}</h1>
-        <p className="pagina-intro">{TEXTOS.paginas.modeloIntro}</p>
+        <div className="modelo-topo-linha">
+          <Mascote humor="animado" className="modelo-guia__pavio" />
+          <p className="pagina-intro">{TEXTOS.paginas.modeloIntro}</p>
+        </div>
       </header>
 
       <Abertura />

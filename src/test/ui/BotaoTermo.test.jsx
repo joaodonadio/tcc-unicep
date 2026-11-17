@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { BotaoTermo } from '../../components/ui/BotaoTermo.jsx';
 import { renderizar } from '../apoio/renderizar.jsx';
 import { EXPLICACOES } from '../../lib/explicacoes.js';
@@ -43,7 +43,7 @@ describe('BotaoTermo', () => {
     expect(screen.getByRole('dialog', { name: EXPLICACOES.pregao.titulo })).toHaveFocus();
   });
 
-  it('Esc fecha o balão e devolve o foco ao termo', () => {
+  it('Esc fecha o balão e devolve o foco ao termo', async () => {
     renderizar(<DoisTermos />);
     const termo = screen.getByRole('button', { name: 'o pregão' });
     fireEvent.click(termo);
@@ -51,32 +51,33 @@ describe('BotaoTermo', () => {
 
     fireEvent.keyDown(dialogo, { key: 'Escape' });
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // o balão sai com animação e só é removido depois da saída (usePresenca)
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(termo).toHaveAttribute('aria-expanded', 'false');
     expect(termo).toHaveFocus();
   });
 
-  it('o botão Fechar do balão fecha e devolve o foco ao termo', () => {
+  it('o botão Fechar do balão fecha e devolve o foco ao termo', async () => {
     renderizar(<DoisTermos />);
     const termo = screen.getByRole('button', { name: 'o pregão' });
     fireEvent.click(termo);
 
     fireEvent.click(screen.getByRole('button', { name: TEXTOS.termo.fechar }));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(termo).toHaveFocus();
   });
 
-  it('clique fora fecha o balão', () => {
+  it('clique fora fecha o balão', async () => {
     renderizar(<DoisTermos />);
     fireEvent.click(screen.getByRole('button', { name: 'o pregão' }));
 
     fireEvent.pointerDown(document.body);
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
-  it('abrir outro termo fecha o primeiro: só um balão por vez', () => {
+  it('abrir outro termo fecha o primeiro: só um balão por vez', async () => {
     renderizar(<DoisTermos />);
     const pregao = screen.getByRole('button', { name: 'o pregão' });
     const sinais = screen.getByRole('button', { name: 'os sinais' });
@@ -84,7 +85,8 @@ describe('BotaoTermo', () => {
     fireEvent.click(pregao);
     fireEvent.click(sinais);
 
-    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    // o balão que fecha sai com animação antes de sumir
+    await waitFor(() => expect(screen.getAllByRole('dialog')).toHaveLength(1));
     expect(screen.getByRole('dialog', { name: EXPLICACOES.sinais.titulo })).toBeInTheDocument();
     expect(pregao).toHaveAttribute('aria-expanded', 'false');
     expect(sinais).toHaveAttribute('aria-expanded', 'true');

@@ -15,9 +15,10 @@ const ZOOM_MIN = 0.9;
 const ZOOM_MAX = 1.3;
 const ZOOM_PASSO = 0.1;
 const CONSULTA_MOVIMENTO = '(prefers-reduced-motion: reduce)';
-const MOVIMENTOS = ['sistema', 'ligadas', 'desligadas'];
+const MOVIMENTOS = ['ligadas', 'desligadas'];
 
-const PADRAO = { nivel: 'simples', zoom: 1, movimento: 'sistema' };
+// movimento null = a pessoa nunca escolheu (ou tinha o antigo 'sistema'): vale a preferência do sistema
+const PADRAO = { nivel: 'simples', zoom: 1, movimento: null };
 
 function carregar() {
   try {
@@ -26,7 +27,7 @@ function carregar() {
     return {
       nivel: salvo.nivel === 'tecnico' ? 'tecnico' : 'simples',
       zoom: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Number(salvo.zoom) || 1)),
-      movimento: MOVIMENTOS.includes(salvo.movimento) ? salvo.movimento : 'sistema',
+      movimento: MOVIMENTOS.includes(salvo.movimento) ? salvo.movimento : null,
     };
   } catch {
     return PADRAO;
@@ -54,8 +55,10 @@ export function PreferenciasProvider({ children }) {
     return () => mq.removeEventListener?.('change', aoMudar);
   }, []);
 
-  const movimentoReduzido =
-    prefs.movimento === 'desligadas' || (prefs.movimento === 'sistema' && sistemaReduz);
+  // sem escolha, o inicial é a preferência do sistema (e acompanha o sistema enquanto não houver escolha)
+  const movimentoEscolhido = prefs.movimento !== null;
+  const movimento = prefs.movimento ?? (sistemaReduz ? 'desligadas' : 'ligadas');
+  const movimentoReduzido = movimento === 'desligadas';
 
   useEffect(() => {
     try {
@@ -80,8 +83,8 @@ export function PreferenciasProvider({ children }) {
     [],
   );
   const definirMovimento = useCallback(
-    (movimento) =>
-      setPrefs((p) => ({ ...p, movimento: MOVIMENTOS.includes(movimento) ? movimento : 'sistema' })),
+    (escolha) =>
+      setPrefs((p) => ({ ...p, movimento: MOVIMENTOS.includes(escolha) ? escolha : null })),
     [],
   );
   const aumentarZoom = useCallback(
@@ -92,19 +95,33 @@ export function PreferenciasProvider({ children }) {
     () => setPrefs((p) => ({ ...p, zoom: Number(Math.max(ZOOM_MIN, p.zoom - ZOOM_PASSO).toFixed(2)) })),
     [],
   );
+  const restaurarZoom = useCallback(() => setPrefs((p) => ({ ...p, zoom: 1 })), []);
 
   const valor = useMemo(
     () => ({
       ...prefs,
+      movimento,
+      movimentoEscolhido,
       definirNivel,
       definirMovimento,
       movimentoReduzido,
       aumentarZoom,
       diminuirZoom,
+      restaurarZoom,
       zoomNoMaximo: prefs.zoom >= ZOOM_MAX,
       zoomNoMinimo: prefs.zoom <= ZOOM_MIN,
     }),
-    [prefs, movimentoReduzido, definirNivel, definirMovimento, aumentarZoom, diminuirZoom],
+    [
+      prefs,
+      movimento,
+      movimentoEscolhido,
+      movimentoReduzido,
+      definirNivel,
+      definirMovimento,
+      aumentarZoom,
+      diminuirZoom,
+      restaurarZoom,
+    ],
   );
 
   return <PreferenciasContext.Provider value={valor}>{children}</PreferenciasContext.Provider>;

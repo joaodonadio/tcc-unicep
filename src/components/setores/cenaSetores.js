@@ -1,9 +1,10 @@
 import { CylinderGeometry, Group, Mesh, Raycaster, Vector2 } from 'three';
 import {
   ALTURA_QUADRO, GLB_DISPONIVEIS, LARGURA_QUADRO, LIMITE_TRIANGULOS, TAMANHO_OBJETO, TAU,
-  alvoDoGiro, anguloDaFrente, encaixe, indiceDaFrente, urlDoGlb,
+  alvoDoGiro, anguloDaFrente, encaixe, formaDoPulo, indiceDaFrente, poseDoPavio, urlDoGlb,
 } from '../../lib/setores3d.js';
 import { suaviza } from '../modelos3d/palco.js';
+import { criaAnimaPavio, criarPavio3D } from '../modelos3d/pavio3d.js';
 import { carregarObjetoGlb, descartarGeometrias, descartarMateriais } from './glbSetor.js';
 import { objetoProcedural } from './objetosSetor.js';
 
@@ -33,6 +34,14 @@ const FORCA_DESTAQUE = 2.2;
 const FORCA_REPOUSO = 0.4;
 const DEFASE = 0.9; // s: fase da assinatura de um setor para o seguinte
 const LUZ_EMISSIVA = 0x5fc9c0; // teal das manchas: destaque do setor sem cor de ação
+const ALVO_X = -0.6; // o quadro é centrado um pouco à esquerda, para o Cotinha (à esquerda) entrar no equilíbrio
+const PAVIO_ESCALA = 1.25; // ~1,1 de altura: um terço do objeto da frente, para a reação ser vista
+const PAVIO_X = -2.05; // logo ao lado da silhueta do objeto (meia largura máxima ~1,5)
+const PAVIO_GIRO = 0.45; // rad: virado levemente para a vitrine
+const POSE_TEMPO = 0.1; // s: constante de tempo da pose do Cotinha (~300 ms para assentar)
+
+/** Cópia da pose para os valores que se movem (braços em array, para não mexer na pose da lista). */
+const copiaPose = (p) => ({ bracos: [...p.bracos], encolhe: p.encolhe, inclina: p.inclina });
 
 /** Parte fracionária (de 0 a 1), também para tempo negativo. */
 const fracao = (x) => x - Math.floor(x);
@@ -182,6 +191,13 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
   let movido = false;
   let x0 = 0;
   let ativo = true;
+  let lista = colunas; // a lista atual (com o sinal de cada setor)
+  // Cotinha: fixo na cena (não recria a cada troca); reage à frente
+  let pavio = null;
+  let pavioAnima = null; // respiração e piscada (só com movimento)
+  let pavioIdx = null; // frente à qual o Cotinha já reagiu
+  let pavioPose = null; // pose atual, caminhando até a do sinal
+  let pulo0 = null; // s em que começou o pulinho da última troca
 
   /** Qualquer interação encerra a entrada e reinicia a espera do giro ocioso. */
   function marcaInteracao() {
@@ -379,6 +395,7 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
 
   const controle = {
     atualiza(novaLista = []) {
+      lista = novaLista;
       if (!P) return;
       n = novaLista.length;
       const vistos = new Set();
@@ -406,10 +423,43 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
     },
   };
 
+  /**
+   * Reação do Cotinha ao setor da frente: a troca para um setor que subiu dá um pulinho; a pose (braços, encolher,
+   * inclinar) caminha até a do sinal em ~300 ms. Com movimento reduzido, a pose vem direto, sem pulo.
+   */
+  function atualizaPavio(s, dt) {
+    const alvoPose = poseDoPavio(lista[alvoIdx]?.sinal);
+    if (alvoIdx !== pavioIdx) {
+      if (pavioIdx != null && !reduz && alvoPose.pulo) pulo0 = s;
+      pavioIdx = alvoIdx;
+    }
+    if (reduz) {
+      pavioPose = copiaPose(alvoPose);
+    } else {
+      const f = 1 - Math.exp(-dt / POSE_TEMPO);
+      pavioPose.bracos = pavioPose.bracos.map((a, i) => a + (alvoPose.bracos[i] - a) * f);
+      pavioPose.encolhe += (alvoPose.encolhe - pavioPose.encolhe) * f;
+      pavioPose.inclina += (alvoPose.inclina - pavioPose.inclina) * f;
+    }
+    if (pavioAnima) pavioAnima(s);
+    else pavio.corpo.scale.set(1, 1, 1);
+    // pulinho: agacha, estica no salto e amassa ao pousar (com movimento reduzido não há pulo)
+    const forma = !reduz && pulo0 != null ? formaDoPulo(s - pulo0) : { altura: 0, escalaY: 1 };
+    // o encolher e o pulo vêm depois da respiração: escalam o corpo sobre o que ela já pôs
+    const e = (1 - pavioPose.encolhe) * forma.escalaY;
+    pavio.corpo.scale.y *= e;
+    pavio.corpo.scale.x *= 1 + (1 - e) * 0.5;
+    pavio.corpo.scale.z *= 1 + (1 - e) * 0.5;
+    pavio.bracos[0].rotation.z = pavioPose.bracos[0];
+    pavio.bracos[1].rotation.z = pavioPose.bracos[1];
+    pavio.grupo.rotation.x = pavioPose.inclina;
+    pavio.grupo.position.y = forma.altura;
+  }
+
   return {
     altura: ALTURA_QUADRO,
     largura: LARGURA_QUADRO,
-    alvo: [0, ALVO_Y, 0],
+    alvo: [ALVO_X, ALVO_Y, 0],
     az: 0,
     elev: ELEV,
     arrastar: false,
@@ -440,6 +490,15 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
       alvoIdx = n ? Math.min(Math.max(0, Math.floor(frente) || 0), n - 1) : 0;
       psiAlvo = anguloDaFrente(alvoIdx, n);
       psi = reduz ? psiAlvo : psiAlvo - ENTRADA_ARCO;
+      // Cotinha de pé ao lado da vitrine, sobre o mesmo chão; a pose começa a do setor da frente (sem entrada)
+      pavio = criarPavio3D({ escala: PAVIO_ESCALA, bracos: 'soltos', M: P.M });
+      pavio.grupo.position.set(PAVIO_X, 0, 0);
+      pavio.grupo.rotation.y = PAVIO_GIRO;
+      P.cena.add(pavio.grupo);
+      // os dois braços são da pose (pavioPose), não da animação
+      pavioAnima = reduz ? null : criaAnimaPavio(pavio, { bracosLivres: [] });
+      pavioPose = copiaPose(poseDoPavio(lista[alvoIdx]?.sinal));
+      pavioIdx = alvoIdx;
       controle.atualiza(colunas);
     },
     anima(s) {
@@ -523,6 +582,7 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
           else respira(col.modelo, col.sy0, t, col.forca);
         }
       });
+      if (pavio) atualizaPavio(s, dt);
       // Com movimento o quadro segue vivo (giro do destaque); fora da tela o palco para sozinho.
       // Com movimento reduzido a cena é estática: redesenha só quando algo muda.
       return !reduz;
@@ -534,6 +594,8 @@ export function cenaSetores({ colunas = [], frente = 0, reduz = false, aoFrente 
       P?.canvas.removeEventListener('pointerup', aoSoltar);
       P?.canvas.removeEventListener('pointercancel', aoCancelar);
       porSetor.forEach((col) => { if (col.glb) descartarMateriais(col.glb); });
+      // materiais do Cotinha são do palco (P.M) e saem no dispose dele; a geometria sai aqui
+      pavio?.grupo.traverse((o) => o.geometry?.dispose());
       descartaveis.forEach((m) => m.dispose());
       porSetor.clear();
     },

@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom';
 import { useDetalhes } from '../../hooks/useDetalhes.js';
 import { centesimosDoTom } from '../../lib/hoje.js';
 import { contar, quantidadeCheia } from '../../lib/formato.js';
+import { humorDoTom } from '../../lib/mascote.js';
 import { usePreferencias } from '../../context/contextos.js';
 import { ROTULO_STATUS, TEXTOS, porNivel } from '../../lib/textos.js';
 import { MiniGrafico } from '../graficos/MiniGrafico.jsx';
 import { BotaoDetalhes, PainelDetalhes } from '../ui/Detalhes.jsx';
 import { Linhas } from '../ui/Estados.jsx';
+import Mascote from '../ui/Mascote.jsx';
 import { TextoComTermo } from '../ui/TextoComTermo.jsx';
 
 /** Ordem da matriz e dos números; `tom` liga à bolinha (.hoje-tom-numeros) e `cor` pinta o grupo de pontos. */
@@ -58,7 +60,12 @@ export function ResumoNoticias({ tom, sentimento, carregando = false }) {
             </li>
           ))}
         </ul>
-        {frase && <p className="hoje-tom-sintese">{frase}</p>}
+        {frase && (
+          <div className="hoje-tom-sintese-linha">
+            <Mascote humor={humorDoTom(tom)} className="hoje-pavio" />
+            <p className="hoje-tom-sintese">{frase}</p>
+          </div>
+        )}
       </>
     );
   }

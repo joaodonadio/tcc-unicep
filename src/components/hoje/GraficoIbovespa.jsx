@@ -7,6 +7,7 @@ import { variacaoDaSerie } from '../../lib/fichaIndicadores.js';
 import { numero, pct } from '../../lib/formato.js';
 import { direcaoDe } from '../../lib/mapaPregao.js';
 import { cortarJanela, JANELAS } from '../../lib/series.js';
+import { ariaDosEventos, eventosNaJanela, marcasDosEventos } from '../../lib/eventosMercado.js';
 import { usePreferencias } from '../../context/contextos.js';
 import { TEXTOS, porNivel } from '../../lib/textos.js';
 import { MiniGrafico } from '../graficos/MiniGrafico.jsx';
@@ -33,6 +34,7 @@ export function GraficoIbovespa() {
     [consulta.data],
   );
   const datas = janela?.datas ?? [];
+  const eventosJanela = eventosNaJanela(datas);
   const fechamento = janela?.valores.fechamento ?? [];
   const finitos = fechamento.filter(finito);
   const temGrafico = finitos.length >= 2;
@@ -57,10 +59,18 @@ export function GraficoIbovespa() {
         <MiniGrafico
           tipo="area"
           faixaExata
+          interativo
+          datas={datas}
           valores={fechamento}
           cor={COR_DA_DIRECAO[direcao] ?? COR_NEUTRA}
           altura={ALTURA_GRAFICO}
-          rotulo={TEXTOS.hoje.mini.ibovespa(formatarPontos(finitos[0]), formatarPontos(finitos[finitos.length - 1]))}
+          marcas={marcasDosEventos(eventosJanela, datas)}
+          rotulo={[
+            TEXTOS.hoje.mini.ibovespa(formatarPontos(finitos[0]), formatarPontos(finitos[finitos.length - 1])),
+            ariaDosEventos(eventosJanela, datas),
+          ]
+            .filter(Boolean)
+            .join(' ')}
         />
         {datas.length > 0 && (
           <div className="chart-foot">
@@ -68,6 +78,11 @@ export function GraficoIbovespa() {
             <span>{dataBR(datas[datas.length - 1])}</span>
           </div>
         )}
+        {eventosJanela.map((e) => (
+          <p key={e.chave} className="hoje-numero-nota">
+            {porNivel(TEXTOS.eventos[e.chave].nota, nivel)}
+          </p>
+        ))}
       </div>
     );
   }

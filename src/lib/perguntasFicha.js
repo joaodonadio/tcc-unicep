@@ -50,15 +50,6 @@ export function perguntaDaUrl(searchParams) {
   return convertida ?? 'regras';
 }
 
-/** Pergunta anterior e próxima (ids), ou null nas pontas e para id desconhecido. */
-export function vizinhas(id) {
-  const indice = PERGUNTAS.findIndex((p) => p.id === id);
-  return {
-    anterior: indice > 0 ? PERGUNTAS[indice - 1].id : null,
-    proxima: indice >= 0 && indice < PERGUNTAS.length - 1 ? PERGUNTAS[indice + 1].id : null,
-  };
-}
-
 /** Chaves de indicadores da pergunta; no nível técnico soma as chaves `tecnico`. */
 export function chavesDaPergunta(id, nivel) {
   const pergunta = PERGUNTAS.find((p) => p.id === id);

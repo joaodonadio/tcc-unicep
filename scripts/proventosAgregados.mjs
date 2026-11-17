@@ -3,51 +3,56 @@
  *
  * A API só tem /v1/proventos/{ticker}: sem esta rota, cada navegador faz 85
  * pedidos para montar a agenda, o que demora muito para quem abre o site pelo
- * túnel. Aqui o servidor busca tudo uma vez, guarda em memória por 6 horas e
- * entrega numa resposta só para todos os visitantes. A chave fica no servidor.
+ * túnel. Aqui o servidor busca tudo ao subir, guarda só na memória dele (nada no
+ * navegador de quem visita) e entrega numa resposta só para todos. A cada 6 horas
+ * renova por trás, sem ninguém esperar: a versão anterior segue sendo servida até
+ * a nova ficar pronta. A chave fica no servidor.
  */
+
+import { criarPedirJson } from './pedirApi.mjs';
 
 const VALIDADE_MS = 6 * 60 * 60_000;
 const SIMULTANEOS = 6;
 const ROTA = '/api/v1/proventos-todos';
 
+/**
+ * Junta os proventos com data de pagamento de todas as ações. `pedirJson(caminho)` devolve o JSON
+ * de /v1/{caminho}. Sem nenhum provento obtido, sobe erro. Devolve o objeto da resposta.
+ */
+export async function montarProventosTodos(pedirJson) {
+  const acoes = await pedirJson('acoes');
+  const tickers = (acoes.registros ?? []).map((a) => a.ticker).filter(Boolean);
+  const registros = [];
+  const falhas = [];
+  let proximo = 0;
+  async function trabalhar() {
+    while (proximo < tickers.length) {
+      const ticker = tickers[proximo++];
+      try {
+        const resp = await pedirJson(`proventos/${encodeURIComponent(ticker)}`);
+        // a agenda só usa pagamentos com data; o resto não precisa trafegar
+        registros.push(...(resp.registros ?? []).filter((r) => r.data_pagamento?.valor));
+      } catch {
+        falhas.push(ticker);
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: SIMULTANEOS }, trabalhar));
+  if (tickers.length > 0 && falhas.length === tickers.length) throw new Error('nenhum provento obtido');
+  return { registros, falhas, gerado_em: new Date().toISOString() };
+}
+
 export function proventosAgregados(env) {
   const base = String(env.API_BASE_URL ?? '').replace(/\/+$/, '');
-  const cabecalhos = { 'X-API-Key': env.API_KEY ?? '' };
   let cache = null; // { em, corpo }
   let emAndamento = null;
 
-  async function pedirJson(caminho) {
-    const resp = await fetch(`${base}/v1/${caminho}`, { headers: cabecalhos });
-    if (!resp.ok) throw new Error(`${caminho}: HTTP ${resp.status}`);
-    return resp.json();
-  }
-
+  const pedirJson = criarPedirJson(env);
   async function montar() {
-    const acoes = await pedirJson('acoes');
-    const tickers = (acoes.registros ?? []).map((a) => a.ticker).filter(Boolean);
-    const registros = [];
-    const falhas = [];
-    let proximo = 0;
-    async function trabalhar() {
-      while (proximo < tickers.length) {
-        const ticker = tickers[proximo++];
-        try {
-          const resp = await pedirJson(`proventos/${encodeURIComponent(ticker)}`);
-          // a agenda só usa pagamentos com data; o resto não precisa trafegar
-          registros.push(...(resp.registros ?? []).filter((r) => r.data_pagamento?.valor));
-        } catch {
-          falhas.push(ticker);
-        }
-      }
-    }
-    await Promise.all(Array.from({ length: SIMULTANEOS }, trabalhar));
-    if (tickers.length > 0 && falhas.length === tickers.length) throw new Error('nenhum provento obtido');
-    return JSON.stringify({ registros, falhas, gerado_em: new Date().toISOString() });
+    return JSON.stringify(await montarProventosTodos(pedirJson));
   }
 
-  function obterCorpo() {
-    if (cache && Date.now() - cache.em < VALIDADE_MS) return Promise.resolve(cache.corpo);
+  function renovar() {
     emAndamento ??= montar()
       .then((corpo) => {
         cache = { em: Date.now(), corpo };
@@ -57,6 +62,13 @@ export function proventosAgregados(env) {
         emAndamento = null;
       });
     return emAndamento;
+  }
+
+  // Com uma versão em mãos, responde na hora (e renova por trás se venceu); só espera na 1ª montagem.
+  function obterCorpo() {
+    if (!cache) return renovar();
+    if (Date.now() - cache.em >= VALIDADE_MS) renovar().catch(() => {});
+    return Promise.resolve(cache.corpo);
   }
 
   function middleware(req, res, next) {
@@ -76,7 +88,9 @@ export function proventosAgregados(env) {
   function instalar(server) {
     if (!base) return; // sem API configurada (modo arquivos): rota não existe
     server.middlewares.use(middleware);
-    obterCorpo().catch(() => {}); // já começa a buscar ao subir o servidor
+    renovar().catch(() => {}); // já começa a buscar ao subir o servidor
+    // renova sozinho a cada 6 horas, mesmo sem visita; unref não segura o processo aberto
+    setInterval(() => renovar().catch(() => {}), VALIDADE_MS).unref?.();
   }
 
   return {

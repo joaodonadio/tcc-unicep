@@ -4,14 +4,13 @@ import {
   categoriaDoAviso,
   fatosDaAtualizacao,
   linhasDePacotes,
-  montarFraseAtualizacao,
   nomePacote,
   notaColeta,
   partesDoAviso,
   resumoAvisos,
   situacaoPainel,
-  situacaoRotulo,
 } from '../../lib/sobreDados.js';
+import { detalhesDaColeta } from '../../lib/sobreDados.js';
 import { TEXTOS } from '../../lib/textos.js';
 import execucaoJson from '../../../public/dados/execucao.json';
 
@@ -45,88 +44,6 @@ describe('nomePacote', () => {
   it('não confunde nome herdado do objeto com pacote conhecido', () => {
     expect(nomePacote('constructor')).toBe('constructor');
     expect(nomePacote('toString')).toBe('toString');
-  });
-});
-
-describe('situacaoRotulo', () => {
-  it('mapeia ok, parcial e falhou', () => {
-    expect(situacaoRotulo('ok')).toBe('concluída');
-    expect(situacaoRotulo('parcial')).toBe('parcial');
-    expect(situacaoRotulo('falhou')).toBe('com falha');
-  });
-
-  it('devolve null para status ausente ou desconhecido', () => {
-    expect(situacaoRotulo(undefined)).toBeNull();
-    expect(situacaoRotulo('em_andamento')).toBeNull();
-    expect(situacaoRotulo('constructor')).toBeNull();
-  });
-});
-
-describe('montarFraseAtualizacao', () => {
-  it('monta a frase completa com pregão, rodada, horário, data e situação', () => {
-    expect(montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao })).toBe(
-      'Pregão de 22/10. Atualização número 8, de 23h23 a 23h25 de 24/10. Situação: concluída.',
-    );
-  });
-
-  it('usa a situação parcial e com falha', () => {
-    expect(montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao: { ...execucao, status: 'parcial' } })).toContain(
-      'Situação: parcial.',
-    );
-    expect(montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao: { ...execucao, status: 'falhou' } })).toContain(
-      'Situação: com falha.',
-    );
-  });
-
-  it('deixa fora a situação quando o status não é conhecido', () => {
-    const frase = montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao: { ...execucao, status: undefined } });
-    expect(frase).not.toContain('Situação');
-    expect(frase).toBe('Pregão de 22/10. Atualização número 8, de 23h23 a 23h25 de 24/10.');
-  });
-
-  it('deixa fora o pregão quando a data de referência não existe', () => {
-    const frase = montarFraseAtualizacao({ dataReferencia: null, execucao });
-    expect(frase).not.toContain('Pregão');
-    expect(frase.startsWith('Atualização número 8')).toBe(true);
-  });
-
-  it('sem rodada, usa só a palavra Atualização', () => {
-    const frase = montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao: { ...execucao, rodada: undefined } });
-    expect(frase).toBe('Pregão de 22/10. Atualização, de 23h23 a 23h25 de 24/10. Situação: concluída.');
-  });
-
-  it('com só o início, diz a partir de que hora', () => {
-    const frase = montarFraseAtualizacao({
-      dataReferencia: '2026-10-22',
-      execucao: { ...execucao, fim: null },
-    });
-    expect(frase).toBe('Pregão de 22/10. Atualização número 8, a partir de 23h23 de 24/10. Situação: concluída.');
-  });
-
-  it('com só o fim, diz até que hora', () => {
-    const frase = montarFraseAtualizacao({
-      dataReferencia: '2026-10-22',
-      execucao: { ...execucao, inicio: null },
-    });
-    expect(frase).toBe('Pregão de 22/10. Atualização número 8, até 23h25 de 24/10. Situação: concluída.');
-  });
-
-  it('sem horários nem data, a frase não inventa o trecho do período', () => {
-    const frase = montarFraseAtualizacao({
-      dataReferencia: '2026-10-22',
-      execucao: { rodada: 8, status: 'ok' },
-    });
-    expect(frase).toBe('Pregão de 22/10. Atualização número 8. Situação: concluída.');
-  });
-
-  it('sem nenhum dado, devolve texto vazio', () => {
-    expect(montarFraseAtualizacao({})).toBe('');
-    expect(montarFraseAtualizacao({ dataReferencia: null, execucao: null })).toBe('');
-  });
-
-  it('não usa travessão nem exclamação', () => {
-    const frase = montarFraseAtualizacao({ dataReferencia: '2026-10-22', execucao });
-    expect(frase).not.toMatch(/[—!]/);
   });
 });
 
@@ -202,15 +119,30 @@ describe('linhasDePacotes: selo e retirados', () => {
 });
 
 describe('situacaoPainel', () => {
-  it('concluída é alta; parcial é acento; com falha é queda', () => {
-    expect(situacaoPainel('ok')).toEqual({ rotulo: TEXTOS.dados.situacaoPainel.ok, tom: 'alta' });
-    expect(situacaoPainel('parcial')).toEqual({ rotulo: TEXTOS.dados.situacaoPainel.parcial, tom: 'acento' });
-    expect(situacaoPainel('falhou')).toEqual({ rotulo: TEXTOS.dados.situacaoPainel.falhou, tom: 'queda' });
+  it('concluída é alta, com mancha alta, pavio contente e frase própria', () => {
+    expect(situacaoPainel('ok')).toEqual({
+      rotulo: TEXTOS.dados.situacaoPainel.ok,
+      tom: 'alta',
+      brilho: 'alta',
+      humor: 'contente',
+      frase: TEXTOS.dados.pavio.ok,
+    });
+  });
+
+  it('parcial é acento e com falha é queda; ambos com pavio preocupado', () => {
+    expect(situacaoPainel('parcial')).toMatchObject({ tom: 'acento', brilho: 'acento', humor: 'preocupado' });
+    expect(situacaoPainel('falhou')).toMatchObject({ tom: 'queda', brilho: 'queda', humor: 'preocupado' });
   });
 
   it('status desconhecido ou herdado vira situação não informada, em tom neutro', () => {
     for (const status of [undefined, 'em_andamento', 'constructor']) {
-      expect(situacaoPainel(status)).toEqual({ rotulo: TEXTOS.dados.situacaoPainel.desconhecida, tom: 'neutro' });
+      expect(situacaoPainel(status)).toEqual({
+        rotulo: TEXTOS.dados.situacaoPainel.desconhecida,
+        tom: 'neutro',
+        brilho: 'aco',
+        humor: 'neutro',
+        frase: TEXTOS.dados.pavio.desconhecida,
+      });
     }
   });
 });
@@ -219,15 +151,22 @@ describe('fatosDaAtualizacao', () => {
   it('monta pregão, publicação e número da atualização, com início e fim à parte', () => {
     expect(fatosDaAtualizacao({ dataReferencia: '2026-10-22', execucao })).toEqual({
       pregao: '22/10/2026',
+      dadosAte: null,
       publicado: '24/10 às 23h25',
       atualizacao: 'nº 8',
       periodo: '23h23 a 23h25',
     });
   });
 
+  it('dados até vêm do instante do mercado, com dia e hora de São Paulo', () => {
+    const fatos = fatosDaAtualizacao({ dataReferencia: '2026-11-04', execucao, dadosAte: '2026-11-05T08:00:00-03:00' });
+    expect(fatos.dadosAte).toBe('05/11 às 08h00');
+  });
+
   it('ausência de dado vira null, nunca texto inventado', () => {
     expect(fatosDaAtualizacao({ dataReferencia: null, execucao: { status: 'ok' } })).toEqual({
       pregao: null,
+      dadosAte: null,
       publicado: null,
       atualizacao: null,
       periodo: null,
@@ -342,5 +281,22 @@ describe('partesDoAviso', () => {
         .join('');
       expect(juntado).toBe(aviso);
     }
+  });
+});
+
+describe('detalhesDaColeta', () => {
+  it('monta fatos e etapas só com o que veio', () => {
+    const { fatos, etapas } = detalhesDaColeta({
+      coleta_status: { consultas: 1, origem: 'cron', t_esperado: '2026-11-04', etapas: { precos: 'concluida', analise: 'pulada' } },
+    });
+    expect(fatos.map((f) => f.valor)).toEqual(['1', '04/11/2026', 'cron']);
+    expect(etapas).toEqual([
+      { chave: 'precos', nome: 'Preços', situacao: 'concluída', concluida: true },
+      { chave: 'analise', nome: 'Análise', situacao: 'pulada', concluida: false },
+    ]);
+  });
+
+  it('sem coleta_status fica vazio, sem inventar valor', () => {
+    expect(detalhesDaColeta({})).toEqual({ fatos: [], etapas: [] });
   });
 });

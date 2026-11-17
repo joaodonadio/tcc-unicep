@@ -7,7 +7,7 @@
  * (a tela mostra "—") e o fato que faltar sai do resumo.
  */
 
-import { dataBR, dataHoraBR, diaMes, horaBR } from './datas.js';
+import { dataBR, dataHoraBR, horaBR } from './datas.js';
 import { TEXTOS } from './textos.js';
 
 const { dados } = TEXTOS;
@@ -18,11 +18,6 @@ const lerMapa = (mapa, chave) => (Object.prototype.hasOwnProperty.call(mapa, cha
 /** Nome legível de um pacote; nome desconhecido sai como veio. */
 export function nomePacote(pacote) {
   return lerMapa(dados.pacotes, pacote) ?? String(pacote ?? '');
-}
-
-/** Status da atualização em texto: ok -> concluída, parcial, falhou -> com falha. */
-export function situacaoRotulo(status) {
-  return lerMapa(dados.situacao, status);
 }
 
 /** Número do campo, ou null se não for um número finito. */
@@ -75,58 +70,76 @@ export function notaColeta(execucao) {
 }
 
 /**
- * Frase de cabeçalho da seção. Exemplo completo:
- * "Pregão de 22/10. Atualização número 8, de 23h23 a 23h25 de 24/10. Situação: concluída."
- * Cada trecho que faltar (pregão, rodada, horário, data, situação) sai da frase.
+ * Bastidores da coleta para os detalhes técnicos: fatos (horários, consultas, pregão lido) e etapas.
+ * Campo que não veio fica de fora; nada vira 0.
  */
-export function montarFraseAtualizacao({ dataReferencia, execucao } = {}) {
-  const f = dados.frase;
-  const reg = execucao ?? {};
-
-  const pregao = diaMes(dataReferencia);
-  const hi = horaBR(reg.inicio);
-  const hf = horaBR(reg.fim);
-  const dia = diaDoInstante(reg.inicio) || diaDoInstante(reg.fim);
-  const rodada = Number.isInteger(reg.rodada) ? reg.rodada : null;
-
-  const cabeca = rodada !== null ? f.atualizacao(rodada) : hi || hf || dia ? f.atualizacaoSemRodada : '';
-  const horas = hi && hf ? f.intervalo(hi, hf) : hi ? f.inicio(hi) : hf ? f.fim(hf) : '';
-  const trecho = [horas, dia ? f.dia(dia) : ''].filter(Boolean).join(' ');
-  const atualizacao = [cabeca, trecho].filter(Boolean).join(', ');
-
-  const rotulo = situacaoRotulo(reg.status);
-
-  return [
-    pregao ? f.pregao(pregao) : '',
-    atualizacao ? `${atualizacao}.` : '',
-    rotulo ? f.situacao(rotulo) : '',
+export function detalhesDaColeta(execucao) {
+  const c = execucao?.coleta_status;
+  if (!c) return { fatos: [], etapas: [] };
+  const t = TEXTOS.dados.coleta;
+  const numero = (v) => (Number.isFinite(v) ? String(v) : null);
+  const fatos = [
+    [t.fatos.inicio, dataHoraBR(c.iniciada_em)],
+    [t.fatos.fim, dataHoraBR(c.finalizada_em)],
+    [t.fatos.entrega, dataHoraBR(c.entrega_concluida_em)],
+    [t.fatos.prazo, dataHoraBR(c.prazo)],
+    [t.fatos.primeiraConsulta, dataHoraBR(c.primeira_consulta_em)],
+    [t.fatos.ultimaConsulta, dataHoraBR(c.ultima_consulta_em)],
+    [t.fatos.consultas, numero(c.consultas)],
+    [t.fatos.espera, Number.isFinite(c.espera_segundos) ? t.segundos(c.espera_segundos) : null],
+    [t.fatos.pregaoEsperado, dataBR(c.t_esperado)],
+    [t.fatos.pregaoLido, dataBR(c.ultimo_pregao_lido)],
+    [t.fatos.origem, c.origem ?? null],
+    [t.fatos.execucao, c.execucao_id ?? null],
   ]
-    .filter(Boolean)
-    .join(' ');
+    .filter(([, valor]) => valor != null && valor !== '')
+    .map(([rotulo, valor]) => ({ rotulo, valor }));
+  const etapas = Object.entries(c.etapas ?? {}).map(([chave, situacao]) => ({
+    chave,
+    nome: t.etapas[chave] ?? chave,
+    situacao: t.situacoes[situacao] ?? situacao,
+    concluida: situacao === 'concluida',
+  }));
+  return { fatos, etapas };
 }
 
 const SITUACOES = ['ok', 'parcial', 'falhou'];
 const TOM_SITUACAO = { ok: 'alta', parcial: 'acento', falhou: 'queda' };
+const BRILHO_SITUACAO = { alta: 'alta', acento: 'acento', queda: 'queda', neutro: 'aco' };
+const HUMOR_SITUACAO = { ok: 'contente', parcial: 'preocupado', falhou: 'preocupado', desconhecida: 'neutro' };
 
-/** Pílula do topo: texto e tom (alta, acento, queda; neutro quando o status não é conhecido). */
+/**
+ * Situação do topo: rótulo, tom (alta, acento, queda, neutro), mancha do cartão (brilho),
+ * humor do pavio e frase curta. Status desconhecido cai em "desconhecida".
+ */
 export function situacaoPainel(status) {
   const chave = SITUACOES.includes(status) ? status : 'desconhecida';
-  return { rotulo: dados.situacaoPainel[chave], tom: TOM_SITUACAO[chave] ?? 'neutro' };
+  const tom = TOM_SITUACAO[chave] ?? 'neutro';
+  return {
+    rotulo: dados.situacaoPainel[chave],
+    tom,
+    brilho: BRILHO_SITUACAO[tom],
+    humor: HUMOR_SITUACAO[chave],
+    frase: dados.pavio[chave],
+  };
 }
 
 /**
  * Fatos do topo. Cada um vem já em texto, ou null quando o dado não chegou (o fato some da tela).
- * `periodo` (início e fim) só interessa ao modo técnico.
+ * `periodo` (início e fim) só interessa ao modo técnico. `dadosAte` é o instante até onde vão os dados (mercado_dia).
  */
-export function fatosDaAtualizacao({ dataReferencia, execucao } = {}) {
+export function fatosDaAtualizacao({ dataReferencia, execucao, dadosAte = null } = {}) {
   const v = dados.valores;
   const reg = execucao ?? {};
   const pregao = dataBR(dataReferencia) || null;
   const diaFim = diaDoInstante(reg.fim);
   const horaFim = horaBR(reg.fim);
   const horaInicio = horaBR(reg.inicio);
+  const diaDadosAte = diaDoInstante(dadosAte);
+  const horaDadosAte = horaBR(dadosAte);
   return {
     pregao,
+    dadosAte: diaDadosAte && horaDadosAte ? v.publicado(diaDadosAte, horaDadosAte) : null,
     publicado: diaFim && horaFim ? v.publicado(diaFim, horaFim) : null,
     atualizacao: Number.isInteger(reg.rodada) ? v.numero(reg.rodada) : null,
     periodo: horaInicio && horaFim ? v.periodo(horaInicio, horaFim) : null,

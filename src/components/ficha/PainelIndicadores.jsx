@@ -91,13 +91,13 @@ function TabelaTecnica({ linhas }) {
                   <NomeComTermo rotulo={l.rotulo} chave={l.explicacao} />
                 </span>
               </th>
-              <td className="ficha-tab-num">
+              <td className="ficha-tab-num" data-rotulo={I.colAcao}>
                 {l.acao}
                 {l.motivo && <span className="valor-motivo ficha-tab-motivo">{l.motivo}</span>}
               </td>
-              <td className="ficha-tab-num">{l.setor}</td>
-              <td className="ficha-tab-num">{l.diferenca}</td>
-              <td>{l.situacao ? I.situacao[l.situacao] : '—'}</td>
+              <td className="ficha-tab-num" data-rotulo={I.colSetor}>{l.setor}</td>
+              <td className="ficha-tab-num" data-rotulo={I.colDiferenca}>{l.diferenca}</td>
+              <td data-rotulo={I.colSituacao}>{l.situacao ? I.situacao[l.situacao] : '—'}</td>
             </tr>
           ))}
         </tbody>

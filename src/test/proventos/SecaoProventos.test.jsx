@@ -38,52 +38,62 @@ describe('SecaoProventos', () => {
     consulta.atual = montarConsulta();
   });
 
-  it('é uma seção com título de nível 2 e os blocos de nível 3', async () => {
+  it('é uma seção com título de nível 2 e os blocos de nível 3', () => {
     const { container } = renderizar(<SecaoProventos />);
 
     expect(container.querySelector('section#proventos')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: porNivel(TEXTOS.proventos.titulo, 'simples') })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 3, name: porNivel(TEXTOS.proventos.graficoTitulo, 'simples') })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 3, name: porNivel(TEXTOS.proventos.rankingTitulo, 'simples') })).toBeInTheDocument();
-    // a agenda continua com o próprio nome, agora como h3
-    expect(screen.getByRole('region', { name: TEXTOS.dia.proventos })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 3, name: TEXTOS.dia.proventos })).toBeInTheDocument();
+    // a agenda à esquerda, com o próprio título como h3
+    expect(screen.getByRole('region', { name: TEXTOS.proventos.agendaTitulo })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: TEXTOS.proventos.agendaTitulo })).toBeInTheDocument();
+  });
+
+  it('a linha do tempo tem os três passos da data-com ao dinheiro na conta', () => {
+    const { container } = renderizar(<SecaoProventos />);
+    const passos = container.querySelector('ol.proventos-linha-tempo');
+    expect(passos).not.toBeNull();
+    expect(within(passos).getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getByText(TEXTOS.proventos.passo2Titulo)).toBeInTheDocument();
+    expect(screen.getByText(TEXTOS.proventos.passo3Titulo)).toBeInTheDocument();
   });
 
   it('o gráfico rotula cada mês da janela, do primeiro ao último', () => {
     renderizar(<SecaoProventos />);
 
+    // nov/2026 também aparece no resumo (mês de pico), por isso getAll
     for (const mes of ['out/2026', 'nov/2026', 'dez/2026', 'jan/2027', 'fev/2027', 'mar/2027']) {
-      expect(screen.getByText(mes)).toBeInTheDocument();
+      expect(screen.getAllByText(mes).length).toBeGreaterThan(0);
     }
   });
 
-  it('a tabela lista as ações com ticker linkando para a pergunta de proventos e nenhum NaN', async () => {
+  it('o ranking mostra até 5 ações, com ticker linkando para a pergunta de proventos e nenhum NaN', async () => {
     const { container } = renderizar(<SecaoProventos />);
 
-    const tabela = await screen.findByRole('table');
-    const linhas = within(tabela).getAllByRole('row').slice(1);
-    expect(linhas.length).toBeGreaterThan(0);
-    expect(linhas.length).toBeLessThanOrEqual(10);
+    const lista = await screen.findByRole('list', { name: TEXTOS.proventos.rankingRolagem });
+    const itens = within(lista).getAllByRole('listitem');
+    expect(itens.length).toBeGreaterThan(0);
+    expect(itens.length).toBeLessThanOrEqual(5);
 
-    for (const linha of linhas) {
-      const link = within(linha).getByRole('link');
+    for (const item of itens) {
+      const link = within(item).getByRole('link');
       expect(link).toHaveAttribute('href', expect.stringMatching(/^\/acao\/[A-Z0-9]+\?pergunta=proventos$/));
     }
 
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 
-  it('a barra é escondida de leitor de tela e a nota sobre o dividend yield aparece', async () => {
+  it('a barra é escondida de leitor de tela e o aviso de passado não garante futuro aparece', async () => {
     const { container } = renderizar(<SecaoProventos />);
 
-    await screen.findByRole('table');
+    await screen.findByRole('list', { name: TEXTOS.proventos.rankingRolagem });
     const barras = container.querySelectorAll('.proventos-barra');
     expect(barras.length).toBeGreaterThan(0);
     for (const barra of barras) {
       expect(barra).toHaveAttribute('aria-hidden', 'true');
     }
-    expect(screen.getByText(porNivel(TEXTOS.proventos.dyNota, 'simples'))).toBeInTheDocument();
+    expect(screen.getByText(TEXTOS.proventos.rankingAviso)).toBeInTheDocument();
   });
 
   it('com a agenda carregando, o gráfico mostra a espera e a seção continua de pé', async () => {

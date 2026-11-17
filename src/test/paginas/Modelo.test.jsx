@@ -27,7 +27,7 @@ describe('Modelo', () => {
     renderizar(<Modelo />);
 
     expect(screen.getByRole('heading', { level: 1, name: TEXTOS.paginas.modelo })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { level: 2, name: TEXTOS.top5.titulo })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2, name: 'Top 5 do experimento' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: TEXTOS.acerto.titulo })).toBeInTheDocument();
   });
 

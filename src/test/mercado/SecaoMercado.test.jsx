@@ -5,41 +5,57 @@ import { renderizar } from '../apoio/renderizar.jsx';
 import { instalarFetchDados } from '../apoio/fetchDados.js';
 import { TEXTOS } from '../../lib/textos.js';
 
-const aba = (chave) => screen.getByRole('tab', { name: TEXTOS.mercado.abas[chave] });
+const grupo = (nome) => screen.getByRole('heading', { level: 3, name: nome }).closest('section');
 
 describe('SecaoMercado', () => {
   beforeEach(() => {
     instalarFetchDados();
   });
 
-  it('mostra o título, a tabela de índices com o Ibovespa e nenhum NaN', async () => {
+  it('mostra o título, os três grupos de índices e nenhum NaN', async () => {
     const { container } = renderizar(<SecaoMercado />);
 
     expect(await screen.findByRole('heading', { level: 2, name: TEXTOS.mercado.titulo })).toBeInTheDocument();
-
-    const tabela = await screen.findByRole('table', { name: TEXTOS.mercado.tabelaTitulo });
-    expect(within(tabela).getByRole('rowheader', { name: /^Ibovespa/ })).toBeInTheDocument();
-    expect(within(tabela).getByRole('columnheader', { name: TEXTOS.mercado.colHoje })).toBeInTheDocument();
-
+    expect(await screen.findByRole('heading', { level: 2, name: TEXTOS.mercado.indicesTitulo })).toBeInTheDocument();
+    for (const nome of ['Bolsa', 'Juros e inflação', 'Câmbio e petróleo']) {
+      expect(screen.getByRole('heading', { level: 3, name: nome })).toBeInTheDocument();
+    }
     expect(container.textContent).not.toMatch(/NaN|undefined/);
   });
 
-  it('não tem mais a aba Setores; a aba Destaques leva à página Setores', async () => {
+  it('não tem abas, nem a seção de destaques nem o link para os setores', async () => {
     renderizar(<SecaoMercado />);
 
-    expect(screen.queryByRole('tab', { name: 'Setores' })).not.toBeInTheDocument();
-    fireEvent.click(aba('destaques'));
-    expect(screen.getByRole('link', { name: TEXTOS.setores.verTodos })).toHaveAttribute('href', '/setores');
+    await screen.findByRole('heading', { level: 2, name: TEXTOS.mercado.indicesTitulo });
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ver todos os setores')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Pesquise o volume/)).not.toBeInTheDocument();
   });
 
-  it('mostra o destaque de cada setor, na aba Destaques', async () => {
+  it('cada índice é um item de lista com o nome, o valor de hoje e os períodos', async () => {
     renderizar(<SecaoMercado />);
+    await screen.findByRole('heading', { level: 3, name: 'Bolsa' });
 
-    fireEvent.click(aba('destaques'));
+    const itens = within(grupo('Bolsa')).getAllByRole('listitem');
+    expect(itens).toHaveLength(5);
+    expect(itens[0]).toHaveTextContent('Ibovespa');
+    expect(itens[0].querySelector('.mercado-indice__grande')).not.toBeNull();
+    expect(within(grupo('Bolsa')).getByText('IDIV')).toBeInTheDocument();
+  });
 
-    expect(
-      await screen.findByRole('heading', { level: 3, name: TEXTOS.mercado.destaqueSetorTitulo }),
-    ).toBeInTheDocument();
+  it('a explicação de uma linha aparece em cada índice, no nível simples', async () => {
+    renderizar(<SecaoMercado />);
+    await screen.findByRole('heading', { level: 3, name: 'Bolsa' });
+
+    expect(within(grupo('Bolsa')).getByText('empresas que mais pagam proventos')).toBeInTheDocument();
+  });
+
+  it('nenhum período aparece como "Indisponível"', async () => {
+    const { container } = renderizar(<SecaoMercado />);
+    await screen.findByRole('heading', { level: 3, name: 'Bolsa' });
+
+    expect(container.textContent).not.toMatch(/Indisponível/);
   });
 
   it('trocar o período marca o botão escolhido com aria-pressed', async () => {
@@ -58,50 +74,47 @@ describe('SecaoMercado', () => {
     expect(seisMeses).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('o gráfico dos índices desenha o Ibovespa com a comparação padrão (IPCA) marcada', async () => {
+  it('o gráfico começa com Ibovespa e CDI ligados e nenhuma comparação', async () => {
     renderizar(<SecaoMercado />);
 
     expect(await screen.findByRole('img', { name: /^Ibovespa: de/ })).toBeInTheDocument();
 
-    const comparar = screen.getByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
-    expect(within(comparar).getByRole('button', { name: TEXTOS.mercado.comparacao.IPCA })).toHaveAttribute(
+    const indices = screen.getByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
+    expect(within(indices).getByRole('button', { name: TEXTOS.dia.ibovespa })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(indices).getByRole('button', { name: TEXTOS.mercado.cdi })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(indices).getByRole('button', { name: TEXTOS.mercado.comparacao.IPCA })).toHaveAttribute(
       'aria-pressed',
-      'true',
+      'false',
     );
   });
 
-  it('as séries fixas aparecem como fixas e as comparações alternam com aria-pressed', async () => {
+  it('todos os índices são chips liga/desliga, sem "Marcar todos" nem rótulo de fixo', async () => {
     renderizar(<SecaoMercado />);
 
-    const comparar = await screen.findByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
-    expect(within(comparar).getAllByText(TEXTOS.mercado.fixo)).toHaveLength(2);
-
-    const idiv = within(comparar).getByRole('button', { name: TEXTOS.mercado.comparacao.IDIV });
+    const indices = await screen.findByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
+    const idiv = within(indices).getByRole('button', { name: TEXTOS.mercado.comparacao.IDIV });
     fireEvent.click(idiv);
     expect(idiv).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(idiv);
+    expect(idiv).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(within(indices).getByRole('button', { name: TEXTOS.dia.ibovespa }));
+    expect(within(indices).getByRole('button', { name: TEXTOS.dia.ibovespa })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByRole('button', { name: 'Marcar todos' })).not.toBeInTheDocument();
+    expect(screen.queryByText('fixo')).not.toBeInTheDocument();
   });
 
-  it('permite marcar todas as comparações ao mesmo tempo e desmarcar todas de uma vez', async () => {
+  it('desligar todos os índices troca o gráfico pelo estado vazio com a frase', async () => {
     renderizar(<SecaoMercado />);
 
-    const comparar = await screen.findByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
-    const idiv = within(comparar).getByRole('button', { name: TEXTOS.mercado.comparacao.IDIV });
-    const smll = within(comparar).getByRole('button', { name: TEXTOS.mercado.comparacao.SMLL });
-
-    fireEvent.click(idiv);
-    fireEvent.click(smll);
-    expect(idiv).toHaveAttribute('aria-pressed', 'true');
-    expect(smll).toHaveAttribute('aria-pressed', 'true');
-
-    fireEvent.click(within(comparar).getByRole('button', { name: TEXTOS.mercado.marcarTodas }));
-    for (const nome of Object.values(TEXTOS.mercado.comparacao)) {
-      expect(within(comparar).getByRole('button', { name: nome })).toHaveAttribute('aria-pressed', 'true');
+    const indices = await screen.findByRole('group', { name: TEXTOS.mercado.comparacaoGrupo });
+    for (const nome of [TEXTOS.dia.ibovespa, TEXTOS.mercado.cdi]) {
+      fireEvent.click(within(indices).getByRole('button', { name: nome }));
     }
 
-    fireEvent.click(within(comparar).getByRole('button', { name: TEXTOS.mercado.desmarcarTodas }));
-    for (const nome of Object.values(TEXTOS.mercado.comparacao)) {
-      expect(within(comparar).getByRole('button', { name: nome })).toHaveAttribute('aria-pressed', 'false');
-    }
+    expect(screen.getByText(TEXTOS.mercado.semSelecao)).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: /^Ibovespa/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: /Rentabilidade de cada série/ })).not.toBeInTheDocument();
   });
 
   it('cada série visível tem um cartão com o valor e a leitura em reais, do maior para o menor', async () => {
@@ -109,7 +122,7 @@ describe('SecaoMercado', () => {
 
     const lista = await screen.findByRole('list', { name: TEXTOS.mercado.resumoLista(TEXTOS.mercado.periodos['6m']) });
     const cartoes = within(lista).getAllByRole('listitem');
-    expect(cartoes.length).toBeGreaterThanOrEqual(3);
+    expect(cartoes.length).toBeGreaterThanOrEqual(2);
 
     const valores = cartoes.map((c) => {
       const texto = c.querySelector('.mercado-rendimento__valor').textContent;

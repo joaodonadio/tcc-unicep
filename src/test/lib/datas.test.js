@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dataBR, dataExtenso, dataHoraBR, diaMes, diaSemanaCurto, hojeISO, horaBR, mesAno, quandoPublicada, rotuloTrimestre, textoPublicacao } from '../../lib/datas.js';
+import { dataBR, dataExtenso, dataHoraBR, diaMes, diaSemanaCurto, hojeISO, horaBR, mesAno, mesExtenso, quandoPublicada, rotuloTrimestre } from '../../lib/datas.js';
 
 describe('datas puras (AAAA-MM-DD) sem fuso', () => {
   it('dataBR', () => {
@@ -13,6 +13,13 @@ describe('datas puras (AAAA-MM-DD) sem fuso', () => {
   it('dataExtenso informa o dia da semana correto', () => {
     expect(dataExtenso('2026-10-22')).toContain('quinta-feira');
     expect(dataExtenso('2026-10-22')).toBe('quinta-feira, 22 de outubro de 2026');
+  });
+
+  it('mesExtenso com inicial maiúscula; mês inválido vira vazio', () => {
+    expect(mesExtenso('2026-11')).toBe('Novembro de 2026');
+    expect(mesExtenso('2027-01')).toBe('Janeiro de 2027');
+    expect(mesExtenso('2026-13')).toBe('');
+    expect(mesExtenso('')).toBe('');
   });
 
   it('mesAno', () => {
@@ -48,8 +55,6 @@ describe('instantes com horário, no fuso de São Paulo', () => {
 });
 
 describe('texto de data único das telas', () => {
-  const agora = new Date('2026-10-27T15:00:00-03:00');
-
   it('diaSemanaCurto', () => {
     expect(diaSemanaCurto('2026-10-26')).toBe('segunda');
     expect(diaSemanaCurto('2026-10-25')).toBe('domingo');
@@ -61,22 +66,5 @@ describe('texto de data único das telas', () => {
     expect(rotuloTrimestre('2024-12-31')).toBe('4T24');
     expect(rotuloTrimestre('2025-03-31')).toBe('1T25');
     expect(rotuloTrimestre('')).toBe('');
-  });
-
-  it('textoPublicacao com publicação de hoje', () => {
-    expect(
-      textoPublicacao({ publicadoEm: '2026-10-27T10:53:50-03:00', dataPregao: '2026-10-26', agora }),
-    ).toBe('Publicado hoje, 27/10, às 10h53 · dados do pregão de segunda, 26/10');
-  });
-
-  it('textoPublicacao com publicação de outro dia', () => {
-    expect(
-      textoPublicacao({ publicadoEm: '2026-10-24T23:25:33-03:00', dataPregao: '2026-10-22', agora }),
-    ).toBe('Publicado em 24/10, às 23h25 · dados do pregão de quinta, 22/10');
-  });
-
-  it('textoPublicacao sem publicação, e sem nada', () => {
-    expect(textoPublicacao({ dataPregao: '2026-10-22', agora })).toBe('Dados do pregão de quinta, 22/10');
-    expect(textoPublicacao({})).toBe('');
   });
 });

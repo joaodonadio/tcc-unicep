@@ -149,6 +149,32 @@ describe('montarTabelaRetornos', () => {
     expect(tabela.linhas).toHaveLength(4);
     tabela.linhas.forEach((linha) => linha.celulas.forEach((c) => expect(c.texto).toBe('—')));
   });
+
+  it('sem variacao_preco.s1 no resumo, mantém as 4 colunas (dado real de hoje)', () => {
+    const tabela = montarTabelaRetornos(R);
+    expect(tabela.colunas.map((c) => c.chave)).toEqual(['d1', 'm1', 'm6', 'a1']);
+  });
+
+  it('com s1 no resumo, ganha a coluna 1 semana depois do dia', () => {
+    const com = structuredClone(R);
+    com.variacao_preco.s1 = { valor: 0.03, status: 'ok' };
+    com.rentabilidade.s1 = { valor: 0.031, status: 'ok' };
+    const tabela = montarTabelaRetornos(com);
+    expect(tabela.colunas.map((c) => c.chave)).toEqual(['d1', 's1', 'm1', 'm6', 'a1']);
+    expect(tabela.linhas[0].celulas[1].texto).toBe(pct(0.03));
+    expect(tabela.linhas[0].celulas[1].texto).toBe('+3,0%');
+    // Ibovespa e setor não trazem s1 aqui: travessão, nunca zero
+    expect(tabela.linhas[2].celulas[1].texto).toBe('—');
+    expect(tabela.linhas[3].celulas[1].texto).toBe('—');
+  });
+
+  it('janela de 1 semana com salto de escala vira célula em revisão', () => {
+    const com = structuredClone(R);
+    com.variacao_preco.s1 = { valor: 0.03, status: 'ok' };
+    const tabela = montarTabelaRetornos(com, { s1: true });
+    expect(tabela.linhas[0].celulas[1].emRevisao).toBe(true);
+    expect(tabela.linhas[0].celulas[1].texto).toBe('—');
+  });
 });
 
 describe('tipo da ação no cabeçalho', () => {

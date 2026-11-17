@@ -1,64 +1,4 @@
-/* Página inicial: O dia, mapa do pregão, notícias e proventos em cartões translúcidos. */
-
-/* ---------- O dia: fatos do quadro ---------- */
-.dia-fatos {
-  margin: 0;
-}
-
-.dia-fato {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  column-gap: var(--espaco-4);
-  row-gap: var(--espaco-1);
-  padding: var(--espaco-4) 0;
-  border-bottom: 1px solid var(--cor-fio);
-}
-
-.dia-fato:last-child {
-  border-bottom: 0;
-}
-
-.dia-fato dt,
-.dia-fato dd {
-  margin: 0;
-}
-
-.dia-fato dt {
-  grid-column: 1;
-  font-size: var(--texto-sm);
-  color: var(--cor-texto-suave);
-}
-
-.dia-fato dt.dia-grupo {
-  color: var(--cor-texto);
-  font-weight: var(--peso-medio);
-}
-
-.dia-fato dt.dia-sub {
-  padding-left: var(--espaco-4);
-}
-
-.dia-fato dd {
-  grid-column: 2;
-  text-align: right;
-  font-size: var(--texto-base);
-  font-weight: var(--peso-medio);
-  font-variant-numeric: tabular-nums;
-}
-
-.dia-fato dd.dia-nota {
-  grid-column: 1 / -1;
-  text-align: left;
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-normal);
-  line-height: 1.45;
-  color: var(--cor-texto-suave);
-}
-
-.dia-fato a {
-  font-weight: var(--peso-titulo);
-}
+/* Mapa do pregão (página Ações): mapa de calor por setor, em cartões translúcidos. */
 
 /* ---------- Mapa do pregão: mapa de calor por setor ---------- */
 .mapa {
@@ -78,6 +18,25 @@
   margin-bottom: var(--espaco-5);
 }
 
+/* Cotinha ao lado da intro do mapa; a grade de blocos não muda */
+.mapa-intro-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-5);
+}
+
+.mapa-intro-linha .mapa-intro {
+  margin-bottom: 0;
+}
+
+.mapa-pavio {
+  --pavio-tam: 2.75rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
+}
+
 .mapa-linhas {
   list-style: none;
   padding: 0;
@@ -88,13 +47,38 @@
 
 .mapa-linha {
   display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr);
+  grid-template-columns: 14.5rem minmax(0, 1fr);
   align-items: start;
   gap: var(--espaco-4);
   padding: var(--espaco-5);
-  background: var(--cor-superficie);
+  /* mesma base escura dos cartões das outras telas, para a fileira destacar do fundo */
+  background: var(--vidro-base);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-cartao);
+  /* a âncora #setor-... cai abaixo do cabeçalho fixo */
+  scroll-margin-top: calc(var(--altura-cabecalho) + var(--espaco-4));
+}
+
+/* Linha alvo de um link do Setores: contorno que some em 2,4 s (sem animação com movimento reduzido) */
+.mapa-linha:target {
+  outline: 2px solid var(--cor-acento);
+  outline-offset: 3px;
+  animation: destaque-alvo 2.4s ease-out both;
+}
+
+@keyframes destaque-alvo {
+  from { outline-color: var(--cor-acento); }
+  to { outline-color: transparent; }
+}
+
+:root[data-movimento='reduzido'] .mapa-linha:target {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-movimento='livre']) .mapa-linha:target {
+    animation: none;
+  }
 }
 
 .mapa-setor {
@@ -119,8 +103,9 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
+  /* grade que ocupa a largura toda: as colunas caem no mesmo lugar em todos os setores */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
   gap: 6px;
 }
 
@@ -131,7 +116,7 @@
   justify-content: center;
   gap: 2px;
   box-sizing: border-box;
-  width: 5.5rem;
+  width: 100%;
   height: 3.25rem;
   padding: var(--espaco-1) var(--espaco-3);
   border-radius: var(--raio-2);
@@ -141,7 +126,7 @@
 }
 
 .mapa-bloco a:hover {
-  outline: 2px solid var(--cor-texto);
+  outline: 2px solid var(--cor-cinza-claro);
   outline-offset: 1px;
 }
 
@@ -187,292 +172,58 @@
   border-radius: var(--raio-pilula);
 }
 
-/* ---------- Notícias e proventos, lado a lado ---------- */
-/* Cada bloco começa com um fio grosso, sem caixa */
-.dia-bloco {
-  min-width: 0;
-  padding: var(--espaco-6);
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-cartao);
-}
-
-.dia-bloco-titulo {
-  font-size: var(--texto-2xl);
+/* Ação mais negociada do setor: canto dobrado em cinza claro e leve sombra; forma, não só cor */
+.mapa-bloco--circulada a {
+  position: relative;
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.7);
   font-weight: var(--peso-forte);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--espaco-4);
 }
 
-.dia-nota {
-  font-size: var(--texto-sm);
-  color: var(--cor-texto-suave);
-  margin-bottom: var(--espaco-3);
+.mapa-bloco--circulada a::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: 1.375rem;
+  block-size: 1.375rem;
+  border-start-end-radius: inherit;
+  background: var(--cor-cinza-claro);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  pointer-events: none;
 }
 
-.dia-vazio {
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-sm);
-}
-
-.dia-tom {
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-medio);
-  margin-bottom: var(--espaco-5);
-}
-
-/* Tom: três números grandes, cada um na cor do seu sinal */
-.dia-contagens {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--espaco-3);
-  margin: 0 0 var(--espaco-4);
-}
-
-.dia-contagem {
+/* Legenda da circulada; a amostra é o mesmo canto em miniatura */
+.mapa-legenda-circulada {
   display: flex;
-  flex-direction: column-reverse;
+  align-items: center;
   gap: var(--espaco-2);
-  padding: var(--espaco-4);
-  background: var(--cor-superficie);
-  border-radius: var(--raio-3);
-}
-
-.dia-contagem dt,
-.dia-contagem dd {
-  margin: 0;
-}
-
-.dia-contagem dt {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
-  color: var(--cor-texto-suave);
-}
-
-.dia-contagem dd {
-  font-size: var(--texto-3xl);
-  font-weight: var(--peso-forte);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--cor-texto);
-}
-
-.dia-contagem[data-contagem='positivas'] dd,
-.dia-contagem[data-contagem='positivas'] dt {
-  color: var(--cor-alta);
-}
-
-.dia-contagem[data-contagem='neutras'] dd {
-  color: var(--cor-texto-suave);
-}
-
-.dia-contagem[data-contagem='negativas'] dd,
-.dia-contagem[data-contagem='negativas'] dt {
-  color: var(--cor-queda);
-}
-
-/* Barra fina com as três proporções (aria-hidden: os números já estão no texto) */
-.dia-barra {
-  display: flex;
-  height: 10px;
-  gap: 3px;
-  overflow: hidden;
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
-  margin-bottom: var(--espaco-5);
-}
-
-.dia-barra span {
-  flex-basis: 0;
-  min-width: 0;
-  border-radius: var(--raio-pilula);
-}
-
-.dia-barra [data-contagem='positivas'] {
-  background: var(--cor-alta);
-}
-
-.dia-barra [data-contagem='neutras'] {
-  background: var(--cor-texto-suave);
-}
-
-.dia-barra [data-contagem='negativas'] {
-  background: var(--cor-queda);
-}
-
-/* Manchetes por tom */
-.dia-manchetes {
-  display: grid;
-  gap: var(--espaco-5);
-  margin-top: var(--espaco-4);
-}
-
-.dia-manchetes-titulo {
-  font-size: var(--texto-xs);
-  font-weight: var(--peso-titulo);
-  letter-spacing: 0.01em;
-  color: var(--cor-texto-suave);
-  margin-bottom: var(--espaco-2);
-}
-
-.dia-manchetes-lista {
-  display: grid;
-  gap: var(--espaco-2);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* Cada manchete é um bloco com borda fina na cor do tom; sem barra lateral grossa */
-.dia-manchetes-lista li {
-  padding: var(--espaco-3);
-  border: 1px solid color-mix(in srgb, var(--cor-texto-suave) 35%, transparent);
-  border-radius: var(--raio-2);
-  background: color-mix(in srgb, var(--cor-texto-suave) 6%, transparent);
-}
-
-.dia-manchetes-lista li[data-tom='alta'] {
-  border-color: color-mix(in srgb, var(--cor-alta) 35%, transparent);
-  background: color-mix(in srgb, var(--cor-alta) 6%, transparent);
-}
-
-.dia-manchetes-lista li[data-tom='queda'] {
-  border-color: color-mix(in srgb, var(--cor-queda) 35%, transparent);
-  background: color-mix(in srgb, var(--cor-queda) 6%, transparent);
-}
-
-.dia-manchetes-lista li > .pilula {
-  margin-bottom: var(--espaco-2);
-  font-size: var(--texto-xs);
-}
-
-.dia-manchetes-coluna[data-tom='positivo'] .dia-manchetes-titulo {
-  color: var(--cor-alta);
-}
-
-.dia-manchetes-coluna[data-tom='negativo'] .dia-manchetes-titulo {
-  color: var(--cor-queda);
-}
-
-.dia-manchete {
-  color: var(--cor-texto);
-  text-decoration: none;
-  font-size: var(--texto-base);
-  line-height: 1.45;
-}
-
-.dia-manchete:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.dia-manchete-fonte {
-  display: block;
-  margin-top: var(--espaco-1);
+  margin: var(--espaco-3) 0 0;
   font-size: var(--texto-xs);
   color: var(--cor-texto-suave);
 }
 
-.dia-mais-manchetes {
-  margin-top: var(--espaco-3);
-  min-height: 2.5rem;
-  padding: 0 var(--espaco-5);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie-2);
-  font: inherit;
-  font-size: var(--texto-sm);
-  font-weight: var(--peso-medio);
-  color: var(--cor-texto);
-  cursor: pointer;
-  transition: background-color var(--duracao) var(--curva);
+.mapa-pavio-legenda {
+  --pavio-tam: 2rem;
+  flex: none;
+  inline-size: var(--pavio-tam);
+  block-size: var(--pavio-tam);
 }
 
-.dia-mais-manchetes:hover {
-  background: var(--cor-superficie-hover);
-}
-
-.dia-mais-manchetes:active {
-  color: var(--cor-texto-suave);
-}
-
-.dia-mais-manchetes:focus-visible {
-  outline: 3px solid var(--cor-foco);
-  outline-offset: 2px;
-}
-
-/* Empresas com mais manchetes: tabela */
-.dia-empresas {
-  margin-top: var(--espaco-6);
-}
-
-.dia-tabela-empresas {
-  margin-top: var(--espaco-2);
-}
-
-.dia-tabela-empresas th,
-.dia-tabela-empresas td {
-  padding: var(--espaco-3) var(--espaco-3);
-}
-
-.dia-tabela-empresas thead th {
-  white-space: normal;
-}
-
-.dia-tabela-empresas tbody th {
-  font-weight: var(--peso-titulo);
-}
-
-/* A regra .tabela tira a borda só das células td; a do cabeçalho de linha (th) ficaria sozinha. */
-.dia-tabela-empresas tbody tr:last-child th {
-  border-bottom: 0;
-}
-
-/* Nome da empresa ao lado do ticker: texto suave, sem competir com o ticker */
-.dia-tabela-empresas .dia-empresa-nome {
-  color: var(--cor-texto-suave);
-  font-weight: var(--peso-medio);
-}
-
-.dia-tabela-empresas td[data-contagem='positivas'] {
-  color: var(--cor-alta);
-  font-weight: var(--peso-medio);
-}
-
-.dia-tabela-empresas td[data-contagem='neutras'] {
-  color: var(--cor-texto-suave);
-  font-weight: var(--peso-medio);
-}
-
-.dia-tabela-empresas td[data-contagem='negativas'] {
-  color: var(--cor-queda);
-  font-weight: var(--peso-medio);
+.mapa-amostra-circulada {
+  display: inline-block;
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  background: var(--cor-cinza-claro);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
 }
 
 /* ---------- Telas menores ---------- */
 @media (max-width: 760px) {
-  .dia-tabela-empresas th,
-  .dia-tabela-empresas td {
-    padding: var(--espaco-2);
-  }
-
   .mapa-linha {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--espaco-2);
     padding: var(--espaco-4);
-  }
-
-  .dia-bloco {
-    padding: var(--espaco-5) var(--espaco-4);
-  }
-
-  .dia-contagem dd {
-    font-size: var(--texto-2xl);
-  }
-
-  .dia-contagem {
-    padding: var(--espaco-3);
   }
 
   .mapa-setor {
@@ -485,31 +236,28 @@
   padding-top: var(--espaco-6);
 }
 
-/* Espera do modelo (SecaoAcerto): aviso amarelo de atenção, a mesma fórmula do aviso da casa.
-   Dois seletores de classe para vencer `.acerto .estado` de acoes.css, que zera a caixa. */
-.acerto .estado.estado--vazio {
-  padding: var(--espaco-5);
-  border: 1px solid color-mix(in srgb, var(--cor-atencao) 32%, transparent);
-  border-radius: var(--raio-3);
-  background: color-mix(in srgb, var(--cor-atencao) 8%, transparent);
-  color: var(--cor-texto);
-}
-
 /* Primeira vez por aqui (ComoUsar): cartões dos passos, anel com o número e ilustração em loop.
    Os estados de entrada (data-visivel) só valem com movimento permitido; com reduced motion,
    tudo fica no quadro final e legível. Só transform e opacity animam. */
-/* Caminho: os cinco passos em uma linha só a partir de 1440px (ao lado da introdução);
-   abaixo disso, grade de cartões que cabe na largura */
+/* Caminho: os cinco passos em grade que cabe na largura */
 .como-usar .como-usar__passos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   gap: var(--espaco-3);
 }
 
-@media (min-width: 1440px) {
-  .como-usar .como-usar__passos {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+/* Os cinco passos sempre em fileiras completas, sem cartão solto */
+@media (min-width: 960px) {
+  .como-usar .como-usar__passos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (min-width: 641px) and (max-width: 959px) {
+  .como-usar .como-usar__passos { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .como-usar .como-usar__passos > * { grid-column: span 2; }
+  .como-usar .como-usar__passos > :nth-child(n + 4) { grid-column: span 3; }
+}
+@media (min-width: 480px) and (max-width: 640px) {
+  .como-usar .como-usar__passos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .como-usar .como-usar__passos > :last-child { grid-column: 1 / -1; }
 }
 
 /* Passo: sub-superfície dentro do cartão de introdução (sem borda colorida no hover) */
@@ -913,6 +661,116 @@
   }
 }
 
+/* Guia do fim do cartão: dicas leves (sem caixa, para não repetir os passos) e o mini dicionário
+   em sub-superfícies. Três colunas; no celular, empilha. */
+.como-usar__guia {
+  margin-top: var(--espaco-5);
+  font-size: var(--texto-sm);
+  line-height: 1.4;
+}
+
+.como-usar__dicas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.como-usar__dica {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  color: var(--cor-texto-suave);
+}
+
+.como-usar__dica-icone {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+  color: var(--cor-acento);
+}
+
+.como-usar__dicionario-titulo {
+  margin: var(--espaco-5) 0 var(--espaco-2);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+}
+
+.como-usar__dicionario {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+.como-usar__verbete {
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-3);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+}
+
+.como-usar__verbete-termo {
+  font-size: var(--texto-base);
+  font-weight: var(--peso-forte);
+  color: var(--cor-texto);
+}
+
+.como-usar__verbete-significado {
+  margin: var(--espaco-1) 0 0;
+  color: var(--cor-texto-suave);
+}
+
+/* Nível das explicações: ícone, frase e o seletor Simples/Técnico numa faixa só; no celular, o seletor desce
+   para baixo da frase, alinhado com ela */
+.como-usar__nivel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-5);
+  padding-top: var(--espaco-4);
+  border-top: 1px solid var(--cor-fio);
+  color: var(--cor-texto);
+}
+
+.como-usar__nivel p {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .como-usar__nivel {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .como-usar__nivel .segmentado {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .como-usar__dicas,
+  .como-usar__dicionario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .como-usar__dicas {
+    gap: var(--espaco-3);
+  }
+}
+
 /* Abaixo de 1440px a introdução vai para cima, em largura toda, e os passos descem para a grade.
    O X fica no canto, como no celular, para não ocupar uma linha da introdução. */
 @media (max-width: 1439px) {
@@ -926,7 +784,7 @@
     gap: var(--espaco-4);
   }
 
-  /* o Pavio fica na linha do título; os passos descem para a largura toda */
+  /* o Cotinha fica na linha do título; os passos descem para a largura toda */
   .como-usar__mascote {
     grid-column: 1;
     grid-row: 1;
@@ -938,6 +796,7 @@
     padding-right: var(--espaco-7);
   }
 
+  .como-usar__navegar,
   .como-usar__passos {
     grid-column: 1 / -1;
   }

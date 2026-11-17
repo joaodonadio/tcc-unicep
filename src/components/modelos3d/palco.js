@@ -22,6 +22,7 @@ import {
   MeshPhysicalMaterial,
   OrthographicCamera,
   Scene,
+  SRGBColorSpace,
   Vector3,
   WebGLRenderer,
 } from 'three';
@@ -41,7 +42,8 @@ function lerCor(ancora, token) {
   const cor = getComputedStyle(sonda).color;
   sonda.remove();
   const n = cor.match(/[\d.]+/g) || [0, 0, 0];
-  return new Color(n[0] / 255, n[1] / 255, n[2] / 255);
+  // valores sRGB: sem o espaço de cor, o three trata como linear e clareia as cores escuras
+  return new Color().setRGB(n[0] / 255, n[1] / 255, n[2] / 255, SRGBColorSpace);
 }
 
 export const suaviza = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
@@ -82,6 +84,19 @@ export function criarPalco(opcoes) {
   luzDir.position.set(4, 14, 12);
   cena.add(new HemisphereLight(0xfff1dc, 0x2b2622, 1.7), luzDir);
 
+  /** Guarda o material para o retingimento e já o pinta: peças do .glb e olhos saem depois do primeiro pintar. */
+  function registra(m, tok, emite) {
+    materiais.push([m, tok, emite]);
+    pinta(m, tok, emite);
+    return m;
+  }
+  /** Cor do token na cor base; com emite, a emissão recebe a mesma cor (brilho próprio). */
+  function pinta(m, tok, emite) {
+    const c = lerCor(container, tok);
+    m.color.copy(c);
+    if (emite) m.emissive.copy(c);
+  }
+
   const M = {
     /** op < 1 deixa a peça translúcida. */
     chapa(tok, op) {
@@ -94,21 +109,21 @@ export function criarPalco(opcoes) {
         polygonOffsetUnits: 1,
         depthWrite: op == null,
       });
-      materiais.push([m, tok]);
+      registra(m, tok);
       return m;
     },
     traco(tok, op = 0.6) {
       const m = new LineBasicMaterial({ transparent: true, opacity: op, depthWrite: false });
-      materiais.push([m, tok]);
+      registra(m, tok);
       return m;
     },
     /** Material opaco com volume (recebe as luzes do palco). */
     solido(tok) {
       const m = new MeshLambertMaterial({ polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
-      materiais.push([m, tok]);
+      registra(m, tok);
       return m;
     },
-    /** Cerâmica esmaltada: rugosidade média e verniz leve para o brilho especular. */
+    /** Cerâmica esmaltada: rugosidade média e verniz leve para o brilho especular. emissivo: luz própria (0 a 1). */
     ceramica(tok, o = {}) {
       const m = new MeshPhysicalMaterial({
         roughness: o.rough ?? 0.45,
@@ -116,24 +131,30 @@ export function criarPalco(opcoes) {
         clearcoat: o.verniz ?? 0.5,
         clearcoatRoughness: 0.25,
       });
-      materiais.push([m, tok]);
+      if (o.emissivo) {
+        m.emissiveIntensity = o.emissivo;
+        registra(m, tok, true);
+      } else {
+        registra(m, tok);
+      }
       return m;
     },
     /** Véu translúcido sem escrita de profundidade (bochechas, sombra de contato). */
     veu(tok, op) {
       const m = new MeshBasicMaterial({ transparent: true, opacity: op, side: DoubleSide, depthWrite: false });
-      materiais.push([m, tok]);
+      registra(m, tok);
       return m;
     },
     casco(tok) {
       const m = new MeshBasicMaterial({ side: BackSide });
-      materiais.push([m, tok]);
+      registra(m, tok);
       return m;
     },
   };
 
   function retinge() {
-    materiais.forEach(([m, t]) => m.color.copy(lerCor(container, t)));
+    // emite: true para materiais com brilho próprio (ver M.ceramica)
+    materiais.forEach(([m, t, emite]) => pinta(m, t, emite));
     sujo = true;
     loop();
   }

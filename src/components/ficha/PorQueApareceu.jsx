@@ -10,7 +10,7 @@ import ComparacaoRegra from './ComparacaoRegra.jsx';
 import PlacarRegras from './PlacarRegras.jsx';
 
 /**
- * Pergunta "O que as regras dizem?": um placar com quantas checagens acenderam por tipo,
+ * Pergunta "O que as checagens mostram?": um placar com quantas checagens acenderam por tipo,
  * as que acenderam em grupos (a favor, pontos de atenção e contexto) e, recolhido, como
  * cada checagem funciona. Nada de decisão nem feedback aqui.
  */
