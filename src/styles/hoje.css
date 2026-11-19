@@ -942,11 +942,6 @@
 }
 
 /* selo "em avaliação": o Top 5 vem do modelo experimental */
-.top5-selo {
-  margin: 0 0 var(--espaco-3);
-  color: var(--cor-acento);
-}
-
 /* avisos do modelo no painel "Como escolhemos" */
 .top5-avisos {
   margin: var(--espaco-3) 0 0;
@@ -959,6 +954,60 @@
   max-width: 60ch;
   color: var(--cor-texto-suave);
   font-size: var(--texto-base);
+}
+
+/* Origem da lista: pelas regras ou pelo modelo em avaliação (mesma receita das abas de Setores) */
+.top5-fontes {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--espaco-1);
+  max-width: 100%;
+  margin-top: var(--espaco-3);
+  padding: var(--espaco-1);
+  border: 1px solid var(--sub-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--sub-fundo);
+  box-shadow: var(--sub-luz);
+}
+
+.top5-fonte {
+  min-height: 2.75rem;
+  padding: var(--espaco-2) var(--espaco-4);
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: transparent;
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* reserva a largura do negrito: a aba não cresce ao ser escolhida */
+.top5-fonte::after {
+  content: attr(data-rotulo);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: var(--peso-forte);
+}
+
+.top5-fonte:hover {
+  background: var(--sub-fundo-hover);
+}
+
+.top5-fonte[aria-pressed='true'] {
+  background: var(--cor-acento);
+  color: var(--cor-acento-texto);
+  font-weight: var(--peso-forte);
+}
+
+.top5-fonte:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
 }
 
 /* "Como escolhemos" aberto: o texto fica entre o cabeçalho e a lista, com respiro embaixo */

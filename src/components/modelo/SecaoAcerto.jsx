@@ -21,13 +21,9 @@ function Dados({ r }) {
       <p className="acerto-resultado">
         {temTaxa ? TEXTOS.acerto.resultado(pct(r.taxa, { casas: 0, sinal: false }), r.nDias) : ROTULO_STATUS.indisponivel}
       </p>
-      {r.comparacao != null && (
+      {(r.comparacao === 'acima' || r.comparacao === 'abaixo') && (
         <p className="acerto-veredito">
-          {r.comparacao === 'acima'
-            ? TEXTOS.acerto.acimaDoAcaso
-            : r.comparacao === 'abaixo'
-              ? TEXTOS.acerto.abaixoDoAcaso
-              : TEXTOS.acerto.dentroDoAcaso}
+          {r.comparacao === 'acima' ? TEXTOS.acerto.acimaDoAcaso : TEXTOS.acerto.abaixoDoAcaso}
         </p>
       )}
       <div className="acerto-regua" aria-hidden="true">

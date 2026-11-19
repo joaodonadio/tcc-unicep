@@ -146,10 +146,12 @@ export function fatosDaAtualizacao({ dataReferencia, execucao, dadosAte = null }
   };
 }
 
+/** Aviso técnico que fica só no bloco da equipe, sem frase no resumo. */
+const AVISO_SEM_RESUMO = /composi[çc][ãa]o do ibovespa|cobertura/i;
+
 /** Regras que transformam um aviso técnico em frase simples (a primeira que casar entra no resumo). */
 const REGRAS_AVISO = [
   { padrao: /modelo provis[óo]rio|teste|top 5 n[ãa]o oficial/i, frase: dados.avisosResumo.modelo },
-  { padrao: /composi[çc][ãa]o do ibovespa|cobertura/i, frase: dados.avisosResumo.ibovespa },
   { padrao: /depois das 10h/i, frase: dados.avisosResumo.horario },
 ];
 
@@ -158,7 +160,8 @@ const REGRAS_AVISO = [
  * Sem avisos: "Nenhum aviso". Avisos que nenhuma regra reconhece: frase genérica.
  */
 export function resumoAvisos(execucao) {
-  const textos = avisosDaAtualizacao(execucao);
+  // a estimativa da composição antiga do Ibovespa não vira frase para o público
+  const textos = avisosDaAtualizacao(execucao).filter((t) => !AVISO_SEM_RESUMO.test(t));
   if (textos.length === 0) return [dados.avisosResumo.nenhum];
   const frases = REGRAS_AVISO.filter(({ padrao }) => textos.some((t) => padrao.test(t))).map(({ frase }) => frase);
   return frases.length > 0 ? frases : [dados.avisosResumo.generico];

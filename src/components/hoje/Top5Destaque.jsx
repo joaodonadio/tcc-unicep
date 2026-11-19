@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 import { usePreferencias } from '../../context/contextos.js';
 import { useAnaliseDoDia, useRecarregarAnalise } from '../../hooks/useAnalise.js';
+import { useExperimentoTop } from '../../hooks/useDados.js';
 import { useDetalhes } from '../../hooks/useDetalhes.js';
 import { useIndicador } from '../../hooks/useIndicador.js';
 import { brl, pct } from '../../lib/formato.js';
@@ -285,9 +286,12 @@ function Painel({ item, nivel }) {
   );
 }
 
+/** As duas origens da lista: as regras (padrão) e o modelo de previsão (pacote experimento/top). */
+const FONTES = ['regras', 'modelo'];
+
 /**
  * Top 5 para estudar hoje: lista (faixa de pílulas no celular) e o palco da ação escolhida.
- * Vem só das regras (o Top 5 do modelo ainda não é publicado). "Como escolhemos" explica a origem.
+ * Duas abas: pelas regras (padrão) ou pelo modelo de previsão. "Como escolhemos" explica a origem.
  * Conteúdo educativo: não é indicação de compra.
  */
 export default function Top5Destaque() {
@@ -296,18 +300,37 @@ export default function Top5Destaque() {
   const { nivel } = usePreferencias();
   const comoEscolhemos = useDetalhes();
   const [escolhido, setEscolhido] = useState(null);
+  const [fonte, setFonte] = useState('regras');
+  const experimento = useExperimentoTop();
+  const idFontes = useId();
 
-  const carregando = isPending;
-  const top = data ? top5ParaEstudar({ sugestoes: data.sugestoes }) : null;
+  const pedeModelo = fonte === 'modelo';
+  const carregando = isPending || (pedeModelo && experimento.isPending);
+  const erro = isError || (pedeModelo && experimento.isError);
+  let top = null;
+  if (data && !pedeModelo) top = top5ParaEstudar({ sugestoes: data.sugestoes });
+  if (data && pedeModelo && experimento.data?.itens?.length) {
+    top = top5ParaEstudar({ experimento: experimento.data, sugestoes: data.sugestoes });
+  }
   const itens = top?.itens ?? [];
+
+  function trocarFonte(nova) {
+    if (nova === fonte) return;
+    setEscolhido(null);
+    setFonte(nova);
+  }
   const atual = itens.find((i) => i.ticker === escolhido) ?? itens[0] ?? null;
-  const comLista = !isError && !carregando && itens.length > 0;
+  const comLista = !erro && !carregando && itens.length > 0;
   // a chave só existe com a lista na tela: assim o indicador mede de novo quando o carregamento termina
   const indicadorLista = useIndicador(comLista ? atual.ticker : null);
 
   let corpo;
   if (isError) {
     corpo = <BlocoErro titulo={T.erroTitulo} mensagem={T.erro} onTentarNovamente={recarregar} mascote />;
+  } else if (erro) {
+    corpo = (
+      <BlocoErro titulo={T.erroTitulo} mensagem={T.erroModelo} onTentarNovamente={() => experimento.refetch()} mascote />
+    );
   } else if (carregando) {
     corpo = (
       <>
@@ -318,7 +341,7 @@ export default function Top5Destaque() {
       </>
     );
   } else if (itens.length === 0) {
-    corpo = <p className="top5-vazio">{T.vazio}</p>;
+    corpo = <p className="top5-vazio">{pedeModelo ? T.vazioModelo : T.vazio}</p>;
   } else {
     corpo = (
       <>
@@ -351,8 +374,24 @@ export default function Top5Destaque() {
           <h2 id="top5-titulo" className="top5-titulo">
             <span className="top5-realce">{T.tituloInicio}</span> {T.tituloFim}
           </h2>
-          {comLista && top.origem === 'modelo' && <span className="chip top5-selo">{T.seloModelo}</span>}
-          <p className="top5-apoio">{top?.origem === 'modelo' ? T.apoioModelo : T.apoio}</p>
+          <p className="top5-apoio">{pedeModelo ? T.apoioModelo : T.apoio}</p>
+          <div className="top5-fontes" role="group" aria-labelledby={idFontes}>
+            <span id={idFontes} className="sr-only">
+              {T.fonteRotulo}
+            </span>
+            {FONTES.map((chave) => (
+              <button
+                key={chave}
+                type="button"
+                className="top5-fonte"
+                aria-pressed={fonte === chave}
+                data-rotulo={T.fontes[chave]}
+                onClick={() => trocarFonte(chave)}
+              >
+                {T.fontes[chave]}
+              </button>
+            ))}
+          </div>
         </div>
         {comLista && (
           <BotaoDetalhes

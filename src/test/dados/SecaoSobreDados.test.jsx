@@ -143,7 +143,6 @@ describe('SecaoSobreDados', () => {
       expect(await screen.findByRole('heading', { level: 3, name: TEXTOS.dados.secoes.avisos })).toBeInTheDocument();
 
       expect(screen.getByText(TEXTOS.dados.avisosResumo.modelo)).toBeInTheDocument();
-      expect(screen.getByText(TEXTOS.dados.avisosResumo.ibovespa)).toBeInTheDocument();
       expect(screen.getByText(TEXTOS.dados.avisosResumo.horario)).toBeInTheDocument();
 
       expect(painelEquipe()).toHaveAttribute('inert');

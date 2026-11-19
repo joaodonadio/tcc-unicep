@@ -127,10 +127,10 @@
   color: var(--cor-acento);
 }
 
-/* Régua do acaso: trilho arredondado; o acaso é um traço com rótulo, o modelo um ponto claro */
+/* Régua: trilho arredondado; o acaso é um traço, o modelo um ponto claro. O modelo fica em cima da barra e o acaso embaixo, para os rótulos nunca se encostarem (celular) */
 .acerto-regua {
   position: relative;
-  height: 4rem;
+  height: 5.75rem;
   margin: var(--espaco-5) 0 var(--espaco-3);
   padding: 0;
   border: 0;
@@ -141,7 +141,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  top: 2.5rem;
   height: 0.5rem;
   border-radius: var(--raio-pilula);
   background: var(--cor-superficie-2);
@@ -150,13 +150,23 @@
 .acerto-acaso,
 .acerto-modelo {
   position: absolute;
-  bottom: 0;
   left: var(--pos);
   transform: translateX(-50%);
-  padding-bottom: var(--espaco-4);
   font-size: var(--texto-xs);
   font-weight: var(--peso-medio);
   white-space: nowrap;
+}
+
+/* em cima: a base do rótulo fica no centro da barra (2,75rem do topo) */
+.acerto-modelo {
+  bottom: calc(100% - 2.75rem);
+  padding-bottom: var(--espaco-4);
+}
+
+/* embaixo: o topo do rótulo fica no centro da barra */
+.acerto-acaso {
+  top: 2.75rem;
+  padding-top: var(--espaco-4);
 }
 
 .acerto-acaso::after,
@@ -168,7 +178,7 @@
 }
 
 .acerto-acaso::after {
-  bottom: -0.25rem;
+  top: -0.5rem;
   width: 3px;
   height: 1rem;
   border-radius: 2px;
@@ -176,7 +186,7 @@
 }
 
 .acerto-modelo::after {
-  bottom: -0.375rem;
+  bottom: -0.625rem;
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;

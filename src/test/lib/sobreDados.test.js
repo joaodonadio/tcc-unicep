@@ -175,10 +175,9 @@ describe('fatosDaAtualizacao', () => {
 });
 
 describe('resumoAvisos', () => {
-  it('reconhece os avisos de modelo de teste, Ibovespa estimado e horário fora do normal', () => {
+  it('reconhece os avisos de modelo de teste e horário fora do normal; o do Ibovespa estimado não vira frase', () => {
     expect(resumoAvisos(execucaoReal)).toEqual([
       TEXTOS.dados.avisosResumo.modelo,
-      TEXTOS.dados.avisosResumo.ibovespa,
       TEXTOS.dados.avisosResumo.horario,
     ]);
   });

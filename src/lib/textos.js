@@ -394,7 +394,6 @@ export const TEXTOS = Object.freeze({
       `Em ${dias} ${dias === 1 ? 'pregão' : 'pregões'}, ${taxa} das ações que o modelo escolheu renderam mais que o Ibovespa.`,
     acimaDoAcaso: 'Acima do acaso.',
     abaixoDoAcaso: 'Abaixo do acaso.',
-    dentroDoAcaso: 'Dentro da faixa do acaso: ainda não dá para separar acerto de sorte.',
     erro: 'Não deu para carregar o histórico do modelo agora.',
   },
 
@@ -520,10 +519,6 @@ export const TEXTOS = Object.freeze({
           texto: {
             simples: 'Estuda 5 anos de pregões.',
             tecnico: 'Árvores XGBoost com 5 anos de pregões, validadas mês a mês com dados anteriores ao período testado.',
-          },
-          pilula: {
-            simples: 'Modelo em teste: as 5 ações dele são medidas, mas ainda não aparecem no site. O Top 5 da página inicial vem das regras.',
-            tecnico: 'Modelo provisório em teste: o Top 5 dele entra no histórico de acerto, mas não é exibido.',
           },
         },
         {
@@ -1377,21 +1372,24 @@ export const TEXTOS = Object.freeze({
     tituloInicio: 'Top 5',
     tituloFim: 'para estudar hoje',
     apoio: 'Cinco ações que as regras destacaram hoje. Toque numa para ver o porquê.',
-    apoioModelo: 'Cinco ações escolhidas pelo modelo em teste. Toque numa para ver o porquê.',
+    apoioModelo: 'Cinco ações escolhidas pelo modelo de previsão. Toque numa para ver o porquê.',
     listaRotulo: 'As cinco ações para estudar hoje',
     origemRegras: {
       simples: (total) =>
-        `Olhamos ${total} regras em cada ação. Entram as com mais pontos a favor; no empate, as com menos pontos de atenção. O modelo de previsão ainda está em teste.`,
+        `Olhamos ${total} regras em cada ação. Entram as com mais pontos a favor; no empate, as com menos pontos de atenção.`,
       tecnico: (total) =>
-        `${total} regras fixas sobre o resumo do pregão e as notícias. Ordem: mais sinais a favor, menos sinais de atenção, maior volume relativo e, por fim, o código. O modelo de previsão ainda está em teste.`,
+        `${total} regras fixas sobre o resumo do pregão e as notícias. Ordem: mais sinais a favor, menos sinais de atenção, maior volume relativo e, por fim, o código.`,
     },
     origemModelo: {
       simples:
-        'Escolhidas e ordenadas pelo modelo de previsão, que ainda está em avaliação. A chance de cada ação fica oculta enquanto ele é conferido. Preço, gráfico e números vêm dos dados do dia.',
+        'Escolhidas e ordenadas pelo modelo de previsão do projeto. Preço, gráfico e números vêm dos dados do dia.',
       tecnico:
-        'Ordem do modelo de previsão, em avaliação. Chance oculta até a conferência. Preço, gráfico e números vêm dos dados do pregão.',
+        'Ordem do modelo de previsão (XGBoost). Preço, gráfico e números vêm dos dados do pregão.',
     },
-    seloModelo: 'Em avaliação',
+    fonteRotulo: 'De onde vem a lista',
+    fontes: { regras: 'Pelas regras', modelo: 'Pelo modelo' },
+    vazioModelo: 'O Top 5 do modelo de hoje ainda não chegou. Veja a lista pelas regras.',
+    erroModelo: 'O Top 5 do modelo não carregou. Tente de novo em instantes.',
     avisosModelo: 'Avisos do modelo de hoje',
     // o que cada efeito de um motivo do modelo quer dizer (o texto do motivo vem do pacote)
     motivoModelo: {
@@ -1558,8 +1556,7 @@ export const TEXTOS = Object.freeze({
       experimento_top: 'Top 5 do modelo',
     },
     avisosResumo: {
-      modelo: 'O modelo de previsão ainda está em teste. Por isso o Top 5 do modelo não aparece no site.',
-      ibovespa: 'Para alguns dias antigos, a lista de ações do Ibovespa foi estimada com a lista de hoje.',
+      modelo: 'O Top 5 do modelo de previsão aparece na página Hoje, na aba "Pelo modelo".',
       horario: 'Esta atualização saiu depois do horário normal.',
       generico: 'Há observações técnicas sobre esta atualização.',
       nenhum: 'Nenhum aviso nesta atualização.',
